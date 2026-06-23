@@ -6,7 +6,7 @@ export default defineConfig({
   // hydra-synth (and some deps) reference Node's `global`
   define: { global: 'globalThis' },
   server: {
-    port: 1420,
+    port: 17420,
     strictPort: true,
   },
   build: {
