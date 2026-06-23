@@ -685,7 +685,10 @@ function resolveSource() {
 function activeSrc() { return state.activeSource || resolveSource(); }
 
 let shownTrackId = null;
-// copy the resolved source's snapshot into the display state, then render
+let lastSig = '';
+// copy the resolved source's snapshot into the display state; only do a full
+// re-render when something structural changed (track/play/like/source/availability).
+// Otherwise just update the progress in place — no DOM rebuild, no flicker.
 async function applyActive(forceSwap) {
   const src = resolveSource();
   state.activeSource = src;
@@ -694,13 +697,36 @@ async function applyActive(forceSwap) {
   state.liked = src === 'spotify' ? sp.liked : false;
   state.track = p.track;
   const id = p.track ? p.track.id : null;
-  if (id !== shownTrackId || forceSwap) {
-    shownTrackId = id;
-    await loadCover(p.track ? p.track.image : '');
-    render(true);
+  const sig = `${src}|${id}|${state.playing}|${state.liked}|${id ? 1 : 0}`;
+  const trackChanged = id !== shownTrackId;
+  if (forceSwap || sig !== lastSig) {
+    lastSig = sig;
+    if (trackChanged) { shownTrackId = id; await loadCover(p.track ? p.track.image : ''); }
+    render(trackChanged || forceSwap);
   } else {
-    render(false);
+    updateProgressDOM();
   }
+}
+
+// lightweight per-second update of the progress bar + time labels (no rebuild)
+function updPair(sel, a, b) {
+  const el = popup.querySelector(sel);
+  if (!el) return;
+  const s = el.querySelectorAll('span');
+  if (s[0]) s[0].textContent = a;
+  if (s[1]) s[1].textContent = b;
+}
+function updateProgressDOM() {
+  if (!state.track) return;
+  const dur = Math.max(1, state.track.durSec);
+  const pct = Math.max(0, Math.min(100, state.track.curSec / dur * 100));
+  popup.querySelectorAll('.fill').forEach(f => { f.style.width = pct + '%'; });
+  const cur = fmt(state.track.curSec), rem = '-' + fmt(dur - state.track.curSec), tot = fmt(dur);
+  updPair('.times', cur, rem);
+  updPair('.scr-times', cur, rem);
+  updPair('.v-times', cur, rem);
+  updPair('.mini-times', cur, tot);
+  if (state.bg === 'hydra') Hydra.setProgress(state.track.curSec / dur);
 }
 
 // SoundCloud controller pushes updates here
@@ -740,8 +766,8 @@ setInterval(() => {
   if (activeSrc() === 'spotify' && sp.track && sp.playing) {
     sp.track.curSec = Math.min(sp.track.durSec, sp.track.curSec + 1);
   }
-  if (state.bg === 'hydra' && state.track) Hydra.setProgress(state.track.curSec / Math.max(1, state.track.durSec));
-  applyActive(false);
+  // SoundCloud progress comes from widget events; just refresh the bar in place
+  updateProgressDOM();
 }, 1000);
 
 // poll Spotify less often, then refresh the view
