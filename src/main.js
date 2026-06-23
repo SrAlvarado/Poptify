@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import { getCurrentWindow, primaryMonitor } from '@tauri-apps/api/window';
+import { getCurrentWindow, currentMonitor, primaryMonitor } from '@tauri-apps/api/window';
 import { LogicalSize, LogicalPosition } from '@tauri-apps/api/dpi';
 
 const appWindow = getCurrentWindow();
@@ -469,16 +469,18 @@ async function layout() {
   resizing = true;
   try {
     await appWindow.setSize(new LogicalSize(winW, winH));
-    const mon = await primaryMonitor();
+    // use the monitor the window is CURRENTLY on (not the primary), so dragging
+    // it to another display doesn't yank it back
+    const mon = (await currentMonitor()) || (await primaryMonitor());
     if (mon) {
       const sf = mon.scaleFactor || 1;
       const sw = mon.size.width / sf, sh = mon.size.height / sf;
       const mx = mon.position.x / sf, my = mon.position.y / sf;
       if (state.skin === 'notch' && state.authed && state.track) {
-        // pin the notch to the top-center of the display
+        // pin the notch to the top-center of the CURRENT display
         await appWindow.setPosition(new LogicalPosition(Math.round(mx + (sw - winW) / 2), Math.round(my)));
       } else {
-        // keep the whole window (popup + settings panel) on screen
+        // only nudge back if it would actually fall off the current screen
         const pos = await appWindow.outerPosition();
         let x = pos.x / sf, y = pos.y / sf;
         let nx = x, ny = y;
