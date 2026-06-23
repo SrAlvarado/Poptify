@@ -43,9 +43,9 @@
   .gear { position: absolute; top: 14px; right: 14px; z-index: 30; width: 32px; height: 32px; background: rgba(0,0,0,0.28); color: #fff; backdrop-filter: blur(8px); }
   .gear:hover { background: rgba(0,0,0,0.45); }
 
-  /* settings overlay */
-  .settings { position: absolute; inset: 0; z-index: 40; background: rgba(10,10,14,0.82); backdrop-filter: blur(24px); border-radius: inherit; padding: 22px; opacity: 0; pointer-events: none; transition: opacity .25s ease; overflow-y: auto; }
-  .settings.open { opacity: 1; pointer-events: auto; }
+  /* settings — floating panel OUTSIDE the popup */
+  .settings { position: fixed; z-index: 100; width: 300px; background: rgba(22,22,28,0.66); backdrop-filter: blur(40px) saturate(180%); -webkit-backdrop-filter: blur(40px) saturate(180%); border-radius: 26px; padding: 20px; box-shadow: 0 30px 80px -15px rgba(0,0,0,0.75), inset 0 0 0 1px rgba(255,255,255,0.12); opacity: 0; transform: scale(0.88) translateY(6px); transform-origin: top left; pointer-events: none; transition: opacity .26s ease, transform .42s cubic-bezier(0.34,1.56,0.64,1); }
+  .settings.open { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
   .settings h3 { font-size: 16px; margin-bottom: 4px; display:flex; justify-content:space-between; align-items:center; }
   .settings .close { width: 30px; height: 30px; background: var(--glass); color:#fff; }
   .settings .sec { margin-top: 18px; }
@@ -239,6 +239,33 @@
   .skin-vinyl .v-ctrls .icon-btn { color:#f3e9dd; width:44px; height:44px; }
   .skin-vinyl .v-ctrls .play { width:60px; height:60px; background:#e9b872; color:#1a120b; }
 
+  /* ============ FANCY APPLE-STYLE FX ============ */
+  .popup { will-change: transform; transition: width .35s cubic-bezier(.4,0,.2,1), transform .25s cubic-bezier(0.34,1.4,0.64,1); }
+  /* skin / track swap: crossfade + blur, no transform (so it can coexist with the 3D tilt) */
+  @keyframes swapIn { from { opacity: 0; filter: blur(10px); } to { opacity: 1; filter: blur(0); } }
+  .swap-anim { animation: swapIn .45s cubic-bezier(0.22,1,0.36,1); }
+  /* heart pop */
+  @keyframes heartPop { 0%{transform:scale(1);} 35%{transform:scale(1.45);} 65%{transform:scale(.82);} 100%{transform:scale(1);} }
+  .heart-pop { animation: heartPop .5s cubic-bezier(0.34,1.56,0.64,1); }
+  /* button tactile press */
+  .icon-btn:active, .pill:active, .wbtn:active, .d:active, .fbtn:active { transform: scale(0.85) !important; }
+  .pill { transition: background .2s ease, transform .15s cubic-bezier(0.34,1.56,0.64,1); }
+  /* settings options spring + check */
+  .opt { transition: transform .18s cubic-bezier(0.34,1.56,0.64,1), background .18s ease, color .18s ease, box-shadow .2s ease; }
+  .opt:active { transform: scale(0.93); }
+  .opt.active { box-shadow: 0 6px 20px -6px rgba(255,255,255,0.4); }
+  /* settings sections cascade in */
+  .settings.open .sec { animation: secIn .5s cubic-bezier(0.22,1,0.36,1) backwards; }
+  .settings.open .sec:nth-child(2){animation-delay:.04s} .settings.open .sec:nth-child(3){animation-delay:.09s} .settings.open .sec:nth-child(4){animation-delay:.14s}
+  @keyframes secIn { from { opacity:0; transform: translateY(10px);} to {opacity:1; transform:translateY(0);} }
+  /* progress fill smooth */
+  .bar .fill { transition: width .25s cubic-bezier(0.22,1,0.36,1); }
+  /* play button morph */
+  .play { transition: transform .2s cubic-bezier(0.34,1.56,0.64,1), background .25s ease; }
+  /* dim backdrop while settings open */
+  .scrim { position: fixed; inset: 0; z-index: 90; background: rgba(0,0,0,0); pointer-events: none; transition: background .3s ease; }
+  .scrim.show { background: rgba(0,0,0,0.28); pointer-events: auto; }
+
   .hint { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); color: var(--text-dim); font-size: 12px; z-index: 5; text-align:center; }
 </style>
 </head>
@@ -253,6 +280,9 @@
   <div class="stage-area">
     <div class="popup" id="popup"></div>
   </div>
+
+  <div class="scrim" id="scrim"></div>
+  <div class="settings" id="settings"></div>
 
   <div class="hint">⚙️ Ajustes dentro del popup · arrastra desde la zona superior / portada · cambia de álbum arriba</div>
 
@@ -525,37 +555,71 @@ function renderVinyl(al, col) {
   </div>`;
 }
 
-// ---------- settings panel ----------
+// ---------- settings panel (floating, OUTSIDE the popup) ----------
+const settingsEl = document.getElementById('settings');
+const scrimEl = document.getElementById('scrim');
+
 function renderSettings() {
   const skinOpts = SKINS.map(s=>`<div class="opt ${state.skin===s.id?'active':''}" data-set-skin="${s.id}"><span class="emoji">${s.emoji}</span>${s.name}</div>`).join('');
   const bgOpts = BGS.map(b=>`<div class="opt ${state.bg===b.id?'active':''}" data-set-bg="${b.id}">${b.name}</div>`).join('');
   const modeOpts = ['expanded','mini'].map(m=>`<div class="opt ${state.mode===m?'active':''}" data-set-mode="${m}">${m==='expanded'?'Expandido':'Mini'}</div>`).join('');
-  return `
-  <div class="settings ${state.settingsOpen?'open':''}">
+  settingsEl.innerHTML = `
     <h3>Ajustes <button class="icon-btn close" data-act="settings">${I.close}</button></h3>
-    <div class="sec"><span class="lbl">Display</span><div class="opts">${skinOpts}</div></div>
-    <div class="sec"><span class="lbl">Fondo</span><div class="opts">${bgOpts}</div></div>
-    <div class="sec"><span class="lbl">Modo (iOS)</span><div class="opts">${modeOpts}</div></div>
-  </div>`;
+    <div class="sec"><span class="lbl">Display</span><div class="opts" style="grid-template-columns:repeat(2,1fr)">${skinOpts}</div></div>
+    <div class="sec"><span class="lbl">Fondo</span><div class="opts" style="grid-template-columns:repeat(3,1fr)">${bgOpts}</div></div>
+    <div class="sec"><span class="lbl">Modo (iOS)</span><div class="opts">${modeOpts}</div></div>`;
+  // bind option clicks
+  settingsEl.querySelectorAll('[data-set-skin]').forEach(el=>el.addEventListener('click',()=>{ state.skin=el.dataset.setSkin; render(true); }));
+  settingsEl.querySelectorAll('[data-set-bg]').forEach(el=>el.addEventListener('click',()=>{ state.bg=el.dataset.setBg; render(true); }));
+  settingsEl.querySelectorAll('[data-set-mode]').forEach(el=>el.addEventListener('click',()=>{ state.mode=el.dataset.setMode; render(true); }));
+  settingsEl.querySelector('[data-act="settings"]').addEventListener('click',()=>{ state.settingsOpen=false; syncSettings(); });
+  settingsEl.classList.toggle('open', state.settingsOpen);
+  scrimEl.classList.toggle('show', state.settingsOpen);
+}
+
+// position the floating panel next to the popup (right side, or left if it would overflow)
+function positionSettings() {
+  const r = popup.getBoundingClientRect();
+  const w = 300, gap = 16;
+  let left = r.right + gap;
+  if (left + w > window.innerWidth - 12) left = r.left - w - gap; // flip to the left
+  if (left < 12) left = 12;                                       // clamp
+  let top = r.top;
+  if (top + 360 > window.innerHeight - 12) top = Math.max(12, window.innerHeight - 372);
+  settingsEl.style.left = left + 'px';
+  settingsEl.style.top = top + 'px';
+}
+
+function syncSettings() {
+  if (state.settingsOpen) positionSettings();
+  renderSettings();
 }
 
 // ---------- main render ----------
 const popup = document.getElementById('popup');
-function render() {
+let likeJustToggled = false;
+function render(swap) {
   const al = ALBUMS[state.album];
   const col = colors();
   const renderers = { ios:renderIOS, ipod:renderIpod, gb:renderGB, psp:renderPSP, mp4:renderMP4, vinyl:renderVinyl };
   popup.className = 'popup skin-' + state.skin + (state.skin==='ios' && state.mode==='mini' ? ' mini' : '');
   popup.innerHTML =
     `<button class="icon-btn gear" data-act="settings" title="Ajustes">${I.gear}</button>`
-    + renderers[state.skin](al, col)
-    + renderSettings();
+    + renderers[state.skin](al, col);
   // draw all album canvases
   popup.querySelectorAll('canvas[data-art]').forEach(cv => {
     drawCover(cv.getContext('2d'), cv.width, cv.height, al);
   });
   if (state.skin==='ios') postIOS(popup);
   bindControls();
+  syncSettings();
+  // fancy: crossfade/blur swap when skin or track changes
+  if (swap) { popup.classList.remove('swap-anim'); void popup.offsetWidth; popup.classList.add('swap-anim'); }
+  // fancy: heart pop on the freshly-rendered like buttons
+  if (likeJustToggled) {
+    likeJustToggled = false;
+    popup.querySelectorAll('[data-act="like"]').forEach(b=>{ b.classList.remove('heart-pop'); void b.offsetWidth; b.classList.add('heart-pop'); });
+  }
 }
 
 // ---------- actions ----------
@@ -564,43 +628,59 @@ function bindControls() {
     el.addEventListener('click', e => {
       const act = el.dataset.act;
       if (act==='play') { state.playing=!state.playing; render(); }
-      else if (act==='next') { state.album=(state.album+1)%ALBUMS.length; state.liked=false; render(); }
-      else if (act==='prev') { state.album=(state.album-1+ALBUMS.length)%ALBUMS.length; state.liked=false; render(); }
-      else if (act==='like') { state.liked=!state.liked; render(); }
-      else if (act==='settings') { state.settingsOpen=!state.settingsOpen; render(); }
+      else if (act==='next') { state.album=(state.album+1)%ALBUMS.length; state.liked=false; render(true); }
+      else if (act==='prev') { state.album=(state.album-1+ALBUMS.length)%ALBUMS.length; state.liked=false; render(true); }
+      else if (act==='like') { state.liked=!state.liked; likeJustToggled=true; render(); }
+      else if (act==='settings') { state.settingsOpen=!state.settingsOpen; syncSettings(); }
       else if (act==='seek') { const r=el.getBoundingClientRect(); const al=ALBUMS[state.album]; al.cur=Math.round((e.clientX-r.left)/r.width*al.dur); render(); }
       else if (act==='lyrics') alert('Aquí se abriría la letra de la canción.');
       else if (act==='video') alert('Aquí se abriría el vídeo de la canción.');
     });
   });
-  // settings option clicks
-  popup.querySelectorAll('[data-set-skin]').forEach(el=>el.addEventListener('click',()=>{ state.skin=el.dataset.setSkin; render(); }));
-  popup.querySelectorAll('[data-set-bg]').forEach(el=>el.addEventListener('click',()=>{ state.bg=el.dataset.setBg; render(); }));
-  popup.querySelectorAll('[data-set-mode]').forEach(el=>el.addEventListener('click',()=>{ state.mode=el.dataset.setMode; render(); }));
   // drag
   popup.querySelectorAll('[data-drag]').forEach(el=>el.addEventListener('mousedown', startDrag));
 }
+
+// close settings when clicking the scrim
+scrimEl.addEventListener('click', ()=>{ state.settingsOpen=false; syncSettings(); });
+
+// ---------- fancy: subtle 3D tilt on hover (Apple-style parallax) ----------
+let tiltRAF = null;
+popup.addEventListener('pointermove', e => {
+  if (dragging) return;
+  const r = popup.getBoundingClientRect();
+  const px = (e.clientX - r.left) / r.width - 0.5;
+  const py = (e.clientY - r.top) / r.height - 0.5;
+  if (tiltRAF) cancelAnimationFrame(tiltRAF);
+  tiltRAF = requestAnimationFrame(()=>{
+    popup.style.transform = `perspective(900px) rotateY(${px*6}deg) rotateX(${-py*6}deg) scale(1.012)`;
+  });
+});
+popup.addEventListener('pointerleave', ()=>{ popup.style.transform = ''; });
 
 // ---------- drag ----------
 let dragging=false, ox=0, oy=0;
 function startDrag(e) {
   if (e.target.closest('[data-act]') && e.target.closest('[data-act]').dataset.act!=='seek') return; // don't drag when pressing a real button
+  popup.style.transform = ''; // clear any tilt so the rect is clean
   dragging=true; const r=popup.getBoundingClientRect(); ox=e.clientX-r.left; oy=e.clientY-r.top;
+  if (state.settingsOpen) positionSettings();
 }
-window.addEventListener('mousemove', e=>{ if(!dragging) return; popup.style.left=(e.clientX-ox)+'px'; popup.style.top=(e.clientY-oy)+'px'; });
+window.addEventListener('mousemove', e=>{ if(!dragging) return; popup.style.left=(e.clientX-ox)+'px'; popup.style.top=(e.clientY-oy)+'px'; if(state.settingsOpen) positionSettings(); });
 window.addEventListener('mouseup', ()=>{ dragging=false; });
+window.addEventListener('resize', ()=>{ if(state.settingsOpen) positionSettings(); });
 
 // ---------- album switcher ----------
 const sw = document.getElementById('switcher');
 ALBUMS.forEach((al,i)=>{
   const chip=document.createElement('div'); chip.className='album-chip';
   chip.innerHTML=`<span class="swatch" style="background:linear-gradient(135deg,${al.palette[0]},${al.palette[1]})"></span>${al.title}`;
-  chip.onclick=()=>{ state.album=i; state.liked=false; document.querySelectorAll('.album-chip').forEach((c,idx)=>c.classList.toggle('active',idx===i)); render(); };
+  chip.onclick=()=>{ state.album=i; state.liked=false; document.querySelectorAll('.album-chip').forEach((c,idx)=>c.classList.toggle('active',idx===i)); render(true); };
   sw.appendChild(chip);
 });
 document.querySelector('.album-chip').classList.add('active');
 
-render();
+render(true);
 </script>
 </body>
 </html>
