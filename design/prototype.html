@@ -32,7 +32,9 @@
   .album-chip .swatch { width: 26px; height: 26px; border-radius: 7px; }
 
   /* ============ POPUP SHELL ============ */
-  .popup { position: fixed; top: 130px; left: 70px; z-index: 10; transition: width .35s cubic-bezier(.4,0,.2,1); }
+  .popup { position: fixed; top: 130px; left: 70px; z-index: 10; transition: width .35s cubic-bezier(.4,0,.2,1); cursor: grab; }
+  .popup.dragging { cursor: grabbing; }
+  .popup [data-act] { cursor: pointer; }
   .stage-area { position: relative; }
 
   .icon-btn { background: none; border: none; color: var(--text); cursor: pointer; display: grid; place-items: center; border-radius: 50%; transition: transform .15s ease, color .2s ease, background .2s ease; }
@@ -645,8 +647,6 @@ function bindControls() {
       else if (act==='video') alert('Aquí se abriría el vídeo de la canción.');
     });
   });
-  // drag
-  popup.querySelectorAll('[data-drag]').forEach(el=>el.addEventListener('mousedown', startDrag));
 }
 
 // close settings when clicking the scrim
@@ -669,13 +669,20 @@ popup.addEventListener('pointerleave', ()=>{ popup.style.transform = ''; });
 // ---------- drag ----------
 let dragging=false, ox=0, oy=0;
 function startDrag(e) {
-  if (e.target.closest('[data-act]') && e.target.closest('[data-act]').dataset.act!=='seek') return; // don't drag when pressing a real button
+  // ignore interactive controls (buttons + seek bar) so they stay clickable;
+  // everything else on the popup — any skin, any mode — drags the whole window
+  if (e.target.closest('[data-act]')) return;
+  if (e.button !== 0) return; // left click only
   popup.style.transform = ''; // clear any tilt so the rect is clean
-  dragging=true; const r=popup.getBoundingClientRect(); ox=e.clientX-r.left; oy=e.clientY-r.top;
+  dragging=true; popup.classList.add('dragging');
+  const r=popup.getBoundingClientRect(); ox=e.clientX-r.left; oy=e.clientY-r.top;
   if (state.settingsOpen) positionSettings();
+  e.preventDefault();
 }
+// one persistent listener on the popup element (survives re-renders)
+popup.addEventListener('mousedown', startDrag);
 window.addEventListener('mousemove', e=>{ if(!dragging) return; popup.style.left=(e.clientX-ox)+'px'; popup.style.top=(e.clientY-oy)+'px'; if(state.settingsOpen) positionSettings(); });
-window.addEventListener('mouseup', ()=>{ dragging=false; });
+window.addEventListener('mouseup', ()=>{ dragging=false; popup.classList.remove('dragging'); });
 window.addEventListener('resize', ()=>{ if(state.settingsOpen) positionSettings(); });
 
 // ---------- album switcher ----------
