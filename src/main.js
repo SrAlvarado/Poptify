@@ -467,6 +467,13 @@ function showScreen(html) {
 
 // attach/detach the Hydra background canvas into the current skin's .bg layer
 let lastHydraKey = '';
+const HBADGE = 'position:absolute;left:8px;right:8px;bottom:8px;z-index:50;padding:6px 9px;border-radius:8px;font-size:11px;text-align:center;background:rgba(0,0,0,0.6);pointer-events:none;';
+function hydraBadge(text, color) {
+  let b = popup.querySelector('.hydra-badge');
+  if (text === null) { if (b) b.remove(); return; }
+  if (!b) { b = document.createElement('div'); b.className = 'hydra-badge'; popup.appendChild(b); }
+  b.textContent = text; b.style.cssText = HBADGE + 'color:' + color + ';';
+}
 function manageHydra() {
   if (state.bg === 'hydra' && state.track) {
     const bgEl = popup.querySelector('.bg');
@@ -476,13 +483,22 @@ function manageHydra() {
       const c = colors();
       const key = state.hydraSketch + ':' + c.dom.join(',') + ':' + c.avg.join(',');
       if (key !== lastHydraKey) { lastHydraKey = key; Hydra.applySketch(state.hydraSketch, c); }
+      const err = Hydra.getError();
+      if (err) hydraBadge('Hydra: ' + err, '#ff8585');
+      else if (Hydra.isReady()) hydraBadge(null);
+      else hydraBadge('Hydra: cargando…', '#ffd479');
       return;
     }
+    // bg=hydra but this skin has no full background
+    hydraBadge('Hydra solo en skins con fondo (iOS / PSP / MP4)', '#ffd479');
+    return;
   }
+  hydraBadge(null);
   lastHydraKey = '';
   const cv = document.getElementById('hydra-canvas');
   if (cv && cv.parentElement) cv.parentElement.removeChild(cv);
 }
+Hydra.onStatus(() => { if (state.bg === 'hydra') manageHydra(); });
 
 async function startHydraAudio() {
   try {

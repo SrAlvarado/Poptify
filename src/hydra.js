@@ -16,6 +16,10 @@ const dyn = {
 };
 
 let hydra = null, h = null, canvas = null, rafT = null;
+let statusCb = null, lastError = '';
+export function onStatus(fn) { statusCb = fn; }
+export function getError() { return lastError; }
+export function isReady() { return !!h; }
 let currentSketch = 'andromeda';
 let currentColors = { d: [0.4, 0.4, 0.6], a: [0.2, 0.2, 0.3] };
 
@@ -98,8 +102,14 @@ async function ensure() {
     apply();
     const tick = () => { dyn.t += 0.016; rafT = requestAnimationFrame(tick); };
     tick();
+    lastError = '';
     console.debug('[poptify] hydra ready');
-  })().catch(e => { console.error('[poptify] hydra init failed', e); });
+    if (statusCb) statusCb();
+  })().catch(e => {
+    lastError = (e && e.message) || String(e);
+    console.error('[poptify] hydra init failed', e);
+    if (statusCb) statusCb();
+  });
   return ensuring;
 }
 
