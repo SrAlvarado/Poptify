@@ -216,6 +216,86 @@ async fn fetch_image(url: String, state: State<'_, AppState>) -> Result<String, 
     spotify::fetch_image_data_url(&state.client, &url).await
 }
 
+#[derive(serde::Serialize)]
+struct Lyrics {
+    synced: Option<String>,
+    plain: Option<String>,
+}
+
+fn pick_lyrics(v: &serde_json::Value) -> Lyrics {
+    let nz = |s: Option<&str>| s.map(|x| x.to_string()).filter(|x| !x.is_empty());
+    Lyrics {
+        synced: nz(v["syncedLyrics"].as_str()),
+        plain: nz(v["plainLyrics"].as_str()),
+    }
+}
+
+/// Fetch lyrics (synced LRC when available) from LRCLIB — free, no API key.
+#[tauri::command]
+async fn fetch_lyrics(
+    artist: String,
+    title: String,
+    album: Option<String>,
+    duration: Option<i64>,
+    state: State<'_, AppState>,
+) -> Result<Lyrics, String> {
+    let enc = urlencoding::encode;
+    let ua = "Poptify (https://github.com/SrAlvarado/Poptify)";
+
+    // exact match first
+    let mut url = format!(
+        "https://lrclib.net/api/get?artist_name={}&track_name={}",
+        enc(&artist), enc(&title)
+    );
+    if let Some(a) = album.as_ref().filter(|s| !s.is_empty()) { url += &format!("&album_name={}", enc(a)); }
+    if let Some(d) = duration { url += &format!("&duration={}", d); }
+
+    let resp = state.client.get(&url).header("User-Agent", ua).send().await.map_err(|e| e.to_string())?;
+    if resp.status().is_success() {
+        let v: serde_json::Value = resp.json().await.map_err(|e| e.to_string())?;
+        return Ok(pick_lyrics(&v));
+    }
+
+    // fallback: search and take the first result
+    let surl = format!("https://lrclib.net/api/search?q={}", enc(&format!("{artist} {title}")));
+    let sresp = state.client.get(&surl).header("User-Agent", ua).send().await.map_err(|e| e.to_string())?;
+    if sresp.status().is_success() {
+        let arr: serde_json::Value = sresp.json().await.map_err(|e| e.to_string())?;
+        if let Some(first) = arr.as_array().and_then(|a| a.first()) {
+            return Ok(pick_lyrics(first));
+        }
+    }
+    Ok(Lyrics { synced: None, plain: None })
+}
+
+/// Raise the window above the menu bar (so the Notch skin sits around the camera),
+/// or restore the normal floating level.
+#[tauri::command]
+fn set_notch_overlay(enable: bool, window: tauri::WebviewWindow) -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    {
+        use objc::runtime::Object;
+        use objc::{msg_send, sel, sel_impl};
+        let ns = window.ns_window().map_err(|e| e.to_string())? as *mut Object;
+        unsafe {
+            if enable {
+                let level: i64 = 25; // above NSMainMenuWindowLevel (24)
+                let _: () = msg_send![ns, setLevel: level];
+                let behavior: u64 = (1 << 0) | (1 << 8); // canJoinAllSpaces | fullScreenAuxiliary
+                let _: () = msg_send![ns, setCollectionBehavior: behavior];
+            } else {
+                let level: i64 = 3; // floating (always-on-top default)
+                let _: () = msg_send![ns, setLevel: level];
+                let behavior: u64 = 0;
+                let _: () = msg_send![ns, setCollectionBehavior: behavior];
+            }
+        }
+    }
+    #[cfg(not(target_os = "macos"))]
+    { let _ = (enable, &window); }
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -261,7 +341,9 @@ pub fn run() {
             prev_track,
             seek,
             set_like,
-            fetch_image
+            fetch_image,
+            fetch_lyrics,
+            set_notch_overlay
         ])
         .run(tauri::generate_context!())
         .expect("error al arrancar Poptify");

@@ -33,6 +33,20 @@
   .auth-link { margin-top: 14px; background: none; border: none; color: var(--text-dim); font-size: 12px; font-weight: 600; cursor: pointer; }
   .auth-link:hover { color: #fff; }
 
+  /* ============ LYRICS ============ */
+  .lyrics { width: 360px; max-width: 86vw; border-radius: 30px; padding: 18px 18px 8px; background: linear-gradient(160deg,#16161c,#0a0a0e); box-shadow: 0 40px 90px -20px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.07); display: flex; flex-direction: column; }
+  .ly-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .ly-title { min-width: 0; }
+  .ly-title .t { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ly-title .a { font-size: 13px; color: var(--text-dim); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ly-head .close { width: 32px; height: 32px; background: var(--glass); color: #fff; flex-shrink: 0; }
+  .ly-scroll { overflow-y: auto; max-height: 440px; padding: 8px 2px 18px; scrollbar-width: thin; -webkit-mask-image: linear-gradient(transparent, #000 12%, #000 88%, transparent); }
+  .ly-scroll::-webkit-scrollbar { width: 0; }
+  .ly-msg { color: var(--text-dim); text-align: center; padding: 40px 10px; font-size: 14px; }
+  .ly-plain { white-space: pre-wrap; line-height: 1.7; font-size: 15px; color: rgba(255,255,255,0.82); }
+  .ly-line { font-size: 18px; font-weight: 700; line-height: 1.35; padding: 6px 0; color: rgba(255,255,255,0.34); transition: color .3s ease, transform .3s ease; transform-origin: left; }
+  .ly-line.cur { color: #fff; transform: scale(1.04); }
+
   .icon-btn { background: none; border: none; color: var(--text); cursor: pointer; display: grid; place-items: center; border-radius: 50%; transition: transform .15s ease, color .2s ease, background .2s ease; }
   .icon-btn:hover { transform: scale(1.1); }
   .icon-btn.liked { color: #1ed760; }

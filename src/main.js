@@ -48,7 +48,13 @@ const state = {
   track: null,       // { id, title, artist, durSec, curSec, image }
   playing: false,
   liked: false,
+  lyricsOpen: false,
 };
+
+// lyrics: cache per track id + current view state
+const lyricsCache = {};
+let lyricsState = { loading: false, synced: null, plain: null, error: false, forId: null };
+let lyCurIdx = -1;
 
 // per-source snapshots
 const sp = { track: null, playing: false, liked: false }; // Spotify (mirrors external player)
@@ -397,6 +403,79 @@ function renderSoundCloud() {
   </div>`;
 }
 
+// ---------- lyrics ----------
+function escapeHtml(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function parseLRC(lrc) {
+  const out = [];
+  for (const line of lrc.split('\n')) {
+    const stamps = [...line.matchAll(/\[(\d+):(\d+(?:\.\d+)?)\]/g)];
+    if (!stamps.length) continue;
+    const text = line.replace(/\[(\d+):(\d+(?:\.\d+)?)\]/g, '').trim();
+    for (const m of stamps) out.push({ t: parseInt(m[1]) * 60 + parseFloat(m[2]), text });
+  }
+  out.sort((a, b) => a.t - b.t);
+  return out;
+}
+
+async function loadLyrics() {
+  const t = state.track;
+  if (!t) return;
+  if (lyricsCache[t.id]) { lyricsState = { ...lyricsCache[t.id], loading: false, error: false, forId: t.id }; return; }
+  lyricsState = { loading: true, synced: null, plain: null, error: false, forId: t.id };
+  render(false);
+  try {
+    const r = await invoke('fetch_lyrics', {
+      artist: (t.artist || '').split(',')[0].trim(),
+      title: t.title || '',
+      album: t.album || null,
+      duration: t.durSec || null,
+    });
+    const synced = r.synced ? parseLRC(r.synced) : null;
+    const data = { synced: (synced && synced.length) ? synced : null, plain: r.plain || null };
+    lyricsCache[t.id] = data;
+    if (state.track && state.track.id === t.id) lyricsState = { ...data, loading: false, error: false, forId: t.id };
+  } catch (e) {
+    console.error('lyrics', e);
+    if (state.track && state.track.id === t.id) lyricsState = { loading: false, synced: null, plain: null, error: true, forId: t.id };
+  }
+  if (state.lyricsOpen) render(false);
+}
+
+function renderLyrics() {
+  const t = state.track || { title: '—', artist: '' };
+  const L = lyricsState;
+  let body;
+  if (L.loading) body = `<div class="ly-msg">Buscando letra…</div>`;
+  else if (L.synced) body = `<div class="ly-lines">${L.synced.map((l, i) => `<div class="ly-line" data-i="${i}">${escapeHtml(l.text) || '♪'}</div>`).join('')}</div>`;
+  else if (L.plain) body = `<div class="ly-plain">${escapeHtml(L.plain)}</div>`;
+  else body = `<div class="ly-msg">No se encontró la letra de esta canción.</div>`;
+  return `
+  <div class="lyrics">
+    <div class="ly-head">
+      <div class="ly-title"><div class="t">${escapeHtml(t.title)}</div><div class="a">${escapeHtml(t.artist)}</div></div>
+      <button class="icon-btn close" data-act="lyrics-close" title="Cerrar">${I.close}</button>
+    </div>
+    <div class="ly-scroll" id="lyScroll">${body}</div>
+  </div>`;
+}
+
+// highlight + autoscroll the current synced line
+function updateLyricsHighlight() {
+  if (!state.lyricsOpen || !lyricsState.synced || !state.track) return;
+  const cur = state.track.curSec;
+  const lines = lyricsState.synced;
+  let idx = 0;
+  for (let i = 0; i < lines.length; i++) { if (lines[i].t <= cur + 0.25) idx = i; else break; }
+  if (idx === lyCurIdx) return;
+  lyCurIdx = idx;
+  const scroll = popup.querySelector('#lyScroll');
+  if (!scroll) return;
+  scroll.querySelectorAll('.ly-line').forEach((el, i) => el.classList.toggle('cur', i === idx));
+  const curEl = scroll.querySelector(`.ly-line[data-i="${idx}"]`);
+  if (curEl) scroll.scrollTo({ top: curEl.offsetTop - scroll.clientHeight / 2 + curEl.clientHeight / 2, behavior: 'smooth' });
+}
+
 // ---------- settings panel (floating) ----------
 const settingsEl = document.getElementById('settings');
 const scrimEl = document.getElementById('scrim');
@@ -426,6 +505,7 @@ function renderSettings() {
       ${state.hydraAudio ? `<select id="hydraDeviceSel" class="auth-input" style="margin-top:8px;width:100%">${(state.hydraInputs.length?state.hydraInputs:[{id:'',label:'(dispositivo por defecto)'}]).map(d=>`<option value="${d.id}" ${state.hydraDevice===d.id?'selected':''}>${d.label}</option>`).join('')}</select>` : ''}
     </div>` : ''}
     <div class="sec"><span class="lbl">Modo (iOS)</span><div class="opts">${modeOpts}</div></div>
+    ${state.track ? `<div class="sec"><button class="opt" style="width:100%" data-act="open-lyrics">Ver letra</button></div>` : ``}
     ${state.authed ? `<div class="sec"><button class="opt" style="width:100%" data-act="logout">Cerrar sesión de Spotify</button></div>` : ``}`;
   settingsEl.querySelectorAll('[data-set-skin]').forEach(el=>el.addEventListener('click',()=>{ state.skin=el.dataset.setSkin; localStorage.setItem('skin',state.skin); render(true); }));
   settingsEl.querySelectorAll('[data-set-bg]').forEach(el=>el.addEventListener('click',()=>{ state.bg=el.dataset.setBg; localStorage.setItem('bg',state.bg); render(true); }));
@@ -439,6 +519,8 @@ function renderSettings() {
   const scLoadS = settingsEl.querySelector('[data-act="sc-load-settings"]');
   if (scLoadS) scLoadS.addEventListener('click', ()=>{ const u=(settingsEl.querySelector('#scUrlInputS').value||'').trim(); if(!u) return; state.scUrl=u; localStorage.setItem('scUrl',u); if(state.source==='spotify'){ state.source='auto'; localStorage.setItem('source','auto'); } sc.load(u); applyActive(true); });
   settingsEl.querySelector('[data-act="settings"]').addEventListener('click',()=>{ state.settingsOpen=false; syncSettings(); });
+  const lyBtn = settingsEl.querySelector('[data-act="open-lyrics"]');
+  if (lyBtn) lyBtn.addEventListener('click', ()=>{ state.settingsOpen=false; state.lyricsOpen=true; render(true); loadLyrics(); });
   const logout = settingsEl.querySelector('[data-act="logout"]');
   if (logout) logout.addEventListener('click', async ()=>{ await invoke('logout'); state.settingsOpen=false; state.authed=false; sp.track=null; applyActive(true); });
   settingsEl.classList.toggle('open', state.settingsOpen);
@@ -464,8 +546,18 @@ function showScreen(html) {
   popup.className = 'popup skin-ios';
   popup.innerHTML = html;
   manageHydra();
+  manageNotchOverlay();
   bindControls();
   syncSettings();
+}
+
+// raise/lower the window over the menu bar so the Notch skin wraps the camera
+let notchOverlayOn = false;
+function manageNotchOverlay() {
+  const want = state.skin === 'notch' && !!state.track && !state.lyricsOpen;
+  if (want === notchOverlayOn) return;
+  notchOverlayOn = want;
+  invoke('set_notch_overlay', { enable: want }).catch(e => console.error(e));
 }
 
 // attach/detach the Hydra background canvas into the current skin's .bg layer
@@ -526,6 +618,7 @@ function render(swap) {
   if (src === 'spotify' && !state.authed) { showScreen(renderConnect()); return; }
   if (src === 'soundcloud' && !sc.state().loaded) { showScreen(renderSoundCloud()); return; }
   if (!state.track) { showScreen(renderEmpty()); return; }
+  if (state.lyricsOpen) { showScreen(renderLyrics()); lyCurIdx = -1; updateLyricsHighlight(); return; }
 
   const al = trackForSkin();
   const col = colors();
@@ -537,6 +630,7 @@ function render(swap) {
   popup.innerHTML = gear + (isMini ? renderIOSMini(al, col) : renderers[state.skin](al, col));
   popup.querySelectorAll('canvas[data-art]').forEach(cv => drawImageCover(cv.getContext('2d'), cv.width, cv.height, coverImg));
   manageHydra();
+  manageNotchOverlay();
   bindControls();
   syncSettings();
   lastSkin = state.skin;
@@ -662,7 +756,9 @@ function bindControls() {
       } else if (act==='logout') {
         await invoke('logout'); state.authed=false; sp.track=null; applyActive(true);
       } else if (act==='lyrics') {
-        alert('Letra: pendiente de integrar un proveedor de letras.');
+        state.lyricsOpen = true; render(true); loadLyrics();
+      } else if (act==='lyrics-close') {
+        state.lyricsOpen = false; render(true);
       } else if (act==='video') {
         alert('Vídeo: la API pública de Spotify no expone vídeo/canvas todavía.');
       }
@@ -746,6 +842,7 @@ function updateProgressDOM() {
   updPair('.v-times', cur, rem);
   updPair('.mini-times', cur, tot);
   if (state.bg === 'hydra') Hydra.setProgress(state.track.curSec / dur);
+  updateLyricsHighlight();
 }
 
 // SoundCloud controller pushes updates here
