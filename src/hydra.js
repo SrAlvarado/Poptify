@@ -3,7 +3,9 @@
 // (FFT bands) captured from a chosen input device — e.g. a BlackHole
 // loopback device so it reacts to system audio even through headphones.
 
-import Hydra from 'hydra-synth';
+// hydra-synth is imported lazily (only when the Hydra background is used) so a
+// failure to load this heavy WebGL lib can never blank the whole app at startup.
+let HydraLib = null;
 
 // shared live values the sketches read every frame
 const dyn = {
@@ -72,26 +74,39 @@ const BUILD = {
   },
 };
 
-export function ensure() {
-  if (hydra) return;
+function makeCanvas() {
+  if (canvas) return canvas;
   canvas = document.createElement('canvas');
   canvas.id = 'hydra-canvas';
   canvas.width = 480; canvas.height = 480;
   canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;';
-  hydra = new Hydra({ canvas, detectAudio: false, makeGlobal: false, autoLoop: true, width: 480, height: 480 });
-  h = hydra.synth;
-  applySketch(currentSketch, null);
-  const tick = () => { dyn.t += 0.016; rafT = requestAnimationFrame(tick); };
-  tick();
+  return canvas;
 }
 
-export function getCanvas() { ensure(); return canvas; }
+let ensuring = null;
+async function ensure() {
+  if (hydra) return;
+  if (ensuring) return ensuring;
+  ensuring = (async () => {
+    makeCanvas();
+    if (!HydraLib) HydraLib = (await import('hydra-synth')).default;
+    hydra = new HydraLib({ canvas, detectAudio: false, makeGlobal: false, autoLoop: true, width: 480, height: 480 });
+    h = hydra.synth;
+    (BUILD[currentSketch] || BUILD.andromeda)(h, currentColors);
+    const tick = () => { dyn.t += 0.016; rafT = requestAnimationFrame(tick); };
+    tick();
+  })().catch(e => { console.error('hydra init', e); });
+  return ensuring;
+}
+
+// returns the canvas synchronously; kicks off async init of the WebGL synth
+export function getCanvas() { makeCanvas(); ensure(); return canvas; }
 
 export function applySketch(id, colors) {
-  ensure();
   if (id) currentSketch = id;
   if (colors) currentColors = normColors(colors);
-  (BUILD[currentSketch] || BUILD.andromeda)(h, currentColors);
+  if (h) (BUILD[currentSketch] || BUILD.andromeda)(h, currentColors);
+  else ensure();
 }
 
 export function setColors(colors) { applySketch(currentSketch, colors); }
