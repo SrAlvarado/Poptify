@@ -2,6 +2,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { getCurrentWindow, currentMonitor, primaryMonitor } from '@tauri-apps/api/window';
 import { LogicalSize, LogicalPosition } from '@tauri-apps/api/dpi';
 import { createSoundCloud } from './soundcloud.js';
+import * as Hydra from './hydra.js';
 
 const appWindow = getCurrentWindow();
 const MARGIN = 22; // transparent breathing room around the popup (for shadow + 3D tilt)
@@ -20,6 +21,7 @@ const BGS = [
   { id:'dark', name:'Oscuro' },
   { id:'blur', name:'Difuminado' },
   { id:'vivid', name:'Vivo' },
+  { id:'hydra', name:'Hydra' },
 ];
 
 // ---------- state ----------
@@ -32,6 +34,11 @@ const state = {
   source: localStorage.getItem('source') || 'auto',
   scUrl: localStorage.getItem('scUrl') || '',
   activeSource: 'spotify',
+  // Hydra background
+  hydraSketch: localStorage.getItem('hydraSketch') || 'andromeda',
+  hydraAudio: localStorage.getItem('hydraAudio') === '1',
+  hydraDevice: localStorage.getItem('hydraDevice') || '',
+  hydraInputs: [],
   // live playback (display copy of the active source)
   authed: false,
   hasClientId: false,
@@ -101,6 +108,7 @@ function loadCover(dataURL) {
 function bgCSS(col) {
   const d=`rgb(${col.dom.join(',')})`, a=`rgb(${col.avg.join(',')})`;
   const dark=`rgb(${col.dom.map(v=>Math.round(v*0.32)).join(',')})`;
+  if (state.bg==='hydra') return '#08080c'; // hydra canvas is drawn on top of this
   if (state.bg==='vivid') {
     const v=col.dom.map(v=>Math.min(255,Math.round(v*1.25+30))), v2=col.avg.map(v=>Math.min(255,Math.round(v*1.2+20)));
     return `radial-gradient(120% 90% at 25% 0%, rgb(${v.join(',')}), transparent 65%), linear-gradient(160deg, rgb(${v.join(',')}), rgb(${v2.join(',')}))`;
@@ -116,7 +124,7 @@ function renderIOS(al, col) {
   return `
   <div class="bg" style="background:${bgCSS(col)}"></div>
   <div class="bg-blur" style="background-image:url(${col.dataURL});opacity:${blur?1:0}"></div>
-  <div class="noise" style="background:rgba(0,0,0,${state.bg==='vivid'?0.12:state.bg==='blur'?0.25:0.30})"></div>
+  <div class="noise" style="background:rgba(0,0,0,${state.bg==='hydra'?0.12:state.bg==='vivid'?0.12:state.bg==='blur'?0.25:0.30})"></div>
   <div class="inner">
     <div class="grip"></div>
     <div class="topbar"><span class="live"></span> Reproduciendo ahora</div>
@@ -150,7 +158,7 @@ function renderIOSMini(al, col) {
   return `
   <div class="bg" style="background:${bgCSS(col)}"></div>
   <div class="bg-blur" style="background-image:url(${col.dataURL});opacity:${blur?1:0}"></div>
-  <div class="noise" style="background:rgba(0,0,0,${state.bg==='vivid'?0.12:state.bg==='blur'?0.25:0.30})"></div>
+  <div class="noise" style="background:rgba(0,0,0,${state.bg==='hydra'?0.12:state.bg==='vivid'?0.12:state.bg==='blur'?0.25:0.30})"></div>
   <div class="inner">
     <div class="mini-bar">
       <div class="mini-art"><canvas data-art width="120" height="120"></canvas></div>
@@ -405,13 +413,26 @@ function renderSettings() {
       </div>
     </div>
     <div class="sec"><span class="lbl">Display</span><div class="opts" style="grid-template-columns:repeat(2,1fr)">${skinOpts}</div></div>
-    <div class="sec"><span class="lbl">Fondo</span><div class="opts" style="grid-template-columns:repeat(3,1fr)">${bgOpts}</div></div>
+    <div class="sec"><span class="lbl">Fondo</span><div class="opts" style="grid-template-columns:repeat(2,1fr)">${bgOpts}</div></div>
+    ${state.bg==='hydra' ? `
+    <div class="sec"><span class="lbl">Hydra · sketch</span>
+      <div class="opts" style="grid-template-columns:repeat(2,1fr)">${Hydra.SKETCHES.map(s=>`<div class="opt ${state.hydraSketch===s.id?'active':''}" data-set-sketch="${s.id}">${s.name}</div>`).join('')}</div>
+    </div>
+    <div class="sec"><span class="lbl">Hydra · audio reactivo (BlackHole)</span>
+      <button class="opt" style="width:100%" data-act="hydra-audio">${state.hydraAudio?'● Audio activo — desactivar':'Activar audio reactivo'}</button>
+      ${state.hydraAudio ? `<select id="hydraDeviceSel" class="auth-input" style="margin-top:8px;width:100%">${(state.hydraInputs.length?state.hydraInputs:[{id:'',label:'(dispositivo por defecto)'}]).map(d=>`<option value="${d.id}" ${state.hydraDevice===d.id?'selected':''}>${d.label}</option>`).join('')}</select>` : ''}
+    </div>` : ''}
     <div class="sec"><span class="lbl">Modo (iOS)</span><div class="opts">${modeOpts}</div></div>
     ${state.authed ? `<div class="sec"><button class="opt" style="width:100%" data-act="logout">Cerrar sesión de Spotify</button></div>` : ``}`;
   settingsEl.querySelectorAll('[data-set-skin]').forEach(el=>el.addEventListener('click',()=>{ state.skin=el.dataset.setSkin; localStorage.setItem('skin',state.skin); render(true); }));
   settingsEl.querySelectorAll('[data-set-bg]').forEach(el=>el.addEventListener('click',()=>{ state.bg=el.dataset.setBg; localStorage.setItem('bg',state.bg); render(true); }));
   settingsEl.querySelectorAll('[data-set-mode]').forEach(el=>el.addEventListener('click',()=>{ state.mode=el.dataset.setMode; localStorage.setItem('mode',state.mode); render(true); }));
   settingsEl.querySelectorAll('[data-set-source]').forEach(el=>el.addEventListener('click',()=>{ state.source=el.dataset.setSource; localStorage.setItem('source',state.source); applyActive(true); }));
+  settingsEl.querySelectorAll('[data-set-sketch]').forEach(el=>el.addEventListener('click',()=>{ state.hydraSketch=el.dataset.setSketch; localStorage.setItem('hydraSketch',state.hydraSketch); lastHydraKey=''; render(true); }));
+  const audioBtn = settingsEl.querySelector('[data-act="hydra-audio"]');
+  if (audioBtn) audioBtn.addEventListener('click', async ()=>{ if(state.hydraAudio){ Hydra.stopAudio(); state.hydraAudio=false; localStorage.setItem('hydraAudio','0'); syncSettings(); } else { await startHydraAudio(); } });
+  const devSel = settingsEl.querySelector('#hydraDeviceSel');
+  if (devSel) devSel.addEventListener('change', async ()=>{ state.hydraDevice=devSel.value; localStorage.setItem('hydraDevice',state.hydraDevice); try{ await Hydra.startAudio(state.hydraDevice||undefined); }catch(e){ console.error(e); } });
   const scLoadS = settingsEl.querySelector('[data-act="sc-load-settings"]');
   if (scLoadS) scLoadS.addEventListener('click', ()=>{ const u=(settingsEl.querySelector('#scUrlInputS').value||'').trim(); if(!u) return; state.scUrl=u; localStorage.setItem('scUrl',u); if(state.source==='spotify'){ state.source='auto'; localStorage.setItem('source','auto'); } sc.load(u); applyActive(true); });
   settingsEl.querySelector('[data-act="settings"]').addEventListener('click',()=>{ state.settingsOpen=false; syncSettings(); });
@@ -439,7 +460,44 @@ function trackForSkin() {
 function showScreen(html) {
   popup.className = 'popup skin-ios';
   popup.innerHTML = html;
+  manageHydra();
   bindControls();
+  syncSettings();
+}
+
+// attach/detach the Hydra background canvas into the current skin's .bg layer
+let lastHydraKey = '';
+function manageHydra() {
+  if (state.bg === 'hydra' && state.track) {
+    const bgEl = popup.querySelector('.bg');
+    if (bgEl) {
+      const cv = Hydra.getCanvas();
+      if (cv.parentElement !== bgEl) bgEl.appendChild(cv);
+      const c = colors();
+      const key = state.hydraSketch + ':' + c.dom.join(',') + ':' + c.avg.join(',');
+      if (key !== lastHydraKey) { lastHydraKey = key; Hydra.applySketch(state.hydraSketch, c); }
+      return;
+    }
+  }
+  lastHydraKey = '';
+  const cv = document.getElementById('hydra-canvas');
+  if (cv && cv.parentElement) cv.parentElement.removeChild(cv);
+}
+
+async function startHydraAudio() {
+  try {
+    await Hydra.startAudio(state.hydraDevice || undefined);
+    state.hydraInputs = await Hydra.listInputs();
+    if (!state.hydraDevice) {
+      const bh = state.hydraInputs.find(d => /blackhole|loopback|soundflower/i.test(d.label));
+      if (bh) { state.hydraDevice = bh.id; localStorage.setItem('hydraDevice', bh.id); await Hydra.startAudio(bh.id); }
+    }
+    state.hydraAudio = true; localStorage.setItem('hydraAudio', '1');
+  } catch (e) {
+    console.error('hydra audio', e);
+    state.hydraAudio = false; localStorage.setItem('hydraAudio', '0');
+    alert('No se pudo acceder al audio. Revisa el permiso de micrófono y que el dispositivo (BlackHole) exista.');
+  }
   syncSettings();
 }
 
@@ -459,6 +517,7 @@ function render(swap) {
   const gear = inlineSettings ? '' : `<button class="icon-btn gear" data-act="settings" title="Ajustes">${I.gear}</button>`;
   popup.innerHTML = gear + (isMini ? renderIOSMini(al, col) : renderers[state.skin](al, col));
   popup.querySelectorAll('canvas[data-art]').forEach(cv => drawImageCover(cv.getContext('2d'), cv.width, cv.height, coverImg));
+  manageHydra();
   bindControls();
   syncSettings();
   lastSkin = state.skin;
@@ -681,6 +740,7 @@ setInterval(() => {
   if (activeSrc() === 'spotify' && sp.track && sp.playing) {
     sp.track.curSec = Math.min(sp.track.durSec, sp.track.curSec + 1);
   }
+  if (state.bg === 'hydra' && state.track) Hydra.setProgress(state.track.curSec / Math.max(1, state.track.durSec));
   applyActive(false);
 }, 1000);
 
@@ -695,6 +755,7 @@ async function boot() {
   } catch (err) { console.error('boot error', err); }
   if (state.authed) await pollSpotify();
   if (state.scUrl && (state.source === 'soundcloud')) { try { await sc.load(state.scUrl); } catch (e) {} }
+  if (state.bg === 'hydra' && state.hydraAudio) { startHydraAudio(); }
   applyActive(true);
 }
 boot();

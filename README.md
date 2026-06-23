@@ -89,6 +89,24 @@ design/
 | `seek`         | Saltar a una posición (ms)                          |
 | `set_like`     | Añadir / quitar de favoritos                         |
 
+## Fondo reactivo Hydra (audio real con BlackHole)
+
+En *Ajustes → Fondo → Hydra* se activa un fondo generativo (WebGL, [hydra-synth](https://hydra.ojack.xyz))
+teñido con el color del álbum y modulado por el progreso de la canción. Funciona en las
+skins con fondo completo (iOS, PSP, MP4).
+
+Para que reaccione al **beat real** (incluso con auriculares) necesitas un dispositivo de
+audio de loopback, porque ni Spotify ni el iframe de SoundCloud exponen su audio:
+
+1. Instala **BlackHole** (gratis): `brew install blackhole-2ch`.
+2. Abre *Configuración de Audio MIDI* → crea un **Dispositivo de salida múltiple** con tus
+   altavoces/auriculares **+ BlackHole 2ch**, y selecciónalo como salida del sistema (así
+   oyes la música y a la vez se copia a BlackHole).
+3. En Poptify: *Ajustes → Hydra · audio reactivo → Activar*, acepta el permiso de
+   micrófono y elige **BlackHole 2ch** en el desplegable.
+
+Sin BlackHole, el fondo sigue funcionando reaccionando al color y al progreso.
+
 ## Limitaciones conocidas
 
 - **Letra** y **vídeo** son placeholders: la API pública de Spotify no expone letras ni
