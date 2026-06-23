@@ -1,3 +1,6 @@
+// hydra-synth references Node's `global`; provide it for the browser before it loads
+if (typeof globalThis.global === 'undefined') globalThis.global = globalThis;
+
 import { invoke } from '@tauri-apps/api/core';
 import { getCurrentWindow, currentMonitor, primaryMonitor } from '@tauri-apps/api/window';
 import { LogicalSize, LogicalPosition } from '@tauri-apps/api/dpi';
