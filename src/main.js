@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { getCurrentWindow, currentMonitor, primaryMonitor } from '@tauri-apps/api/window';
 import { LogicalSize, LogicalPosition } from '@tauri-apps/api/dpi';
+import { createSoundCloud } from './soundcloud.js';
 
 const appWindow = getCurrentWindow();
 const MARGIN = 22; // transparent breathing room around the popup (for shadow + 3D tilt)
@@ -27,13 +28,22 @@ const state = {
   bg: localStorage.getItem('bg') || 'dark',
   mode: localStorage.getItem('mode') || 'expanded',
   settingsOpen: false,
-  // live playback
+  // source: 'auto' picks whichever is playing; or force 'spotify' / 'soundcloud'
+  source: localStorage.getItem('source') || 'auto',
+  scUrl: localStorage.getItem('scUrl') || '',
+  activeSource: 'spotify',
+  // live playback (display copy of the active source)
   authed: false,
   hasClientId: false,
   track: null,       // { id, title, artist, durSec, curSec, image }
   playing: false,
   liked: false,
 };
+
+// per-source snapshots
+const sp = { track: null, playing: false, liked: false }; // Spotify (mirrors external player)
+const sc = createSoundCloud({ onUpdate: onScUpdate });     // SoundCloud (Poptify is the player)
+const scArtCache = {};
 
 // ---------- SVG icons ----------
 const I = {
@@ -350,15 +360,29 @@ function renderConnect() {
       <div class="auth-sub">Conecta tu cuenta para ver lo que está sonando.</div>
       <button class="auth-btn spotify" data-act="login">Conectar con Spotify</button>
     `}
+    <button class="auth-link" data-act="use-soundcloud">Usar SoundCloud →</button>
   </div>`;
 }
 function renderEmpty() {
+  const sc = state.activeSource === 'soundcloud';
   return `
   <div class="auth">
     <div class="auth-logo">🔇</div>
     <div class="auth-title">Nada sonando</div>
-    <div class="auth-sub">Reproduce algo en Spotify y aparecerá aquí.</div>
+    <div class="auth-sub">${sc ? 'Carga una URL de SoundCloud o reproduce algo.' : 'Reproduce algo en Spotify y aparecerá aquí.'}</div>
     <button class="auth-btn ghost" data-act="settings">Ajustes</button>
+  </div>`;
+}
+
+function renderSoundCloud() {
+  return `
+  <div class="auth">
+    <div class="auth-logo">☁️</div>
+    <div class="auth-title">SoundCloud</div>
+    <div class="auth-sub">Pega una URL de SoundCloud (track, playlist o tus likes) y Poptify la reproduce.</div>
+    <input id="scUrlInput" class="auth-input" placeholder="https://soundcloud.com/artista/cancion" value="${state.scUrl || ''}" />
+    <button class="auth-btn spotify" style="background:#ff5500;color:#fff" data-act="sc-load">Reproducir</button>
+    <button class="auth-link" data-act="use-spotify">← Usar Spotify</button>
   </div>`;
 }
 
@@ -370,8 +394,16 @@ function renderSettings() {
   const skinOpts = SKINS.map(s=>`<div class="opt ${state.skin===s.id?'active':''}" data-set-skin="${s.id}"><span class="emoji">${s.emoji}</span>${s.name}</div>`).join('');
   const bgOpts = BGS.map(b=>`<div class="opt ${state.bg===b.id?'active':''}" data-set-bg="${b.id}">${b.name}</div>`).join('');
   const modeOpts = ['expanded','mini'].map(m=>`<div class="opt ${state.mode===m?'active':''}" data-set-mode="${m}">${m==='expanded'?'Expandido':'Mini'}</div>`).join('');
+  const srcOpts = [['auto','Auto'],['spotify','Spotify'],['soundcloud','SoundCloud']].map(([id,n])=>`<div class="opt ${state.source===id?'active':''}" data-set-source="${id}">${n}</div>`).join('');
   settingsEl.innerHTML = `
     <h3>Ajustes <button class="icon-btn close" data-act="settings">${I.close}</button></h3>
+    <div class="sec"><span class="lbl">Fuente</span>
+      <div class="opts" style="grid-template-columns:repeat(3,1fr)">${srcOpts}</div>
+      <div style="margin-top:8px;display:flex;gap:6px">
+        <input id="scUrlInputS" class="auth-input" style="margin-top:0;flex:1" placeholder="URL de SoundCloud" value="${state.scUrl||''}" />
+        <button class="opt" data-act="sc-load-settings" style="width:auto;padding:0 14px">▶</button>
+      </div>
+    </div>
     <div class="sec"><span class="lbl">Display</span><div class="opts" style="grid-template-columns:repeat(2,1fr)">${skinOpts}</div></div>
     <div class="sec"><span class="lbl">Fondo</span><div class="opts" style="grid-template-columns:repeat(3,1fr)">${bgOpts}</div></div>
     <div class="sec"><span class="lbl">Modo (iOS)</span><div class="opts">${modeOpts}</div></div>
@@ -379,9 +411,12 @@ function renderSettings() {
   settingsEl.querySelectorAll('[data-set-skin]').forEach(el=>el.addEventListener('click',()=>{ state.skin=el.dataset.setSkin; localStorage.setItem('skin',state.skin); render(true); }));
   settingsEl.querySelectorAll('[data-set-bg]').forEach(el=>el.addEventListener('click',()=>{ state.bg=el.dataset.setBg; localStorage.setItem('bg',state.bg); render(true); }));
   settingsEl.querySelectorAll('[data-set-mode]').forEach(el=>el.addEventListener('click',()=>{ state.mode=el.dataset.setMode; localStorage.setItem('mode',state.mode); render(true); }));
+  settingsEl.querySelectorAll('[data-set-source]').forEach(el=>el.addEventListener('click',()=>{ state.source=el.dataset.setSource; localStorage.setItem('source',state.source); applyActive(true); }));
+  const scLoadS = settingsEl.querySelector('[data-act="sc-load-settings"]');
+  if (scLoadS) scLoadS.addEventListener('click', ()=>{ const u=(settingsEl.querySelector('#scUrlInputS').value||'').trim(); if(!u) return; state.scUrl=u; localStorage.setItem('scUrl',u); if(state.source==='spotify'){ state.source='auto'; localStorage.setItem('source','auto'); } sc.load(u); applyActive(true); });
   settingsEl.querySelector('[data-act="settings"]').addEventListener('click',()=>{ state.settingsOpen=false; syncSettings(); });
   const logout = settingsEl.querySelector('[data-act="logout"]');
-  if (logout) logout.addEventListener('click', async ()=>{ await invoke('logout'); state.settingsOpen=false; state.authed=false; state.track=null; render(true); });
+  if (logout) logout.addEventListener('click', async ()=>{ await invoke('logout'); state.settingsOpen=false; state.authed=false; sp.track=null; applyActive(true); });
   settingsEl.classList.toggle('open', state.settingsOpen);
   scrimEl.classList.toggle('show', state.settingsOpen);
 }
@@ -401,23 +436,19 @@ function trackForSkin() {
   return { title: state.track.title || '—', artist: state.track.artist || '—', cur: state.track.curSec, dur: Math.max(1, state.track.durSec) };
 }
 
+function showScreen(html) {
+  popup.className = 'popup skin-ios';
+  popup.innerHTML = html;
+  bindControls();
+  syncSettings();
+}
+
 function render(swap) {
-  // not connected yet → connect / setup screen
-  if (!state.authed) {
-    popup.className = 'popup skin-ios';
-    popup.innerHTML = renderConnect();
-    bindControls();
-    syncSettings();
-    return;
-  }
-  // connected but nothing playing
-  if (!state.track) {
-    popup.className = 'popup skin-ios';
-    popup.innerHTML = renderEmpty();
-    bindControls();
-    syncSettings();
-    return;
-  }
+  const src = activeSrc();
+  // setup screens depending on the active source
+  if (src === 'spotify' && !state.authed) { showScreen(renderConnect()); return; }
+  if (src === 'soundcloud' && !sc.state().loaded) { showScreen(renderSoundCloud()); return; }
+  if (!state.track) { showScreen(renderEmpty()); return; }
 
   const al = trackForSkin();
   const col = colors();
@@ -502,18 +533,20 @@ function bindControls() {
   popup.querySelectorAll('[data-act]').forEach(el => {
     el.addEventListener('click', async e => {
       const act = el.dataset.act;
+      const src = activeSrc();
       if (act==='play') {
-        state.playing = !state.playing; render();
-        try { await invoke('set_playing', { play: state.playing }); } catch(err){ console.error(err); }
+        if (src==='soundcloud') { sc.toggle(); }
+        else { state.playing = !state.playing; sp.playing = state.playing; render(); try { await invoke('set_playing', { play: state.playing }); } catch(err){ console.error(err); } }
       } else if (act==='next') {
-        try { await invoke('next_track'); } catch(err){ console.error(err); }
-        setTimeout(poll, 350);
+        if (src==='soundcloud') { sc.next(); }
+        else { try { await invoke('next_track'); } catch(err){ console.error(err); } setTimeout(async()=>{ await pollSpotify(); applyActive(true); }, 350); }
       } else if (act==='prev') {
-        try { await invoke('prev_track'); } catch(err){ console.error(err); }
-        setTimeout(poll, 350);
+        if (src==='soundcloud') { sc.prev(); }
+        else { try { await invoke('prev_track'); } catch(err){ console.error(err); } setTimeout(async()=>{ await pollSpotify(); applyActive(true); }, 350); }
       } else if (act==='like') {
         if (!state.track) return;
-        state.liked = !state.liked; likeJustToggled = true; render();
+        if (src==='soundcloud') return; // SoundCloud likes need API auth — not available via the widget
+        state.liked = !state.liked; sp.liked = state.liked; likeJustToggled = true; render();
         try { await invoke('set_like', { trackId: state.track.id, liked: state.liked }); } catch(err){ console.error(err); }
       } else if (act==='settings') {
         state.settingsOpen = !state.settingsOpen; syncSettings();
@@ -521,12 +554,12 @@ function bindControls() {
         if (!state.track) return;
         const r = el.getBoundingClientRect();
         const frac = Math.min(1, Math.max(0, (e.clientX - r.left)/r.width));
-        const positionMs = Math.round(frac * state.track.durSec * 1000);
-        state.track.curSec = Math.round(positionMs/1000); render();
-        try { await invoke('seek', { positionMs }); } catch(err){ console.error(err); }
+        state.track.curSec = Math.round(frac * state.track.durSec); render();
+        if (src==='soundcloud') sc.seekSec(frac * state.track.durSec);
+        else { try { await invoke('seek', { positionMs: Math.round(frac * state.track.durSec * 1000) }); } catch(err){ console.error(err); } }
       } else if (act==='login') {
         el.textContent = 'Abriendo Spotify…'; el.disabled = true;
-        try { await invoke('login'); state.authed = true; await poll(); render(true); }
+        try { await invoke('login'); state.authed = true; await pollSpotify(); applyActive(true); }
         catch(err){ console.error(err); el.textContent = 'Reintentar'; el.disabled = false; }
       } else if (act==='save-id') {
         const input = popup.querySelector('#clientIdInput');
@@ -534,8 +567,22 @@ function bindControls() {
         if (!id) return;
         try { await invoke('set_client_id', { clientId: id }); state.hasClientId = true; render(true); }
         catch(err){ console.error(err); }
+      } else if (act==='sc-load') {
+        const u = (popup.querySelector('#scUrlInput')?.value || '').trim();
+        if (!u) return;
+        state.scUrl = u; localStorage.setItem('scUrl', u);
+        if (state.source==='spotify') { state.source='auto'; localStorage.setItem('source','auto'); }
+        el.textContent = 'Cargando…'; el.disabled = true;
+        try { await sc.load(u); } catch(err){ console.error(err); }
+        applyActive(true);
+      } else if (act==='use-soundcloud') {
+        state.source = 'soundcloud'; localStorage.setItem('source','soundcloud');
+        if (state.scUrl) { try { await sc.load(state.scUrl); } catch(e){} }
+        applyActive(true);
+      } else if (act==='use-spotify') {
+        state.source = 'spotify'; localStorage.setItem('source','spotify'); applyActive(true);
       } else if (act==='logout') {
-        await invoke('logout'); state.authed=false; state.track=null; render(true);
+        await invoke('logout'); state.authed=false; sp.track=null; applyActive(true);
       } else if (act==='lyrics') {
         alert('Letra: pendiente de integrar un proveedor de letras.');
       } else if (act==='video') {
@@ -550,7 +597,7 @@ scrimEl.addEventListener('click', ()=>{ state.settingsOpen=false; syncSettings()
 // ---------- Apple-style tilt ----------
 let tiltRAF = null;
 popup.addEventListener('pointermove', e => {
-  if (state.skin==='notch' || !state.authed || !state.track) return;
+  if (state.skin==='notch' || !state.track) return;
   const r = popup.getBoundingClientRect();
   const px = (e.clientX - r.left)/r.width - 0.5, py = (e.clientY - r.top)/r.height - 0.5;
   if (tiltRAF) cancelAnimationFrame(tiltRAF);
@@ -566,48 +613,79 @@ popup.addEventListener('mousedown', e => {
 });
 window.addEventListener('resize', ()=>{ layout(); });
 
-// ---------- polling Spotify ----------
-let lastTrackId = null;
-async function poll() {
-  try {
-    const np = await invoke('now_playing'); // null | {id,title,artist,album,image,duration_ms,progress_ms,is_playing,liked}
-    if (!np) {
-      const had = !!state.track;
-      state.track = null;
-      if (had) render(true);
-      return;
-    }
-    console.debug('[poptify] now_playing:', np.title, '| playing=', np.is_playing, '| liked=', np.liked);
-    const trackChanged = np.id !== lastTrackId;
-    state.playing = np.is_playing;
-    state.liked = np.liked;
-    state.track = {
-      id: np.id, title: np.title, artist: np.artist,
-      durSec: Math.round(np.duration_ms/1000), curSec: Math.round(np.progress_ms/1000),
-      image: np.image,
-    };
-    if (trackChanged) {
-      lastTrackId = np.id;
-      await loadCover(np.image);
-      render(true);
-    } else {
-      render(false);
-    }
-  } catch (err) {
-    console.error('poll error', err);
+// ---------- source resolution ----------
+function resolveSource() {
+  if (state.source !== 'auto') return state.source;
+  const s = sc.state();
+  if (s.playing) return 'soundcloud';
+  if (sp.playing) return 'spotify';
+  if (s.loaded) return 'soundcloud';
+  if (sp.track) return 'spotify';
+  return state.authed ? 'spotify' : (s.loaded ? 'soundcloud' : 'spotify');
+}
+function activeSrc() { return state.activeSource || resolveSource(); }
+
+let shownTrackId = null;
+// copy the resolved source's snapshot into the display state, then render
+async function applyActive(forceSwap) {
+  const src = resolveSource();
+  state.activeSource = src;
+  const p = src === 'soundcloud' ? sc.state() : sp;
+  state.playing = p.playing;
+  state.liked = src === 'spotify' ? sp.liked : false;
+  state.track = p.track;
+  const id = p.track ? p.track.id : null;
+  if (id !== shownTrackId || forceSwap) {
+    shownTrackId = id;
+    await loadCover(p.track ? p.track.image : '');
+    render(true);
+  } else {
+    render(false);
   }
 }
 
-// local 1s ticker advances progress between polls (smoother bar)
-setInterval(() => {
-  if (state.authed && state.track && state.playing) {
-    state.track.curSec = Math.min(state.track.durSec, state.track.curSec + 1);
-    render(false);
+// SoundCloud controller pushes updates here
+async function onScUpdate(kind) {
+  const st = sc.state();
+  if (st.track && st.track.artworkUrl && !st.track.image) {
+    const u = st.track.artworkUrl;
+    if (scArtCache[u]) st.track.image = scArtCache[u];
+    else {
+      try { st.track.image = await invoke('fetch_image', { url: u }); scArtCache[u] = st.track.image; }
+      catch (e) { st.track.image = ''; }
+    }
   }
+  applyActive(kind === 'track' || kind === 'loaded' || kind === 'finish');
+}
+
+// ---------- Spotify polling ----------
+async function pollSpotify() {
+  if (!state.authed) { sp.track = null; sp.playing = false; return; }
+  try {
+    const np = await invoke('now_playing');
+    if (!np) { sp.track = null; sp.playing = false; sp.liked = false; }
+    else {
+      sp.playing = np.is_playing;
+      sp.liked = np.liked;
+      sp.track = {
+        id: np.id, title: np.title, artist: np.artist,
+        durSec: Math.round(np.duration_ms / 1000), curSec: Math.round(np.progress_ms / 1000),
+        image: np.image,
+      };
+    }
+  } catch (err) { console.error('poll error', err); }
+}
+
+// 1s ticker: advance progress + re-resolve the active source (catches auto-switch)
+setInterval(() => {
+  if (activeSrc() === 'spotify' && sp.track && sp.playing) {
+    sp.track.curSec = Math.min(sp.track.durSec, sp.track.curSec + 1);
+  }
+  applyActive(false);
 }, 1000);
 
-// poll the API a bit less often (avoid hammering)
-setInterval(poll, 3000);
+// poll Spotify less often, then refresh the view
+setInterval(async () => { await pollSpotify(); applyActive(false); }, 3000);
 
 // ---------- boot ----------
 async function boot() {
@@ -615,7 +693,8 @@ async function boot() {
     state.hasClientId = await invoke('has_client_id');
     state.authed = await invoke('auth_status');
   } catch (err) { console.error('boot error', err); }
-  if (state.authed) await poll();
-  render(true);
+  if (state.authed) await pollSpotify();
+  if (state.scUrl && (state.source === 'soundcloud')) { try { await sc.load(state.scUrl); } catch (e) {} }
+  applyActive(true);
 }
 boot();

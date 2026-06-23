@@ -30,6 +30,8 @@
   .auth-btn:disabled { opacity: .6; cursor: default; }
   .auth-btn.spotify { background: #1ed760; color: #06140c; }
   .auth-btn.ghost { background: var(--glass); color: #fff; }
+  .auth-link { margin-top: 14px; background: none; border: none; color: var(--text-dim); font-size: 12px; font-weight: 600; cursor: pointer; }
+  .auth-link:hover { color: #fff; }
 
   .icon-btn { background: none; border: none; color: var(--text); cursor: pointer; display: grid; place-items: center; border-radius: 50%; transition: transform .15s ease, color .2s ease, background .2s ease; }
   .icon-btn:hover { transform: scale(1.1); }

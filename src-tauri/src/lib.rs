@@ -209,6 +209,13 @@ async fn set_like(track_id: String, liked: bool, state: State<'_, AppState>) -> 
     spotify::player_command(&state.client, &token, method, &format!("/me/tracks?ids={track_id}")).await
 }
 
+/// Fetch any image URL and return it as a data: URL (sidesteps canvas CORS taint).
+/// Used for SoundCloud artwork so reactive colors still work.
+#[tauri::command]
+async fn fetch_image(url: String, state: State<'_, AppState>) -> Result<String, String> {
+    spotify::fetch_image_data_url(&state.client, &url).await
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -253,7 +260,8 @@ pub fn run() {
             next_track,
             prev_track,
             seek,
-            set_like
+            set_like,
+            fetch_image
         ])
         .run(tauri::generate_context!())
         .expect("error al arrancar Poptify");
