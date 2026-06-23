@@ -91,7 +91,11 @@ async fn login(app: AppHandle) -> Result<(), String> {
 
     let verifier = spotify::gen_verifier();
     let challenge = spotify::challenge(&verifier);
-    let url = spotify::build_auth_url(&client_id, &challenge);
+
+    // grab a free loopback port BEFORE building the URL so the redirect matches
+    let (server, port) = spotify::bind_server()?;
+    let redirect_uri = spotify::redirect_uri(port);
+    let url = spotify::build_auth_url(&client_id, &challenge, &redirect_uri);
 
     // open the system browser for the consent screen
     app.opener()
@@ -99,11 +103,11 @@ async fn login(app: AppHandle) -> Result<(), String> {
         .map_err(|e| format!("no se pudo abrir el navegador: {e}"))?;
 
     // block (off the async runtime) until the loopback redirect arrives
-    let code = tokio::task::spawn_blocking(spotify::wait_for_code)
+    let code = tokio::task::spawn_blocking(move || spotify::wait_for_code(server))
         .await
         .map_err(|e| e.to_string())??;
 
-    let tokens = spotify::exchange(&state.client, &client_id, &code, &verifier).await?;
+    let tokens = spotify::exchange(&state.client, &client_id, &code, &verifier, &redirect_uri).await?;
     {
         let mut g = state.tokens.lock().unwrap();
         *g = Some(tokens.clone());

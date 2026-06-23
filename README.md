@@ -21,11 +21,19 @@ sin marco, transparente, siempre encima y **se arrastra desde cualquier punto**.
 
 1. Entra en <https://developer.spotify.com/dashboard> y crea una app.
 2. Copia el **Client ID**.
-3. En *Edit settings → Redirect URIs* añade **exactamente**:
+3. En *Edit settings → Redirect URIs* añade **las tres** (la app usa el primer puerto
+   libre, así el login funciona aunque uno esté ocupado):
    ```
    http://127.0.0.1:14528/callback
+   http://127.0.0.1:14529/callback
+   http://127.0.0.1:14530/callback
    ```
 4. Guarda.
+
+> El redirect a `127.0.0.1` corre en la máquina de **cada usuario** (servidor temporal
+> local durante el login), por eso una sola configuración vale para todos. Lo que limita
+> el número de usuarios es el *Development Mode* de Spotify (máx. 25 usuarios que añadas a
+> mano en *User Management*); para uso público hay que pedir *Extended Quota Mode*.
 
 ## 3. Instalar y ejecutar
 

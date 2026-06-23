@@ -5,9 +5,14 @@ use rand::Rng;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
-pub const REDIRECT_PORT: u16 = 14528;
-pub const REDIRECT_URI: &str = "http://127.0.0.1:14528/callback";
+/// Candidate loopback ports tried in order. Register every one of these as a
+/// Redirect URI in the Spotify dashboard so login still works if one is busy.
+pub const REDIRECT_PORTS: &[u16] = &[14528, 14529, 14530];
 pub const SCOPES: &str = "user-read-currently-playing user-read-playback-state user-modify-playback-state user-library-read user-library-modify";
+
+pub fn redirect_uri(port: u16) -> String {
+    format!("http://127.0.0.1:{port}/callback")
+}
 
 const AUTH_URL: &str = "https://accounts.spotify.com/authorize";
 const TOKEN_URL: &str = "https://accounts.spotify.com/api/token";
@@ -60,21 +65,32 @@ pub fn challenge(verifier: &str) -> String {
     base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(digest)
 }
 
-pub fn build_auth_url(client_id: &str, challenge: &str) -> String {
+pub fn build_auth_url(client_id: &str, challenge: &str, redirect_uri: &str) -> String {
     format!(
         "{AUTH_URL}?response_type=code&client_id={}&scope={}&redirect_uri={}&code_challenge_method=S256&code_challenge={}",
         urlencoding::encode(client_id),
         urlencoding::encode(SCOPES),
-        urlencoding::encode(REDIRECT_URI),
+        urlencoding::encode(redirect_uri),
         challenge
     )
 }
 
+/// Binds the loopback server to the first free candidate port.
+/// Returns the server and the port it actually grabbed.
+pub fn bind_server() -> Result<(tiny_http::Server, u16), String> {
+    for &port in REDIRECT_PORTS {
+        if let Ok(server) = tiny_http::Server::http(("127.0.0.1", port)) {
+            return Ok((server, port));
+        }
+    }
+    Err(format!(
+        "no hay puerto libre para el login (probados: {:?})",
+        REDIRECT_PORTS
+    ))
+}
+
 /// Blocks until the browser redirects back with `?code=...`, returns the code.
-/// Runs a tiny single-shot HTTP server on the loopback redirect port.
-pub fn wait_for_code() -> Result<String, String> {
-    let server = tiny_http::Server::http(("127.0.0.1", REDIRECT_PORT))
-        .map_err(|e| format!("no se pudo abrir el servidor local: {e}"))?;
+pub fn wait_for_code(server: tiny_http::Server) -> Result<String, String> {
     for request in server.incoming_requests() {
         let url = request.url().to_string();
         // url looks like /callback?code=XXarbi or /callback?error=...
@@ -107,13 +123,13 @@ pub fn wait_for_code() -> Result<String, String> {
 }
 
 // ---------- token exchange / refresh ----------
-pub async fn exchange(client: &reqwest::Client, client_id: &str, code: &str, verifier: &str) -> Result<Tokens, String> {
+pub async fn exchange(client: &reqwest::Client, client_id: &str, code: &str, verifier: &str, redirect_uri: &str) -> Result<Tokens, String> {
     let resp = client
         .post(TOKEN_URL)
         .form(&[
             ("grant_type", "authorization_code"),
             ("code", code),
-            ("redirect_uri", REDIRECT_URI),
+            ("redirect_uri", redirect_uri),
             ("client_id", client_id),
             ("code_verifier", verifier),
         ])
