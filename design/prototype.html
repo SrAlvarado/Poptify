@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Spotify PopUp · Prototipo de diseño</title>
+<title>Poptify · Prototipo de diseño</title>
 <style>
   :root {
     --glass: rgba(255, 255, 255, 0.08);
@@ -13,7 +13,6 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-user-select: none; user-select: none; }
-
   html, body { height: 100%; }
 
   body {
@@ -25,25 +24,29 @@
     color: var(--text);
     min-height: 100vh;
     overflow-x: hidden;
-    padding: 32px 24px 64px;
+    padding: 28px 24px 64px;
   }
 
-  .stage-header { max-width: 1100px; margin: 0 auto 28px; }
+  .stage-header { max-width: 1100px; margin: 0 auto 22px; }
   .stage-header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
   .stage-header p { color: var(--text-dim); font-size: 13px; margin-top: 6px; }
 
-  .album-switcher {
-    display: flex; gap: 10px; flex-wrap: wrap;
-    max-width: 1100px; margin: 0 auto 36px;
+  /* control toolbar */
+  .toolbar { display: flex; gap: 26px; flex-wrap: wrap; max-width: 1100px; margin: 0 auto 18px; align-items:center; }
+  .group { display: flex; align-items: center; gap: 8px; }
+  .group .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-dim); margin-right: 2px; }
+  .seg { display: flex; background: var(--glass); border-radius: 12px; padding: 4px; gap: 2px; }
+  .seg button {
+    border: none; background: none; color: var(--text-dim); cursor: pointer;
+    padding: 7px 14px; border-radius: 9px; font-size: 13px; font-weight: 600; transition: all .15s ease;
   }
+  .seg button.active { background: #fff; color: #111; }
+
+  .album-switcher { display: flex; gap: 10px; flex-wrap: wrap; max-width: 1100px; margin: 0 auto 30px; }
   .album-chip {
-    display: flex; align-items: center; gap: 10px;
-    padding: 6px 14px 6px 6px;
-    border-radius: 999px;
-    background: var(--glass);
-    border: 1px solid rgba(255,255,255,0.08);
-    cursor: pointer; transition: all .2s ease;
-    font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; gap: 10px; padding: 6px 14px 6px 6px;
+    border-radius: 999px; background: var(--glass); border: 1px solid rgba(255,255,255,0.08);
+    cursor: pointer; transition: all .2s ease; font-size: 13px; font-weight: 600;
   }
   .album-chip:hover { background: var(--glass-strong); }
   .album-chip.active { background: #fff; color: #111; }
@@ -51,98 +54,104 @@
 
   /* ---------- POPUP ---------- */
   .popup {
-    position: fixed;
-    top: 140px; left: 80px;
-    width: 360px;
-    border-radius: 38px;
-    overflow: hidden;
+    position: fixed; top: 150px; left: 80px; width: 360px;
+    border-radius: 38px; overflow: hidden;
     box-shadow: 0 40px 90px -20px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.07);
-    backdrop-filter: blur(2px);
-    transition: box-shadow .3s ease;
-    z-index: 10;
+    z-index: 10; transition: width .35s cubic-bezier(.4,0,.2,1), border-radius .35s ease;
   }
 
-  /* reactive background layers */
-  .bg {
-    position: absolute; inset: 0; z-index: 0;
-    transition: background 0.8s ease;
-  }
-  .bg-noise {
-    position: absolute; inset: 0; z-index: 1;
-    backdrop-filter: blur(60px) saturate(180%);
-    -webkit-backdrop-filter: blur(60px) saturate(180%);
-    background: rgba(0,0,0,0.28);
-  }
+  .bg { position: absolute; inset: 0; z-index: 0; transition: background .8s ease, opacity .8s ease; background-size: cover; background-position: center; }
+  .bg-blur-img { position: absolute; inset: -40px; z-index: 0; background-size: cover; background-position: center; filter: blur(40px) saturate(140%); transform: scale(1.2); opacity: 0; transition: opacity .8s ease; }
+  .bg-noise { position: absolute; inset: 0; z-index: 1; background: rgba(0,0,0,0.30); }
 
-  .popup-inner {
-    position: relative; z-index: 2;
-    padding: 22px 22px 26px;
-  }
+  .popup-inner { position: relative; z-index: 2; padding: 22px 22px 26px; }
 
-  /* drag handle / status bar */
-  .drag-bar {
-    display: flex; align-items: center; justify-content: space-between;
-    cursor: grab;
-    padding: 2px 4px 16px;
-  }
+  .grip { width: 38px; height: 5px; border-radius: 99px; background: rgba(255,255,255,0.35); position:absolute; left:50%; transform:translateX(-50%); top:9px; }
+  .drag-bar { display: flex; align-items: center; justify-content: space-between; cursor: grab; padding: 4px 4px 16px; }
   .drag-bar:active { cursor: grabbing; }
-  .drag-bar .now { font-size: 13px; font-weight: 600; opacity: .85; display:flex; align-items:center; gap:7px;}
+  .drag-bar .now { font-size: 13px; font-weight: 600; opacity: .85; display:flex; align-items:center; gap:7px; }
   .drag-bar .now .live { width:7px; height:7px; border-radius:50%; background:#1ed760; box-shadow:0 0 8px #1ed760; }
-  .grip { width: 38px; height: 5px; border-radius: 99px; background: rgba(255,255,255,0.35); margin: 0 auto; position:absolute; left:50%; transform:translateX(-50%); top:8px;}
 
-  /* album art */
   .art-wrap { position: relative; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px -12px rgba(0,0,0,0.6); aspect-ratio:1; }
-  .art-wrap canvas, .art-wrap .art { width: 100%; height: 100%; display: block; }
+  .art-wrap canvas { width: 100%; height: 100%; display: block; }
 
-  /* track info */
   .track { margin-top: 22px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
   .track .title { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
   .track .artist { font-size: 16px; color: var(--text-dim); margin-top: 3px; font-weight: 500; }
-  .icon-btn {
-    background: none; border: none; color: var(--text); cursor: pointer;
-    width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%;
-    transition: transform .15s ease, color .2s ease; flex-shrink: 0;
-  }
+  .icon-btn { background: none; border: none; color: var(--text); cursor: pointer; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; transition: transform .15s ease, color .2s ease; flex-shrink: 0; }
   .icon-btn:hover { transform: scale(1.12); }
   .icon-btn.liked { color: #1ed760; }
 
-  /* scrubber */
   .scrubber { margin-top: 20px; }
   .bar { height: 7px; border-radius: 99px; background: rgba(255,255,255,0.22); position: relative; overflow: hidden; cursor: pointer; }
   .bar .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 38%; background: rgba(255,255,255,0.95); border-radius: 99px; }
   .times { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
 
-  /* controls */
   .controls { margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 30px; }
   .controls .icon-btn { width: 48px; height: 48px; }
   .controls .play { width: 68px; height: 68px; background: #fff; color: #111; border-radius: 50%; }
   .controls .play:hover { transform: scale(1.06); }
 
-  /* bottom actions: lyrics / video */
   .actions { margin-top: 24px; display: flex; gap: 12px; }
-  .pill {
-    flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
-    padding: 13px; border-radius: 16px;
-    background: var(--glass); border: 1px solid rgba(255,255,255,0.08);
-    color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer;
-    transition: background .2s ease;
-  }
+  .pill { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px; border-radius: 16px; background: var(--glass); border: 1px solid rgba(255,255,255,0.08); color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s ease; }
   .pill:hover { background: var(--glass-strong); }
-  .pill svg { opacity: .9; }
+
+  /* ---------- MINI MODE ---------- */
+  .popup.mini { width: 320px; border-radius: 22px; }
+  .popup.mini .popup-inner { padding: 14px 16px; }
+  .popup.mini .grip { display: none; }
+  .popup.mini .drag-bar { display: none; }
+  .popup.mini .art-wrap { display: none; }
+  .popup.mini .actions { display: none; }
+  .popup.mini .controls { margin: 0; gap: 4px; }
+  .popup.mini .controls .icon-btn { width: 36px; height: 36px; }
+  .popup.mini .controls .play { width: 42px; height: 42px; }
+  .popup.mini .controls .play svg { width: 20px; height: 20px; }
+  .popup.mini .controls .prev { display: none; }
+  .popup.mini .track { margin: 0; flex: 1; min-width: 0; align-items: center; }
+  .popup.mini .track .title { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .popup.mini .track .artist { font-size: 12px; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .popup.mini .track .likeBtn { display: none; }
+  .popup.mini .scrubber { order: 5; margin: 10px 0 0; flex-basis: 100%; }
+  .popup.mini .scrubber .times { display: none; }
+  .popup.mini .scrubber .bar { height: 4px; }
+  .popup.mini .mini-art { display: block; }
+  .mini-art { display: none; width: 48px; height: 48px; border-radius: 10px; overflow: hidden; flex-shrink: 0; box-shadow: 0 6px 16px -4px rgba(0,0,0,.5); cursor: grab; }
+  .mini-art canvas { width: 100%; height: 100%; }
+  .popup.mini .row { display: flex; align-items: center; gap: 12px; }
 
   .hint { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); color: var(--text-dim); font-size: 12px; z-index: 5; }
 </style>
 </head>
 <body>
   <div class="stage-header">
-    <h1>🎧 Spotify PopUp — Prototipo de diseño</h1>
-    <p>Estilo "pantalla de bloqueo de iOS". El fondo reacciona al color de la portada. Arrastra el popup desde la barra superior. Cambia de álbum abajo.</p>
+    <h1>🎵 Poptify — Prototipo de diseño</h1>
+    <p>Estilo "pantalla de bloqueo de iOS". Fondo reactivo al color de la portada. Arrastra el popup. Prueba los 3 fondos y los 2 modos.</p>
+  </div>
+
+  <div class="toolbar">
+    <div class="group">
+      <span class="lbl">Fondo</span>
+      <div class="seg" id="bgSeg">
+        <button data-bg="dark" class="active">Degradado oscuro</button>
+        <button data-bg="blur">Portada difuminada</button>
+        <button data-bg="vivid">Color vivo</button>
+      </div>
+    </div>
+    <div class="group">
+      <span class="lbl">Modo</span>
+      <div class="seg" id="modeSeg">
+        <button data-mode="expanded" class="active">Expandido</button>
+        <button data-mode="mini">Mini</button>
+      </div>
+    </div>
   </div>
 
   <div class="album-switcher" id="switcher"></div>
 
   <div class="popup" id="popup">
     <div class="bg" id="bg"></div>
+    <div class="bg-blur-img" id="bgBlur"></div>
     <div class="bg-noise"></div>
     <div class="popup-inner">
       <div class="grip"></div>
@@ -153,35 +162,39 @@
         </button>
       </div>
 
-      <div class="art-wrap">
-        <canvas id="art" width="600" height="600"></canvas>
-      </div>
+      <div class="row">
+        <div class="mini-art" id="miniArtWrap"><canvas id="miniArt" width="120" height="120"></canvas></div>
 
-      <div class="track">
-        <div>
-          <div class="title" id="title">—</div>
-          <div class="artist" id="artist">—</div>
+        <div class="art-wrap" id="artWrap">
+          <canvas id="art" width="600" height="600"></canvas>
         </div>
-        <button class="icon-btn" id="likeBtn" title="Favorito">
-          <svg id="heart" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-        </button>
-      </div>
 
-      <div class="scrubber">
-        <div class="bar" id="bar"><div class="fill" id="fill"></div></div>
-        <div class="times"><span id="cur">1:24</span><span id="dur">-2:18</span></div>
-      </div>
+        <div class="track">
+          <div style="min-width:0">
+            <div class="title" id="title">—</div>
+            <div class="artist" id="artist">—</div>
+          </div>
+          <button class="icon-btn likeBtn" id="likeBtn" title="Favorito">
+            <svg id="heart" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+          </button>
+        </div>
 
-      <div class="controls">
-        <button class="icon-btn" title="Anterior">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5L9 12l11 7z"/></svg>
-        </button>
-        <button class="icon-btn play" id="playBtn" title="Pausar">
-          <svg id="playIcon" width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
-        </button>
-        <button class="icon-btn" title="Siguiente">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5l11 7L4 19z"/></svg>
-        </button>
+        <div class="scrubber">
+          <div class="bar" id="bar"><div class="fill" id="fill"></div></div>
+          <div class="times"><span id="cur">1:24</span><span id="dur">-2:18</span></div>
+        </div>
+
+        <div class="controls">
+          <button class="icon-btn prev" title="Anterior">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5L9 12l11 7z"/></svg>
+          </button>
+          <button class="icon-btn play" id="playBtn" title="Pausar">
+            <svg id="playIcon" width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+          </button>
+          <button class="icon-btn" title="Siguiente">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5l11 7L4 19z"/></svg>
+          </button>
+        </div>
       </div>
 
       <div class="actions">
@@ -197,10 +210,9 @@
     </div>
   </div>
 
-  <div class="hint">Arrastra el popup · pulsa play · marca favorito · cambia de álbum</div>
+  <div class="hint">Arrastra el popup · cambia fondo y modo arriba · cambia de álbum</div>
 
 <script>
-// ---------- Sample albums (covers generated procedurally so it works offline) ----------
 const ALBUMS = [
   { title: "Midnight City", artist: "M83", palette: ["#ff5e62","#ff9966","#2b1055"], dur: 222, cur: 84 },
   { title: "Blonde", artist: "Frank Ocean", palette: ["#f6d365","#fda085","#5a3f37"], dur: 248, cur: 60 },
@@ -212,134 +224,149 @@ const ALBUMS = [
 
 const canvas = document.getElementById('art');
 const ctx = canvas.getContext('2d');
+const miniCanvas = document.getElementById('miniArt');
+const miniCtx = miniCanvas.getContext('2d');
 
-function drawCover(album) {
-  const w = canvas.width, h = canvas.height;
+let bgStyle = 'dark';
+
+function drawCover(targetCtx, w, h, album) {
   const [a, b, c] = album.palette;
-  // gradient base
-  const g = ctx.createLinearGradient(0, 0, w, h);
+  const g = targetCtx.createLinearGradient(0, 0, w, h);
   g.addColorStop(0, a); g.addColorStop(0.55, b); g.addColorStop(1, c);
-  ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
-  // soft geometric blobs for an "album-art" feel
-  ctx.globalCompositeOperation = 'overlay';
+  targetCtx.fillStyle = g; targetCtx.fillRect(0, 0, w, h);
+  targetCtx.globalCompositeOperation = 'overlay';
   for (let i = 0; i < 5; i++) {
-    const rg = ctx.createRadialGradient(
-      (0.2 + 0.15*i) * w, (0.8 - 0.15*i) * h, 0,
-      (0.2 + 0.15*i) * w, (0.8 - 0.15*i) * h, w * (0.3 + 0.05*i));
-    rg.addColorStop(0, 'rgba(255,255,255,0.5)');
-    rg.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.fillStyle = rg; ctx.fillRect(0, 0, w, h);
+    const rg = targetCtx.createRadialGradient((0.2+0.15*i)*w, (0.8-0.15*i)*h, 0, (0.2+0.15*i)*w, (0.8-0.15*i)*h, w*(0.3+0.05*i));
+    rg.addColorStop(0, 'rgba(255,255,255,0.5)'); rg.addColorStop(1, 'rgba(255,255,255,0)');
+    targetCtx.fillStyle = rg; targetCtx.fillRect(0, 0, w, h);
   }
-  ctx.globalCompositeOperation = 'source-over';
+  targetCtx.globalCompositeOperation = 'source-over';
 }
 
-// Extract dominant + secondary color from the canvas pixels
 function extractColors() {
   const { width, height } = canvas;
   const data = ctx.getImageData(0, 0, width, height).data;
-  let r = 0, g = 0, b = 0, n = 0;
-  const buckets = {};
-  for (let i = 0; i < data.length; i += 4 * 80) {
-    const R = data[i], G = data[i+1], B = data[i+2];
-    r += R; g += G; b += B; n++;
-    const key = `${R>>5},${G>>5},${B>>5}`;
-    buckets[key] = (buckets[key] || 0) + 1;
+  let r=0,g=0,b=0,n=0; const buckets={};
+  for (let i=0; i<data.length; i+=4*80) {
+    const R=data[i],G=data[i+1],B=data[i+2]; r+=R;g+=G;b+=B;n++;
+    const key=`${R>>5},${G>>5},${B>>5}`; buckets[key]=(buckets[key]||0)+1;
   }
-  const avg = [Math.round(r/n), Math.round(g/n), Math.round(b/n)];
-  // most frequent vivid bucket
-  let best = null, bestScore = -1;
+  const avg=[Math.round(r/n),Math.round(g/n),Math.round(b/n)];
+  let best=null,bestScore=-1;
   for (const k in buckets) {
-    const [br, bg, bb] = k.split(',').map(x => (parseInt(x)<<5) + 16);
-    const sat = Math.max(br,bg,bb) - Math.min(br,bg,bb);
-    const score = buckets[k] * (sat + 30);
-    if (score > bestScore) { bestScore = score; best = [br, bg, bb]; }
+    const [br,bg,bb]=k.split(',').map(x=>(parseInt(x)<<5)+16);
+    const sat=Math.max(br,bg,bb)-Math.min(br,bg,bb);
+    const score=buckets[k]*(sat+30);
+    if (score>bestScore){bestScore=score;best=[br,bg,bb];}
   }
-  return { avg, dominant: best || avg };
+  return { avg, dominant: best||avg };
 }
 
 function applyBackground() {
   const { avg, dominant } = extractColors();
-  const d = `rgb(${dominant.join(',')})`;
-  const a = `rgb(${avg.join(',')})`;
-  const dark = `rgb(${dominant.map(v => Math.round(v*0.35)).join(',')})`;
-  document.getElementById('bg').style.background =
-    `radial-gradient(120% 80% at 30% 10%, ${d}, transparent 60%),
-     radial-gradient(120% 90% at 80% 100%, ${a}, transparent 55%),
-     linear-gradient(160deg, ${d}, ${dark})`;
+  const d=`rgb(${dominant.join(',')})`, a=`rgb(${avg.join(',')})`;
+  const dark=`rgb(${dominant.map(v=>Math.round(v*0.32)).join(',')})`;
+  const bgEl = document.getElementById('bg');
+  const blurEl = document.getElementById('bgBlur');
+  blurEl.style.opacity = '0';
+
+  if (bgStyle === 'dark') {
+    bgEl.style.background =
+      `radial-gradient(120% 80% at 30% 10%, ${d}, transparent 60%),
+       radial-gradient(120% 90% at 80% 100%, ${a}, transparent 55%),
+       linear-gradient(160deg, ${d}, ${dark})`;
+    document.querySelector('.bg-noise').style.background='rgba(0,0,0,0.30)';
+  } else if (bgStyle === 'vivid') {
+    const vivid = dominant.map(v=>Math.min(255, Math.round(v*1.25+30)));
+    const v2 = avg.map(v=>Math.min(255, Math.round(v*1.2+20)));
+    bgEl.style.background =
+      `radial-gradient(120% 90% at 25% 0%, rgb(${vivid.join(',')}), transparent 65%),
+       linear-gradient(160deg, rgb(${vivid.join(',')}), rgb(${v2.join(',')}))`;
+    document.querySelector('.bg-noise').style.background='rgba(0,0,0,0.12)';
+  } else if (bgStyle === 'blur') {
+    bgEl.style.background = `linear-gradient(160deg, ${dark}, #000)`;
+    blurEl.style.backgroundImage = `url(${canvas.toDataURL()})`;
+    blurEl.style.opacity = '1';
+    document.querySelector('.bg-noise').style.background='rgba(0,0,0,0.25)';
+  }
 }
 
-function fmt(s) { const m = Math.floor(s/60); const sec = Math.floor(s%60); return `${m}:${sec.toString().padStart(2,'0')}`; }
+function fmt(s){const m=Math.floor(s/60),sec=Math.floor(s%60);return `${m}:${sec.toString().padStart(2,'0')}`;}
 
-let current = 0;
+let current=0;
 function load(i) {
-  current = i;
-  const album = ALBUMS[i];
-  drawCover(album);
+  current=i; const album=ALBUMS[i];
+  drawCover(ctx, canvas.width, canvas.height, album);
+  drawCover(miniCtx, miniCanvas.width, miniCanvas.height, album);
   applyBackground();
-  document.getElementById('title').textContent = album.title;
-  document.getElementById('artist').textContent = album.artist;
-  const pct = album.cur / album.dur;
-  document.getElementById('fill').style.width = (pct*100) + '%';
-  document.getElementById('cur').textContent = fmt(album.cur);
-  document.getElementById('dur').textContent = '-' + fmt(album.dur - album.cur);
-  document.querySelectorAll('.album-chip').forEach((c, idx) => c.classList.toggle('active', idx === i));
+  document.getElementById('title').textContent=album.title;
+  document.getElementById('artist').textContent=album.artist;
+  const pct=album.cur/album.dur;
+  document.getElementById('fill').style.width=(pct*100)+'%';
+  document.getElementById('cur').textContent=fmt(album.cur);
+  document.getElementById('dur').textContent='-'+fmt(album.dur-album.cur);
+  document.querySelectorAll('.album-chip').forEach((c,idx)=>c.classList.toggle('active',idx===i));
 }
 
-// build switcher chips
-const sw = document.getElementById('switcher');
-ALBUMS.forEach((al, i) => {
-  const chip = document.createElement('div');
-  chip.className = 'album-chip';
-  chip.innerHTML = `<span class="swatch" style="background:linear-gradient(135deg,${al.palette[0]},${al.palette[1]})"></span>${al.title}`;
-  chip.onclick = () => load(i);
+const sw=document.getElementById('switcher');
+ALBUMS.forEach((al,i)=>{
+  const chip=document.createElement('div');
+  chip.className='album-chip';
+  chip.innerHTML=`<span class="swatch" style="background:linear-gradient(135deg,${al.palette[0]},${al.palette[1]})"></span>${al.title}`;
+  chip.onclick=()=>load(i);
   sw.appendChild(chip);
 });
 
-// like toggle
-document.getElementById('likeBtn').addEventListener('click', (e) => {
-  const btn = e.currentTarget;
-  const heart = document.getElementById('heart');
+// bg selector
+document.getElementById('bgSeg').addEventListener('click', e=>{
+  const btn=e.target.closest('button'); if(!btn) return;
+  document.querySelectorAll('#bgSeg button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); bgStyle=btn.dataset.bg; applyBackground();
+});
+
+// mode selector
+document.getElementById('modeSeg').addEventListener('click', e=>{
+  const btn=e.target.closest('button'); if(!btn) return;
+  document.querySelectorAll('#modeSeg button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('popup').classList.toggle('mini', btn.dataset.mode==='mini');
+});
+
+document.getElementById('likeBtn').addEventListener('click', e=>{
+  const btn=e.currentTarget, heart=document.getElementById('heart');
   btn.classList.toggle('liked');
-  heart.setAttribute('fill', btn.classList.contains('liked') ? 'currentColor' : 'none');
+  heart.setAttribute('fill', btn.classList.contains('liked')?'currentColor':'none');
 });
 
-// play/pause toggle
-let playing = true;
-document.getElementById('playBtn').addEventListener('click', () => {
-  playing = !playing;
-  document.getElementById('playIcon').innerHTML = playing
-    ? '<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>'
-    : '<path d="M8 5l12 7-12 7z"/>';
+let playing=true;
+document.getElementById('playBtn').addEventListener('click', ()=>{
+  playing=!playing;
+  document.getElementById('playIcon').innerHTML=playing
+    ?'<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>'
+    :'<path d="M8 5l12 7-12 7z"/>';
 });
 
-// scrub
-document.getElementById('bar').addEventListener('click', (e) => {
-  const rect = e.currentTarget.getBoundingClientRect();
-  const pct = (e.clientX - rect.left) / rect.width;
-  const al = ALBUMS[current];
-  al.cur = Math.round(pct * al.dur);
-  load(current);
+document.getElementById('bar').addEventListener('click', e=>{
+  const rect=e.currentTarget.getBoundingClientRect();
+  const pct=(e.clientX-rect.left)/rect.width;
+  const al=ALBUMS[current]; al.cur=Math.round(pct*al.dur); load(current);
 });
 
-// ---------- drag the popup ----------
-const popup = document.getElementById('popup');
-const dragbar = document.getElementById('dragbar');
-let dragging = false, ox = 0, oy = 0;
-dragbar.addEventListener('mousedown', (e) => {
-  dragging = true;
-  const r = popup.getBoundingClientRect();
-  ox = e.clientX - r.left; oy = e.clientY - r.top;
-  popup.style.boxShadow = '0 60px 120px -20px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.12)';
+// drag (from drag-bar in expanded, mini-art in mini)
+const popup=document.getElementById('popup');
+let dragging=false,ox=0,oy=0;
+function startDrag(e){
+  dragging=true; const r=popup.getBoundingClientRect();
+  ox=e.clientX-r.left; oy=e.clientY-r.top;
+  popup.style.boxShadow='0 60px 120px -20px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.12)';
+}
+document.getElementById('dragbar').addEventListener('mousedown', startDrag);
+document.getElementById('miniArtWrap').addEventListener('mousedown', startDrag);
+window.addEventListener('mousemove', e=>{
+  if(!dragging) return;
+  popup.style.left=(e.clientX-ox)+'px'; popup.style.top=(e.clientY-oy)+'px';
 });
-window.addEventListener('mousemove', (e) => {
-  if (!dragging) return;
-  popup.style.left = (e.clientX - ox) + 'px';
-  popup.style.top = (e.clientY - oy) + 'px';
-});
-window.addEventListener('mouseup', () => {
-  dragging = false;
-  popup.style.boxShadow = '';
-});
+window.addEventListener('mouseup', ()=>{ dragging=false; popup.style.boxShadow=''; });
 
 load(0);
 </script>
