@@ -106,14 +106,10 @@ async function ensure() {
 // returns the canvas synchronously; kicks off async init of the WebGL synth
 export function getCanvas() { makeCanvas(); ensure(); return canvas; }
 
-function apply() {
-  try { (BUILD[currentSketch] || BUILD.andromeda)(h, currentColors); }
-  catch (e) { console.error('[poptify] hydra sketch failed', e); }
-}
 export function applySketch(id, colors) {
   if (id) currentSketch = id;
   if (colors) currentColors = normColors(colors);
-  if (h) apply();
+  if (h) (BUILD[currentSketch] || BUILD.andromeda)(h, currentColors);
   else ensure();
 }
 
