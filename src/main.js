@@ -1,7 +1,9 @@
 import { invoke } from '@tauri-apps/api/core';
-import { getCurrentWindow } from '@tauri-apps/api/window';
+import { getCurrentWindow, primaryMonitor } from '@tauri-apps/api/window';
+import { LogicalSize, LogicalPosition } from '@tauri-apps/api/dpi';
 
 const appWindow = getCurrentWindow();
+const MARGIN = 22; // transparent breathing room around the popup (for shadow + 3D tilt)
 
 // ---------- catalog ----------
 const SKINS = [
@@ -114,7 +116,7 @@ function renderIOS(al, col) {
         <div class="title">${al.title}</div>
         <div class="artist">${al.artist}</div>
       </div>
-      <button class="icon-btn like" data-act="like" title="Favorito">${I.heart(state.liked)}</button>
+      <button class="icon-btn like ${state.liked?'liked':''}" data-act="like" title="Favorito">${I.heart(state.liked)}</button>
     </div>
     <div class="scrub">
       <div class="bar" data-act="seek"><div class="fill" style="width:${pct}%"></div></div>
@@ -292,7 +294,7 @@ function renderVinyl(al, col) {
       <div class="v-info">
         <div class="title">${al.title}</div>
         <div class="artist">${al.artist}</div>
-        <button class="icon-btn like" data-act="like">${I.heart(state.liked)}</button>
+        <button class="icon-btn like ${state.liked?'liked':''}" data-act="like">${I.heart(state.liked)}</button>
       </div>
     </div>
     <div class="v-scrub">
@@ -384,20 +386,9 @@ function renderSettings() {
   scrimEl.classList.toggle('show', state.settingsOpen);
 }
 
-function positionSettings() {
-  const r = popup.getBoundingClientRect();
-  const w = 300, gap = 16;
-  let left = r.right + gap;
-  if (left + w > window.innerWidth - 12) left = r.left - w - gap;
-  if (left < 12) left = 12;
-  let top = r.top;
-  if (top + 360 > window.innerHeight - 12) top = Math.max(12, window.innerHeight - 372);
-  settingsEl.style.left = left + 'px';
-  settingsEl.style.top = top + 'px';
-}
 function syncSettings() {
-  if (state.settingsOpen) positionSettings();
   renderSettings();
+  layout();
 }
 
 // ---------- main render ----------
@@ -417,7 +408,6 @@ function render(swap) {
     popup.innerHTML = renderConnect();
     bindControls();
     syncSettings();
-    positionPopup();
     return;
   }
   // connected but nothing playing
@@ -426,7 +416,6 @@ function render(swap) {
     popup.innerHTML = renderEmpty();
     bindControls();
     syncSettings();
-    positionPopup();
     return;
   }
 
@@ -441,7 +430,6 @@ function render(swap) {
   popup.querySelectorAll('canvas[data-art]').forEach(cv => drawImageCover(cv.getContext('2d'), cv.width, cv.height, coverImg));
   bindControls();
   syncSettings();
-  positionPopup();
   lastSkin = state.skin;
   if (swap) { popup.classList.remove('swap-anim'); void popup.offsetWidth; popup.classList.add('swap-anim'); }
   if (likeJustToggled) {
@@ -450,12 +438,49 @@ function render(swap) {
   }
 }
 
-// center the popup within the (transparent) window; notch sticks to the top
-function positionPopup() {
-  popup.style.transform = '';
-  const r = popup.getBoundingClientRect();
-  popup.style.left = Math.round((window.innerWidth - r.width)/2) + 'px';
-  popup.style.top = state.skin==='notch' && state.authed && state.track ? '0px' : Math.round((window.innerHeight - r.height)/2) + 'px';
+// resize the OS window to fit the current skin (+ settings panel when open),
+// place the popup/panel inside, and pin the notch to the top of the screen.
+let lastWinW = 0, lastWinH = 0;
+let resizing = false;
+async function layout() {
+  popup.style.transform = ''; // clear tilt so measurements are clean
+  const pr = popup.getBoundingClientRect();
+  const pw = Math.ceil(pr.width), ph = Math.ceil(pr.height);
+  const gap = 14, panelW = 300;
+  let winW, winH;
+
+  if (state.settingsOpen) {
+    const panelH = Math.ceil(settingsEl.offsetHeight) || 360;
+    winW = MARGIN + pw + gap + panelW + MARGIN;
+    winH = MARGIN * 2 + Math.max(ph, panelH);
+    popup.style.left = MARGIN + 'px';
+    popup.style.top = Math.round((winH - ph) / 2) + 'px';
+    settingsEl.style.left = (MARGIN + pw + gap) + 'px';
+    settingsEl.style.top = Math.round((winH - panelH) / 2) + 'px';
+  } else {
+    winW = pw + MARGIN * 2;
+    winH = ph + MARGIN * 2;
+    popup.style.left = MARGIN + 'px';
+    popup.style.top = MARGIN + 'px';
+  }
+
+  if (winW === lastWinW && winH === lastWinH) return;
+  lastWinW = winW; lastWinH = winH;
+  resizing = true;
+  try {
+    await appWindow.setSize(new LogicalSize(winW, winH));
+    // pin the notch skin to the top-center of the primary display
+    if (state.skin === 'notch' && state.authed && state.track) {
+      const mon = await primaryMonitor();
+      if (mon) {
+        const sf = mon.scaleFactor || 1;
+        const screenW = mon.size.width / sf;
+        const x = Math.round((screenW - winW) / 2);
+        await appWindow.setPosition(new LogicalPosition(x, 0));
+      }
+    }
+  } catch (e) { console.error('layout', e); }
+  resizing = false;
 }
 
 // ---------- actions ----------
@@ -515,7 +540,7 @@ popup.addEventListener('pointermove', e => {
   const r = popup.getBoundingClientRect();
   const px = (e.clientX - r.left)/r.width - 0.5, py = (e.clientY - r.top)/r.height - 0.5;
   if (tiltRAF) cancelAnimationFrame(tiltRAF);
-  tiltRAF = requestAnimationFrame(()=>{ popup.style.transform = `perspective(900px) rotateY(${px*6}deg) rotateX(${-py*6}deg) scale(1.012)`; });
+  tiltRAF = requestAnimationFrame(()=>{ popup.style.transform = `perspective(1000px) rotateY(${px*4}deg) rotateX(${-py*4}deg)`; });
 });
 popup.addEventListener('pointerleave', ()=>{ popup.style.transform=''; });
 
@@ -525,7 +550,7 @@ popup.addEventListener('mousedown', e => {
   if (e.target.closest('[data-act]') || e.target.closest('input')) return; // keep controls clickable
   appWindow.startDragging();
 });
-window.addEventListener('resize', ()=>{ positionPopup(); if (state.settingsOpen) positionSettings(); });
+window.addEventListener('resize', ()=>{ layout(); });
 
 // ---------- polling Spotify ----------
 let lastTrackId = null;
@@ -538,6 +563,7 @@ async function poll() {
       if (had) render(true);
       return;
     }
+    console.debug('[poptify] now_playing:', np.title, '| playing=', np.is_playing, '| liked=', np.liked);
     const trackChanged = np.id !== lastTrackId;
     state.playing = np.is_playing;
     state.liked = np.liked;
