@@ -93,11 +93,11 @@
   .mini-bar .icon-btn { width: 40px; height: 40px; color: #fff; flex-shrink: 0; }
   .mini-bar .play { width: 46px; height: 46px; background: #fff; color: #111; }
   .mini-bar .play svg { width: 50%; height: 50%; }
-  .mini-bar .mini-dur { font-size: 13px; color: rgba(255,255,255,0.88); font-variant-numeric: tabular-nums; white-space: nowrap; margin: 0 2px; flex-shrink: 0; }
+  .mini-bar .mini-seek { flex: 1; min-width: 60px; margin: 0 4px; }
+  .mini-bar .mini-seek .bar { height: 6px; }
+  .mini-bar .mini-times { display: flex; justify-content: space-between; margin-top: 5px; font-size: 10px; color: rgba(255,255,255,0.7); font-variant-numeric: tabular-nums; }
   .mini-bar .settings-inline { background: rgba(255,255,255,0.14); }
   .mini-bar .settings-inline:hover { background: rgba(255,255,255,0.24); }
-  .mini-progress { margin-top: 10px; }
-  .mini-progress .bar { height: 4px; }
 
   /* ============ SKIN: iPod / MP3 ============ */
   .skin-ipod { width: 300px; border-radius: 26px; background: linear-gradient(160deg,#fafafa,#d9dde2); box-shadow: 0 40px 90px -20px rgba(0,0,0,0.7), inset 0 1px 0 #fff, 0 0 0 1px rgba(0,0,0,0.15); padding: 20px 20px 26px; color:#111; }
@@ -401,11 +401,13 @@ function renderIOSMini(al, col) {
       <button class="icon-btn" data-act="prev" title="Anterior">${I.prev}</button>
       <button class="icon-btn play" data-act="play" title="Pausa">${I.play()}</button>
       <button class="icon-btn" data-act="next" title="Siguiente">${I.next}</button>
-      <span class="mini-dur">${fmt(al.cur)} / ${fmt(al.dur)}</span>
+      <div class="mini-seek">
+        <div class="bar" data-act="seek"><div class="fill" style="width:${pct}%"></div></div>
+        <div class="mini-times"><span>${fmt(al.cur)}</span><span>${fmt(al.dur)}</span></div>
+      </div>
       <button class="icon-btn like ${state.liked?'liked':''}" data-act="like" title="Favorito">${I.heart(state.liked)}</button>
       <button class="icon-btn settings-inline" data-act="settings" title="Ajustes">${I.gear}</button>
     </div>
-    <div class="mini-progress"><div class="bar" data-act="seek"><div class="fill" style="width:${pct}%"></div></div></div>
   </div>`;
 }
 
