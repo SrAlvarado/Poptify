@@ -469,14 +469,26 @@ async function layout() {
   resizing = true;
   try {
     await appWindow.setSize(new LogicalSize(winW, winH));
-    // pin the notch skin to the top-center of the primary display
-    if (state.skin === 'notch' && state.authed && state.track) {
-      const mon = await primaryMonitor();
-      if (mon) {
-        const sf = mon.scaleFactor || 1;
-        const screenW = mon.size.width / sf;
-        const x = Math.round((screenW - winW) / 2);
-        await appWindow.setPosition(new LogicalPosition(x, 0));
+    const mon = await primaryMonitor();
+    if (mon) {
+      const sf = mon.scaleFactor || 1;
+      const sw = mon.size.width / sf, sh = mon.size.height / sf;
+      const mx = mon.position.x / sf, my = mon.position.y / sf;
+      if (state.skin === 'notch' && state.authed && state.track) {
+        // pin the notch to the top-center of the display
+        await appWindow.setPosition(new LogicalPosition(Math.round(mx + (sw - winW) / 2), Math.round(my)));
+      } else {
+        // keep the whole window (popup + settings panel) on screen
+        const pos = await appWindow.outerPosition();
+        let x = pos.x / sf, y = pos.y / sf;
+        let nx = x, ny = y;
+        if (x + winW > mx + sw) nx = mx + sw - winW - 8;
+        if (y + winH > my + sh) ny = my + sh - winH - 8;
+        if (nx < mx + 8) nx = mx + 8;
+        if (ny < my + 8) ny = my + 8;
+        if (Math.abs(nx - x) > 1 || Math.abs(ny - y) > 1) {
+          await appWindow.setPosition(new LogicalPosition(Math.round(nx), Math.round(ny)));
+        }
       }
     }
   } catch (e) { console.error('layout', e); }
