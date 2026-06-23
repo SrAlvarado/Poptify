@@ -84,25 +84,20 @@
   .skin-ios .pill { flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding:13px; border-radius:16px; background:var(--glass); border:1px solid rgba(255,255,255,0.08); color:var(--text); font-size:14px; font-weight:600; cursor:pointer; }
   .skin-ios .pill:hover { background: var(--glass-strong); }
 
-  /* iOS mini */
-  .skin-ios.mini { width: 340px; border-radius: 22px; }
-  .skin-ios.mini .inner { padding: 14px 16px; }
-  .skin-ios.mini .grip, .skin-ios.mini .topbar, .skin-ios.mini .art, .skin-ios.mini .actions, .skin-ios.mini .times { display:none; }
-  .skin-ios.mini .mini-row { display:flex; align-items:center; gap:12px; }
-  .skin-ios.mini .mini-art { display:block; width:46px; height:46px; border-radius:10px; overflow:hidden; flex-shrink:0; box-shadow:0 6px 16px -4px rgba(0,0,0,.5); cursor:grab; }
-  .skin-ios.mini .mini-art canvas { width:100%; height:100%; }
-  .skin-ios.mini .track { margin:0; flex:1; min-width:0; align-items:center; }
-  .skin-ios.mini .title { font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .skin-ios.mini .artist { font-size:12px; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .skin-ios.mini .like { display:none; }
-  .skin-ios.mini .scrub { order:5; flex-basis:100%; margin:10px 0 0; }
-  .skin-ios.mini .scrub .bar { height:4px; }
-  .skin-ios.mini .ctrls { margin:0; gap:6px; }
-  .skin-ios.mini .ctrls .icon-btn { width:34px; height:34px; }
-  .skin-ios.mini .ctrls .play { width:40px; height:40px; }
-  .skin-ios.mini .ctrls .play svg { width:18px; height:18px; }
-  .skin-ios .mini-art, .skin-ios .mini-row > .ctrls .mini-like { }
-  .skin-ios:not(.mini) .mini-art { display:none; }
+  /* iOS mini — single horizontal control strip */
+  .skin-ios.mini { width: 470px; border-radius: 22px; }
+  .skin-ios.mini .inner { padding: 12px 14px; }
+  .mini-bar { display: flex; align-items: center; gap: 10px; }
+  .mini-bar .mini-art { width: 46px; height: 46px; border-radius: 11px; overflow: hidden; flex-shrink: 0; box-shadow: 0 6px 16px -4px rgba(0,0,0,.55); cursor: grab; }
+  .mini-bar .mini-art canvas { width: 100%; height: 100%; display: block; }
+  .mini-bar .icon-btn { width: 40px; height: 40px; color: #fff; flex-shrink: 0; }
+  .mini-bar .play { width: 46px; height: 46px; background: #fff; color: #111; }
+  .mini-bar .play svg { width: 50%; height: 50%; }
+  .mini-bar .mini-dur { font-size: 13px; color: rgba(255,255,255,0.88); font-variant-numeric: tabular-nums; white-space: nowrap; margin: 0 2px; flex-shrink: 0; }
+  .mini-bar .settings-inline { background: rgba(255,255,255,0.14); }
+  .mini-bar .settings-inline:hover { background: rgba(255,255,255,0.24); }
+  .mini-progress { margin-top: 10px; }
+  .mini-progress .bar { height: 4px; }
 
   /* ============ SKIN: iPod / MP3 ============ */
   .skin-ipod { width: 300px; border-radius: 26px; background: linear-gradient(160deg,#fafafa,#d9dde2); box-shadow: 0 40px 90px -20px rgba(0,0,0,0.7), inset 0 1px 0 #fff, 0 0 0 1px rgba(0,0,0,0.15); padding: 20px 20px 26px; color:#111; }
@@ -368,26 +363,22 @@ function renderIOS(al, col) {
   <div class="inner">
     <div class="grip"></div>
     <div class="topbar" data-drag><span class="live"></span> Reproduciendo ahora</div>
-    <div class="mini-row">
-      <div class="mini-art" data-drag><canvas data-art width="120" height="120"></canvas></div>
-      <div class="art" data-drag><canvas data-art width="600" height="600"></canvas></div>
-      <div class="track">
-        <div style="min-width:0">
-          <div class="title">${al.title}</div>
-          <div class="artist">${al.artist}</div>
-        </div>
-        <button class="icon-btn like" data-act="like" title="Favorito">${I.heart(state.liked)}</button>
+    <div class="art" data-drag><canvas data-art width="600" height="600"></canvas></div>
+    <div class="track">
+      <div style="min-width:0">
+        <div class="title">${al.title}</div>
+        <div class="artist">${al.artist}</div>
       </div>
-      <div class="scrub">
-        <div class="bar" data-act="seek"><div class="fill" style="width:${pct}%"></div></div>
-        <div class="times"><span>${fmt(al.cur)}</span><span>-${fmt(al.dur-al.cur)}</span></div>
-      </div>
-      <div class="ctrls">
-        <button class="icon-btn" data-act="prev">${I.prev}</button>
-        <button class="icon-btn mini-like" data-act="like" title="Favorito" style="display:none">${I.heart(state.liked)}</button>
-        <button class="icon-btn play" data-act="play">${I.play()}</button>
-        <button class="icon-btn" data-act="next">${I.next}</button>
-      </div>
+      <button class="icon-btn like" data-act="like" title="Favorito">${I.heart(state.liked)}</button>
+    </div>
+    <div class="scrub">
+      <div class="bar" data-act="seek"><div class="fill" style="width:${pct}%"></div></div>
+      <div class="times"><span>${fmt(al.cur)}</span><span>-${fmt(al.dur-al.cur)}</span></div>
+    </div>
+    <div class="ctrls">
+      <button class="icon-btn" data-act="prev">${I.prev}</button>
+      <button class="icon-btn play" data-act="play">${I.play()}</button>
+      <button class="icon-btn" data-act="next">${I.next}</button>
     </div>
     <div class="actions">
       <button class="pill" data-act="lyrics"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h12M4 18h8"/></svg>Letra</button>
@@ -396,11 +387,26 @@ function renderIOS(al, col) {
   </div>`;
 }
 
-// inject the mini-mode prev+like ordering for iOS mini: show like in controls when mini
-function postIOS(root) {
-  if (state.mode==='mini') {
-    root.querySelector('.mini-like').style.display='grid';
-  }
+// iOS MINI — order: art, prev, play, next, duration, like, settings
+function renderIOSMini(al, col) {
+  const pct = al.cur/al.dur*100;
+  const blur = state.bg==='blur';
+  return `
+  <div class="bg" style="background:${bgCSS(col)}"></div>
+  <div class="bg-blur" style="background-image:url(${col.dataURL});opacity:${blur?1:0}"></div>
+  <div class="noise" style="background:rgba(0,0,0,${state.bg==='vivid'?0.12:state.bg==='blur'?0.25:0.30})"></div>
+  <div class="inner">
+    <div class="mini-bar">
+      <div class="mini-art" data-drag><canvas data-art width="120" height="120"></canvas></div>
+      <button class="icon-btn" data-act="prev" title="Anterior">${I.prev}</button>
+      <button class="icon-btn play" data-act="play" title="Pausa">${I.play()}</button>
+      <button class="icon-btn" data-act="next" title="Siguiente">${I.next}</button>
+      <span class="mini-dur">${fmt(al.cur)} / ${fmt(al.dur)}</span>
+      <button class="icon-btn like ${state.liked?'liked':''}" data-act="like" title="Favorito">${I.heart(state.liked)}</button>
+      <button class="icon-btn settings-inline" data-act="settings" title="Ajustes">${I.gear}</button>
+    </div>
+    <div class="mini-progress"><div class="bar" data-act="seek"><div class="fill" style="width:${pct}%"></div></div></div>
+  </div>`;
 }
 
 function renderIpod(al) {
@@ -601,16 +607,16 @@ let likeJustToggled = false;
 function render(swap) {
   const al = ALBUMS[state.album];
   const col = colors();
+  const isMini = state.skin==='ios' && state.mode==='mini';
   const renderers = { ios:renderIOS, ipod:renderIpod, gb:renderGB, psp:renderPSP, mp4:renderMP4, vinyl:renderVinyl };
-  popup.className = 'popup skin-' + state.skin + (state.skin==='ios' && state.mode==='mini' ? ' mini' : '');
-  popup.innerHTML =
-    `<button class="icon-btn gear" data-act="settings" title="Ajustes">${I.gear}</button>`
-    + renderers[state.skin](al, col);
+  popup.className = 'popup skin-' + state.skin + (isMini ? ' mini' : '');
+  // floating gear on every skin EXCEPT iOS-mini (which has an inline settings button)
+  const gear = isMini ? '' : `<button class="icon-btn gear" data-act="settings" title="Ajustes">${I.gear}</button>`;
+  popup.innerHTML = gear + (isMini ? renderIOSMini(al, col) : renderers[state.skin](al, col));
   // draw all album canvases
   popup.querySelectorAll('canvas[data-art]').forEach(cv => {
     drawCover(cv.getContext('2d'), cv.width, cv.height, al);
   });
-  if (state.skin==='ios') postIOS(popup);
   bindControls();
   syncSettings();
   // fancy: crossfade/blur swap when skin or track changes
