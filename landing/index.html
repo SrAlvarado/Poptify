@@ -89,8 +89,9 @@
   .mock .m-bg{position:absolute;inset:0;transition:background .6s}
   .mock .m-noise{position:absolute;inset:0;background:rgba(0,0,0,.28)}
   .mock .m-in{position:relative;padding:20px}
-  .mock .m-top{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;opacity:.85;margin-bottom:14px}
-  .mock .m-top .d{width:7px;height:7px;border-radius:50%;background:var(--c4);box-shadow:0 0 8px var(--c4)}
+  .mock .m-top{display:flex;align-items:center;justify-content:center;position:relative;height:14px;margin-bottom:16px}
+  .mock .grip{width:40px;height:5px;border-radius:99px;background:rgba(255,255,255,.4)}
+  .mock .m-top .eq{position:absolute;right:0;top:-1px}
   .mock .m-art{aspect-ratio:1;border-radius:18px;box-shadow:0 20px 50px -14px rgba(0,0,0,.7);transition:background .6s}
   .mock .m-row{display:flex;justify-content:space-between;align-items:flex-start;margin-top:18px}
   .mock .m-title{font-size:20px;font-weight:800;letter-spacing:-.02em}
@@ -133,8 +134,10 @@
   .card::before{content:"";position:absolute;inset:0;border-radius:24px;padding:1px;opacity:0;transition:opacity .3s;
     background:linear-gradient(120deg,var(--c1),var(--c3),var(--c4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
   .card:hover::before{opacity:1}
-  .card .ico{font-size:38px;display:inline-block;transition:transform .3s}
-  .card:hover .ico{transform:rotate(-10deg) scale(1.15)}
+  .card .ico{width:48px;height:48px;display:grid;place-items:center;border-radius:14px;
+    background:linear-gradient(135deg,rgba(255,45,155,.28),rgba(0,229,255,.22));border:1px solid var(--line);transition:transform .3s}
+  .card .ico svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .card:hover .ico{transform:rotate(-8deg) scale(1.1)}
   .card h3{font-size:20px;font-weight:900;margin:14px 0 8px;letter-spacing:-.01em}
   .card p{color:var(--dim);font-size:15px;line-height:1.6}
 
@@ -149,23 +152,42 @@
     background:linear-gradient(120deg,var(--c3),var(--c1));-webkit-background-clip:text;background-clip:text;color:transparent}
   .stat .l{color:var(--dim);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:12px;margin-top:6px}
 
-  /* skins strip */
-  .skins{display:flex;gap:16px;overflow-x:auto;padding:46px 4px 10px;scroll-snap-type:x mandatory;scrollbar-width:none}
-  .skins::-webkit-scrollbar{display:none}
-  .skin{flex:0 0 200px;scroll-snap-align:center;border-radius:22px;padding:22px 18px;background:var(--glass);border:1px solid var(--line);
-    text-align:center;transition:transform .3s}
-  .skin:hover{transform:translateY(-8px) rotate(-1.5deg)}
-  .skin .face{height:150px;border-radius:16px;display:grid;place-items:center;font-size:54px;margin-bottom:14px;
-    box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
-  .skin .nm{font-weight:800}
-  .skin .ds{color:var(--dim);font-size:13px;margin-top:4px}
+  /* blossom-style drag carousel */
+  .carousel{margin:46px -6vw 0;padding:10px 6vw;overflow:hidden;cursor:grab;touch-action:pan-y}
+  .carousel.drag{cursor:grabbing}
+  .car-track{display:flex;gap:20px;width:max-content;will-change:transform}
+  .skin{flex:0 0 230px;border-radius:24px;padding:20px;background:var(--glass);border:1px solid var(--line);
+    will-change:transform;user-select:none}
+  .skin .face{height:180px;border-radius:18px;display:grid;place-items:center;margin-bottom:16px;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.1), 0 18px 40px -18px rgba(0,0,0,.7)}
+  .skin .face svg{width:74px;height:74px}
+  .skin .nm{font-weight:900;font-size:18px}
+  .skin .ds{color:var(--dim);font-size:13px;margin-top:3px}
+  .drag-hint{text-align:center;color:var(--dim);font-weight:700;letter-spacing:.3em;font-size:11px;text-transform:uppercase;margin-top:18px}
 
   /* download */
   .download{text-align:center}
-  .dl-card{margin-top:40px;border-radius:30px;padding:clamp(30px,6vw,64px);position:relative;overflow:hidden;
-    background:linear-gradient(120deg,rgba(255,45,155,.18),rgba(0,229,255,.16));border:1px solid var(--line)}
-  .dl-card .hero-cta{margin-top:28px}
-  .req{color:var(--dim);font-size:13px;margin-top:18px}
+  .dl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:20px;margin:46px auto 0;max-width:860px}
+  .dl{position:relative;text-align:left;border-radius:26px;padding:30px;background:var(--glass);border:1px solid var(--line);
+    overflow:hidden;transition:transform .3s,box-shadow .3s,border-color .3s}
+  .dl:hover{transform:translateY(-6px)}
+  .dl .glow{position:absolute;inset:0;opacity:0;transition:opacity .3s;background:radial-gradient(70% 90% at 50% 0,rgba(255,255,255,.12),transparent)}
+  .dl:hover .glow{opacity:1}
+  .dl .pglyph{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;background:rgba(255,255,255,.06);border:1px solid var(--line);position:relative}
+  .dl .pglyph svg{width:28px;height:28px;fill:#fff}
+  .dl h3{font-family:Anton;font-size:30px;margin-top:18px;letter-spacing:.01em}
+  .dl .fmt{color:var(--dim);font-size:14px;margin-top:4px}
+  .dl .req2{color:var(--dim);font-size:12.5px;margin-top:14px;line-height:1.5}
+  .dl .go{position:relative;margin-top:22px;display:inline-flex;align-items:center;gap:10px;padding:14px 24px;border-radius:14px;
+    font-weight:800;text-decoration:none;color:#fff;border:none;overflow:hidden}
+  .dl .go svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .dl.macc .go{background:linear-gradient(120deg,var(--c1),var(--c2))}
+  .dl.andd .go{background:linear-gradient(120deg,var(--c3),var(--c4));color:#06140c}
+  .dl .tag{position:absolute;top:18px;right:18px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+    padding:5px 11px;border-radius:99px;background:rgba(255,255,255,.1);color:var(--dim)}
+  .dl.you{border-color:transparent;box-shadow:0 0 0 1.5px var(--c3),0 26px 70px -28px var(--c3)}
+  .dl.you .tag{background:var(--c3);color:#06140c}
+  .req{color:var(--dim);font-size:13px;margin-top:24px}
 
   footer{text-align:center;padding:60px 20px;border-top:1px solid var(--line);color:var(--dim)}
   footer .brand{justify-content:center;margin-bottom:14px;color:#fff}
@@ -196,7 +218,6 @@
 
   <header class="hero">
     <div>
-      <span class="eyebrow"><span class="live"></span> Reproduciendo ahora</span>
       <h1 class="title">POPTIFY</h1>
       <div class="tagline">Tu música, en una nube de color.</div>
       <p class="sub">El popup flotante que muestra lo que suena en Spotify con estética de pantalla de bloqueo de iOS, <b>fondo reactivo al color del álbum</b> y skins retro. Móvelo por toda la pantalla. Para Mac y Android.</p>
@@ -216,7 +237,7 @@
           <div class="m-bg" id="mBg"></div>
           <div class="m-noise"></div>
           <div class="m-in">
-            <div class="m-top"><span class="d"></span> Reproduciendo ahora <span class="eq" style="margin-left:auto"><span></span><span></span><span></span><span></span></span></div>
+            <div class="m-top"><span class="grip"></span><span class="eq"><span></span><span></span><span></span><span></span></span></div>
             <div class="m-art" id="mArt"></div>
             <div class="m-row">
               <div><div class="m-title" id="mTitle">Midnight City</div><div class="m-artist" id="mArtist">M83</div></div>
@@ -262,28 +283,37 @@
       <h2>Siete <em>skins</em>, un mood</h2>
       <p class="lead">Desde la pantalla de bloqueo de iOS hasta una Game Boy, una PSP o un vinilo girando. Cámbialas al vuelo desde los ajustes.</p>
     </div>
-    <div class="skins" id="skinStrip"></div>
+    <div class="carousel" id="carousel"><div class="car-track" id="skinStrip"></div></div>
+    <p class="drag-hint">← arrastra →</p>
   </section>
 
   <section id="descargar" class="download">
     <div class="reveal">
-      <div class="kicker">Gratis · Mac & Android</div>
+      <div class="kicker">Gratis · v0.1.0</div>
       <h2>Dale al <em>play</em></h2>
-    </div>
-    <div class="dl-card reveal">
       <p class="lead" style="margin-inline:auto">Descárgalo, conéctalo a Spotify y deja que la música pinte tu pantalla.</p>
-      <div class="hero-cta">
-        <a class="btn mac" data-dl href="#" id="dlMac">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.7c0-2.2 1.8-3.3 1.9-3.4-1-1.5-2.6-1.7-3.2-1.7-1.4-.1-2.7.8-3.3.8-.7 0-1.7-.8-2.8-.8-1.4 0-2.8.8-3.5 2.1-1.5 2.6-.4 6.5 1.1 8.6.7 1 1.5 2.2 2.6 2.1 1-.1 1.4-.7 2.7-.7s1.6.7 2.7.6c1.1 0 1.8-1 2.5-2 .8-1.2 1.1-2.3 1.1-2.3 0 0-2.1-.8-2.1-3.2zM14.3 5.9c.6-.7 1-1.7.9-2.7-.9 0-1.9.6-2.5 1.3-.5.6-1 1.6-.9 2.6 1 .1 2-.5 2.5-1.2z"/></svg>
-          <span class="lbl">Descargar<small>para macOS · .dmg</small></span>
-        </a>
-        <a class="btn android" data-dl href="#" id="dlAndroid">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 9.5l1.4-2.4c.1-.2 0-.4-.1-.5-.2-.1-.4 0-.5.1l-1.4 2.5C15.4 8.1 13.8 7.7 12 7.7s-3.4.4-4.5 1l-1.4-2.5c-.1-.2-.3-.2-.5-.1-.2.1-.2.3-.1.5L6.9 9C4.6 10.3 3 12.6 3 15.3h18c0-2.7-1.6-5-3.4-5.8zM8 13.4c-.4 0-.7-.3-.7-.7s.3-.7.7-.7.7.3.7.7-.3.7-.7.7zm8 0c-.4 0-.7-.3-.7-.7s.3-.7.7-.7.7.3.7.7-.3.7-.7.7z"/></svg>
-          <span class="lbl">Descargar<small>para Android · .apk</small></span>
-        </a>
-      </div>
-      <p class="req">macOS Apple Silicon · Android 8+ · Requiere cuenta de Spotify (controles con Premium)</p>
     </div>
+    <div class="dl-grid reveal">
+      <div class="dl macc" id="dlMacCard">
+        <span class="tag">macOS</span>
+        <div class="glow"></div>
+        <div class="pglyph"><svg viewBox="0 0 24 24"><path d="M16.4 12.7c0-2.2 1.8-3.3 1.9-3.4-1-1.5-2.6-1.7-3.2-1.7-1.4-.1-2.7.8-3.3.8-.7 0-1.7-.8-2.8-.8-1.4 0-2.8.8-3.5 2.1-1.5 2.6-.4 6.5 1.1 8.6.7 1 1.5 2.2 2.6 2.1 1-.1 1.4-.7 2.7-.7s1.6.7 2.7.6c1.1 0 1.8-1 2.5-2 .8-1.2 1.1-2.3 1.1-2.3 0 0-2.1-.8-2.1-3.2zM14.3 5.9c.6-.7 1-1.7.9-2.7-.9 0-1.9.6-2.5 1.3-.5.6-1 1.6-.9 2.6 1 .1 2-.5 2.5-1.2z"/></svg></div>
+        <h3>Para Mac</h3>
+        <div class="fmt">.dmg · Apple Silicon</div>
+        <div class="req2">macOS 11+. Primera apertura: clic derecho → Abrir (app sin firmar).</div>
+        <a class="go" data-dl href="#"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M5 21h14"/></svg>Descargar</a>
+      </div>
+      <div class="dl andd" id="dlAndCard">
+        <span class="tag">Android</span>
+        <div class="glow"></div>
+        <div class="pglyph"><svg viewBox="0 0 24 24"><path d="M17.6 9.5l1.4-2.4c.1-.2 0-.4-.1-.5-.2-.1-.4 0-.5.1l-1.4 2.5C15.4 8.1 13.8 7.7 12 7.7s-3.4.4-4.5 1l-1.4-2.5c-.1-.2-.3-.2-.5-.1-.2.1-.2.3-.1.5L6.9 9C4.6 10.3 3 12.6 3 15.3h18c0-2.7-1.6-5-3.4-5.8zM8 13.4c-.4 0-.7-.3-.7-.7s.3-.7.7-.7.7.3.7.7-.3.7-.7.7zm8 0c-.4 0-.7-.3-.7-.7s.3-.7.7-.7.7.3.7.7-.3.7-.7.7z"/></svg></div>
+        <h3>Para Android</h3>
+        <div class="fmt">.apk · Android 8+</div>
+        <div class="req2">Activa "instalar de orígenes desconocidos" para instalar el APK.</div>
+        <a class="go" data-dl href="#"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M5 21h14"/></svg>Descargar</a>
+      </div>
+    </div>
+    <p class="req">Requiere cuenta de Spotify · controles con Premium · código abierto en GitHub</p>
   </section>
 
   <footer>
@@ -300,6 +330,15 @@
   // ===== download links (point to GitHub releases; edit when you publish) =====
   const RELEASES = "https://github.com/SrAlvarado/Poptify/releases/latest";
   document.querySelectorAll('[data-dl]').forEach(a=>{ a.href = RELEASES; });
+
+  // highlight the visitor's platform card
+  (function(){
+    const ua=navigator.userAgent||'';
+    const isAndroid=/android/i.test(ua);
+    const isMac=/Macintosh|Mac OS X/i.test(ua) && !isAndroid;
+    const card = isAndroid?document.getElementById('dlAndCard'):isMac?document.getElementById('dlMacCard'):null;
+    if(card){ card.classList.add('you'); card.querySelector('.tag').textContent='Tu sistema'; }
+  })();
 
   // ===== nav scrolled state =====
   const nav = document.getElementById('nav');
@@ -373,29 +412,74 @@
   fillMq(document.getElementById('mq2'),true);
 
   // ===== features =====
+  const ICONS={
+    reactive:'<path d="M12 3s6 6.4 6 10.4a6 6 0 1 1-12 0C6 9.4 12 3 12 3z"/>',
+    ios:'<rect x="6.5" y="2.5" width="11" height="19" rx="3"/><line x1="10" y1="5.5" x2="14" y2="5.5"/>',
+    skins:'<path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/>',
+    move:'<path d="M12 3v18M3 12h18"/><path d="M8.5 6.5 12 3l3.5 3.5M8.5 17.5 12 21l3.5-3.5M6.5 8.5 3 12l3.5 3.5M17.5 8.5 21 12l-3.5 3.5"/>',
+    lyrics:'<path d="M5 6h14M5 11h9M5 16h12"/>',
+    sources:'<line x1="4" y1="10" x2="4" y2="14"/><line x1="8" y1="7" x2="8" y2="17"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="16" y1="8" x2="16" y2="16"/><line x1="20" y1="10.5" x2="20" y2="13.5"/>',
+  };
   const FEATURES=[
-    ["🎨","Fondo reactivo","El color del popup late con la portada del álbum. Modo difuminado, vivo o el caótico fondo Hydra."],
-    ["📱","Como el lock screen de iOS","Portada grande, título, artista, progreso y controles. Bonito de serie."],
-    ["🕹️","7 skins retro","iOS, iPod, Game Boy, PSP, MP4, Vinilo y modo Notch que rodea la cámara del Mac."],
-    ["🖱️","Movible y flotante","Arrástralo por toda la pantalla. Siempre encima, sin marco, ligero."],
-    ["🎤","Letras sincronizadas","Karaoke en directo que sigue el ritmo de la canción."],
-    ["🔊","Spotify + SoundCloud","Refleja Spotify o reproduce SoundCloud. Cambia de fuente al vuelo."],
+    ["reactive","Fondo reactivo","El color del popup late con la portada del álbum. Modo difuminado, vivo o el caótico fondo Hydra."],
+    ["ios","Como el lock screen de iOS","Portada grande, título, artista, progreso y controles. Bonito de serie."],
+    ["skins","7 skins retro","iOS, iPod, Game Boy, PSP, MP4, Vinilo y modo Notch que rodea la cámara del Mac."],
+    ["move","Movible y flotante","Arrástralo por toda la pantalla. Siempre encima, sin marco, ligero."],
+    ["lyrics","Letras sincronizadas","Karaoke en directo que sigue el ritmo de la canción."],
+    ["sources","Spotify + SoundCloud","Refleja Spotify o reproduce SoundCloud. Cambia de fuente al vuelo."],
   ];
   document.getElementById('features').innerHTML = FEATURES.map(f=>
-    `<div class="card reveal"><span class="ico">${f[0]}</span><h3>${f[1]}</h3><p>${f[2]}</p></div>`).join('');
+    `<div class="card reveal"><span class="ico"><svg viewBox="0 0 24 24">${ICONS[f[0]]}</svg></span><h3>${f[1]}</h3><p>${f[2]}</p></div>`).join('');
 
   // ===== skins strip =====
+  const GLYPH={
+    ios:'<rect x="15" y="6" width="18" height="36" rx="5"/><line x1="21" y1="10" x2="27" y2="10"/>',
+    ipod:'<rect x="14" y="5" width="20" height="38" rx="5"/><rect x="18" y="9" width="12" height="9" rx="1"/><circle cx="24" cy="31" r="7"/><circle cx="24" cy="31" r="1.6"/>',
+    gb:'<rect x="11" y="5" width="26" height="38" rx="4"/><rect x="16" y="10" width="16" height="13" rx="1"/><path d="M16 33h7M19.5 29.5v7"/><circle cx="30" cy="34" r="1.6"/>',
+    psp:'<rect x="5" y="14" width="38" height="20" rx="9"/><circle cx="12" cy="24" r="3"/><circle cx="36" cy="24" r="3"/>',
+    mp4:'<rect x="8" y="12" width="32" height="24" rx="3"/><path d="M21 19l9 5-9 5z"/>',
+    vinyl:'<circle cx="24" cy="24" r="18"/><circle cx="24" cy="24" r="9"/><circle cx="24" cy="24" r="2"/>',
+    notch:'<rect x="6" y="11" width="36" height="20" rx="6"/><rect x="18" y="11" width="12" height="6" rx="3"/>',
+  };
   const SKINS=[
-    ["📱","iOS","Pantalla de bloqueo","linear-gradient(135deg,#ff5e62,#2b1055)"],
-    ["🎧","iPod","Rueda de clic","linear-gradient(135deg,#fafafa,#c9ccd2)"],
-    ["🎮","Game Boy","LCD verde","linear-gradient(135deg,#9bbc0f,#306230)"],
-    ["🕹️","PSP","Widescreen","linear-gradient(135deg,#2a2a30,#0c0c10)"],
-    ["📺","MP4","Reproductor","linear-gradient(135deg,#1c1f26,#0a0c10)"],
-    ["💿","Vinilo","Disco girando","linear-gradient(135deg,#1a120b,#e9b872)"],
-    ["📷","Notch","Rodea la cámara","linear-gradient(135deg,#00e5ff,#8b2bff)"],
+    ["ios","iOS","Pantalla de bloqueo","linear-gradient(135deg,#ff5e62,#2b1055)","#fff"],
+    ["ipod","iPod","Rueda de clic","linear-gradient(135deg,#fafafa,#c9ccd2)","#444"],
+    ["gb","Game Boy","LCD verde","linear-gradient(135deg,#9bbc0f,#306230)","#0f380f"],
+    ["psp","PSP","Widescreen","linear-gradient(135deg,#3a3a44,#0c0c10)","#fff"],
+    ["mp4","MP4","Reproductor","linear-gradient(135deg,#1c2330,#0a0c10)","#5ad1a0"],
+    ["vinyl","Vinilo","Disco girando","linear-gradient(135deg,#2a1c0b,#e9b872)","#fff"],
+    ["notch","Notch","Rodea la cámara","linear-gradient(135deg,#00e5ff,#8b2bff)","#fff"],
   ];
   document.getElementById('skinStrip').innerHTML = SKINS.map(s=>
-    `<div class="skin reveal"><div class="face" style="background:${s[3]}">${s[0]}</div><div class="nm">${s[1]}</div><div class="ds">${s[2]}</div></div>`).join('');
+    `<div class="skin"><div class="face" style="background:${s[3]}"><svg viewBox="0 0 48 48" fill="none" stroke="${s[4]}" stroke-width="1.7" stroke-linejoin="round">${GLYPH[s[0]]}</svg></div><div class="nm">${s[1]}</div><div class="ds">${s[2]}</div></div>`).join('');
+
+  // ===== blossom-style drag carousel: physics drag + inertia + bend =====
+  (function(){
+    const car=document.getElementById('carousel'), track=document.getElementById('skinStrip');
+    let x=0, vel=0, dragging=false, lastPX=0, minX=0;
+    car.addEventListener('pointerdown', e=>{ dragging=true; car.classList.add('drag'); lastPX=e.clientX; vel=0; car.setPointerCapture(e.pointerId); e.preventDefault(); });
+    car.addEventListener('pointermove', e=>{ if(!dragging) return; const dx=e.clientX-lastPX; lastPX=e.clientX; x+=dx; vel=dx; });
+    const end=()=>{ dragging=false; car.classList.remove('drag'); };
+    car.addEventListener('pointerup', end); car.addEventListener('pointercancel', end); car.addEventListener('pointerleave', end);
+    const cx=()=>innerWidth/2;
+    function loop(){
+      minX = Math.min(0, car.clientWidth - track.scrollWidth - 8);
+      if(!dragging){
+        x+=vel; vel*=0.93;
+        if(x>0){ x+=(0-x)*0.18; vel=0; }
+        else if(x<minX){ x+=(minX-x)*0.18; vel=0; }
+        if(Math.abs(vel)<0.04) vel=0;
+      }
+      const skew=Math.max(-15,Math.min(15, vel*-0.7));
+      track.style.transform=`translateX(${x}px) skewX(${skew}deg)`;
+      for(const it of track.children){
+        const r=it.getBoundingClientRect(); const d=Math.abs((r.left+r.width/2)-cx())/innerWidth;
+        it.style.transform=`scale(${(1-Math.min(.16,d*.5)).toFixed(3)}) skewX(${(-skew*0.5).toFixed(2)}deg)`;
+      }
+      requestAnimationFrame(loop);
+    }
+    loop();
+  })();
 
   // ===== scroll reveal =====
   const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }),{threshold:.15});
