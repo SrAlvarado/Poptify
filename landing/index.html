@@ -24,7 +24,11 @@
   ::selection{background:var(--c1);color:#fff}
 
   /* ===== animated neon background ===== */
-  .bg{position:fixed; inset:0; z-index:-3; overflow:hidden; background:var(--bg)}
+  #gl{position:fixed;inset:0;z-index:-3;width:100%;height:100%;display:none}
+  body.gl #gl{display:block}
+  body.gl .bg{background:transparent}
+  body.gl .bg .blob{opacity:.18;filter:blur(95px)}
+  .bg{position:fixed; inset:0; z-index:-2; overflow:hidden; background:var(--bg)}
   .blob{position:absolute; border-radius:50%; filter:blur(70px); opacity:.55; mix-blend-mode:screen; will-change:transform}
   .b1{width:46vw;height:46vw;background:var(--c1);top:-8vw;left:-6vw;animation:drift1 18s ease-in-out infinite}
   .b2{width:42vw;height:42vw;background:var(--c3);top:30vh;right:-10vw;animation:drift2 22s ease-in-out infinite}
@@ -41,17 +45,20 @@
 
   /* ===== nav ===== */
   nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
-    padding:18px clamp(18px,5vw,56px);transition:background .3s,backdrop-filter .3s}
-  nav.scrolled{background:rgba(7,6,12,.6);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
-  .brand{font-family:Anton;font-size:26px;letter-spacing:.04em;display:flex;align-items:center;gap:10px}
-  .brand .dot{width:14px;height:14px;border-radius:50%;background:conic-gradient(from 0deg,var(--c1),var(--c3),var(--c4),var(--c5),var(--c1));animation:spin 4s linear infinite}
+    padding:10px clamp(14px,4vw,42px);background:var(--c1);border-bottom:3px solid #000;transition:box-shadow .3s, background .8s ease}
+  nav.scrolled{box-shadow:0 10px 30px -10px rgba(0,0,0,.6)}
+  .brand{font-family:Anton;font-size:26px;letter-spacing:.02em;display:flex;align-items:center;gap:9px;color:#000;font-style:italic;text-transform:lowercase}
+  .brand .dot{width:14px;height:14px;border-radius:50%;background:conic-gradient(from 0deg,#fff,var(--c3),var(--c4),#000,#fff);animation:spin 4s linear infinite;border:2px solid #000}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .nav-links{display:flex;gap:26px;align-items:center}
-  .nav-links a{color:var(--dim);text-decoration:none;font-weight:600;font-size:14px;transition:color .2s}
-  .nav-links a:hover{color:#fff}
-  .nav-cta{padding:10px 20px;border-radius:99px;background:#fff;color:#111;font-weight:800;font-size:14px;text-decoration:none;transition:transform .15s}
-  .nav-cta:hover{transform:scale(1.06)}
-  @media(max-width:760px){.nav-links a:not(.nav-cta){display:none}}
+  .nav-links{display:flex;gap:clamp(12px,2vw,28px);align-items:center}
+  .nav-links a{color:#000;text-decoration:none;font-family:Anton;font-weight:400;font-size:17px;letter-spacing:.03em;text-transform:uppercase;transition:color .15s,transform .15s}
+  .nav-links a:hover{color:#fff;transform:skewX(-6deg)}
+  .nav-cta{padding:8px 16px;border-radius:0;background:#000;color:var(--c4);transition:transform .15s,background .2s}
+  .nav-cta:hover{transform:scale(1.06) rotate(-2deg);color:#fff}
+  .lang{display:flex;gap:6px;padding-left:8px;border-left:2px solid #000}
+  .lang span{font-family:Anton;font-size:15px;padding:2px 9px;border:2px solid #000;border-radius:99px;cursor:pointer}
+  .lang span.on{background:#000;color:var(--c4)}
+  @media(max-width:860px){.nav-links a:not(.nav-cta){display:none}}
 
   /* ===== hero ===== */
   .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;
@@ -238,11 +245,43 @@
   .socials svg{width:20px;height:20px;fill:#fff}
 
   .confetti{position:fixed;width:10px;height:14px;z-index:100;pointer-events:none;border-radius:2px}
+  /* ===== Amnesia-style maximalism ===== */
+  .sticker{position:absolute;font-family:Anton;text-transform:uppercase;letter-spacing:.03em;padding:9px 15px;
+    border:2px solid #000;border-radius:99px;font-size:15px;z-index:7;box-shadow:0 6px 0 rgba(0,0,0,.35);white-space:nowrap}
+  .sticker.s1{background:var(--c4);color:#000;top:104px;left:5vw;transform:rotate(-10deg)}
+  .sticker.s2{background:#000;color:var(--c4);top:180px;right:6vw;transform:rotate(9deg)}
+  .sticker.s3{background:#fff;color:#000;bottom:150px;left:8vw;transform:rotate(6deg)}
+  .sticker.s4{background:var(--c1);color:#fff;bottom:120px;right:9vw;transform:rotate(-7deg)}
+  @media(max-width:760px){.sticker.s2,.sticker.s3{display:none}}
+
+  .rbadge{position:absolute;width:128px;height:128px;z-index:8}
+  .rbadge .ring{animation:spin 9s linear infinite;transform-origin:60px 60px}
+  .rbadge text{fill:#000;font-family:Anton;font-size:11.5px;letter-spacing:.5px;text-transform:uppercase}
+  .rbadge .disc{fill:var(--c4);stroke:#000;stroke-width:3}
+  .rbadge .pl{fill:#000}
+  .rbadge.hero{top:84px;right:7vw}
+  @media(max-width:760px){.rbadge.hero{top:auto;bottom:-30px;right:50%;transform:translateX(50%);width:104px;height:104px}}
+
+  /* word wall */
+  .wall{position:relative;overflow:hidden;background:#000;border-top:3px solid var(--c4);border-bottom:3px solid var(--c4);margin:70px 0;padding:6px 0;transform:rotate(-1.5deg) scale(1.04)}
+  .wall .wrow{white-space:nowrap;font-family:Anton;font-size:clamp(38px,8.5vw,108px);line-height:1.06}
+  .wall .wrow .t{display:inline-block;will-change:transform;animation:scroll 24s linear infinite}
+  .wall .wrow.r .t{animation-direction:reverse}
+  .wall .wrow span{color:var(--c4);margin-right:.32em}
+  .wall .wrow.o span{color:transparent;-webkit-text-stroke:2px var(--c4)}
+
+  /* skins as posters */
+  .skin{background:#100f17;border:2px solid #000;box-shadow:7px 7px 0 rgba(0,0,0,.45);position:relative}
+  .skin .ptag{position:absolute;top:-12px;left:14px;font-family:Anton;font-size:12px;text-transform:uppercase;letter-spacing:.04em;
+    background:var(--c4);color:#000;border:2px solid #000;border-radius:99px;padding:4px 11px;transform:rotate(-4deg);z-index:2}
+  .skin .pno{position:absolute;top:12px;right:14px;font-family:Anton;font-size:16px;color:rgba(255,255,255,.4)}
+
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
   <div class="progress" id="prog"></div>
+  <canvas id="gl"></canvas>
   <div class="bg" id="bg">
     <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
     <div class="blob b4"></div><div class="blob b5"></div>
@@ -251,12 +290,14 @@
   <div class="cursor" id="cursor"></div>
 
   <nav id="nav">
-    <div class="brand"><span class="dot"></span>POPTIFY</div>
+    <div class="brand"><span class="dot"></span>poptify</div>
     <div class="nav-links">
       <a href="#que-es">Qué es</a>
+      <a href="#como">Cómo</a>
       <a href="#skins">Skins</a>
-      <a href="#descargar">Descargar</a>
-      <a href="#descargar" class="nav-cta">Descargar ↓</a>
+      <a href="#faq">FAQ</a>
+      <a href="#descargar" class="nav-cta">DESCARGAR ↓</a>
+      <div class="lang"><span class="on">ES</span><span>EN</span></div>
     </div>
   </nav>
 
@@ -297,6 +338,18 @@
         </div>
       </div>
     </div>
+    <span class="sticker s1">Gratis</span>
+    <span class="sticker s2">Mac + Android</span>
+    <span class="sticker s3">★ Reactivo</span>
+    <span class="sticker s4">v0.1.0</span>
+    <svg class="rbadge hero" viewBox="0 0 120 120" aria-hidden="true">
+      <g class="ring">
+        <defs><path id="rc" d="M60,60 m-46,0 a46,46 0 1,1 92,0 a46,46 0 1,1 -92,0"/></defs>
+        <circle class="disc" cx="60" cy="60" r="57"/>
+        <text><textPath href="#rc">POPTIFY · REPRODUCIENDO AHORA · EN COLOR · </textPath></text>
+      </g>
+      <path class="pl" d="M51 47l23 13-23 13z"/>
+    </svg>
     <div class="scroll-cue">scroll<div class="ch"></div></div>
   </header>
 
@@ -310,6 +363,8 @@
     </div>
     <div class="album-chips" id="albumChips"></div>
   </section>
+
+  <div class="wall" id="wall"></div>
 
   <section id="que-es">
     <div class="reveal">
@@ -454,6 +509,9 @@
     const root=document.documentElement.style;
     root.setProperty('--c1',al.p[0]); root.setProperty('--c3',al.p[1]); root.setProperty('--c5',al.p[2]);
     document.querySelectorAll('.achip').forEach((c,k)=>c.classList.toggle('active',k===i));
+    // feed the WebGL background shader
+    window.__poptifyColors = al.p.slice();
+    if (window.__setPoptifyColors) window.__setPoptifyColors(al.p[0],al.p[1],al.p[2]);
   }
   // album picker chips (reactive demo)
   document.getElementById('albumChips').innerHTML = ALBUMS.map((al,i)=>
@@ -538,8 +596,9 @@
     ["vinyl","Vinilo","Disco girando","linear-gradient(135deg,#2a1c0b,#e9b872)","#fff"],
     ["notch","Notch","Rodea la cámara","linear-gradient(135deg,#00e5ff,#8b2bff)","#fff"],
   ];
-  document.getElementById('skinStrip').innerHTML = SKINS.map(s=>
-    `<div class="skin"><div class="face" style="background:${s[3]}"><svg viewBox="0 0 48 48" fill="none" stroke="${s[4]}" stroke-width="1.7" stroke-linejoin="round">${GLYPH[s[0]]}</svg></div><div class="nm">${s[1]}</div><div class="ds">${s[2]}</div></div>`).join('');
+  const PT=["LOCK SCREEN","CLICK WHEEL","8-BIT","WIDESCREEN","VIDEO","ANALOG","DYNAMIC"];
+  document.getElementById('skinStrip').innerHTML = SKINS.map((s,i)=>
+    `<div class="skin" data-rot="${i%2?1.4:-1.4}"><span class="ptag">${PT[i]}</span><span class="pno">0${i+1}</span><div class="face" style="background:${s[3]}"><svg viewBox="0 0 48 48" fill="none" stroke="${s[4]}" stroke-width="1.7" stroke-linejoin="round">${GLYPH[s[0]]}</svg></div><div class="nm">${s[1]}</div><div class="ds">${s[2]}</div></div>`).join('');
 
   // ===== blossom-style drag carousel: physics drag + inertia + bend =====
   (function(){
@@ -562,7 +621,8 @@
       track.style.transform=`translateX(${x}px) skewX(${skew}deg)`;
       for(const it of track.children){
         const r=it.getBoundingClientRect(); const d=Math.abs((r.left+r.width/2)-cx())/innerWidth;
-        it.style.transform=`scale(${(1-Math.min(.16,d*.5)).toFixed(3)}) skewX(${(-skew*0.5).toFixed(2)}deg)`;
+        const rot=it.dataset.rot||0;
+        it.style.transform=`scale(${(1-Math.min(.16,d*.5)).toFixed(3)}) skewX(${(-skew*0.5).toFixed(2)}deg) rotate(${rot}deg)`;
       }
       requestAnimationFrame(loop);
     }
@@ -620,6 +680,82 @@
   // ===== scroll progress bar =====
   const prog=document.getElementById('prog');
   addEventListener('scroll',()=>{ const h=document.documentElement.scrollHeight-innerHeight; prog.style.width=(h>0?scrollY/h*100:0)+'%'; },{passive:true});
+
+  // ===== word wall (tiled scrolling rows, Amnesia-style) =====
+  (function(){
+    const wall=document.getElementById('wall');
+    const WORDS=['REPRODUCIENDO','EN COLOR','POPTIFY','DALE AL PLAY','SIN PARAR'];
+    let html='';
+    for(let r=0;r<5;r++){
+      const w=WORDS[r%WORDS.length];
+      let line=''; for(let k=0;k<8;k++) line+=`<span>${w}</span>`;
+      html+=`<div class="wrow ${r%2?'r':''} ${r%3===1?'o':''}"><span class="t">${line}</span><span class="t" aria-hidden="true">${line}</span></div>`;
+    }
+    wall.innerHTML=html;
+  })();
+</script>
+
+<!-- WebGL reactive background (three.js): flowing neon clouds tinted by the album -->
+<script type="module">
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    try {
+      const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
+      const canvas = document.getElementById('gl');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias:false, powerPreference:'high-performance' });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      const scene = new THREE.Scene();
+      const camera = new THREE.Camera();
+
+      const hex = h => { const n=parseInt(h.replace('#',''),16); return new THREE.Vector3(((n>>16)&255)/255,((n>>8)&255)/255,(n&255)/255); };
+      const init = window.__poptifyColors || ['#ff2d9b','#00e5ff','#8b2bff'];
+      const uniforms = {
+        u_time:{value:0}, u_res:{value:new THREE.Vector2()},
+        c1:{value:hex(init[0])}, c2:{value:hex(init[1])}, c3:{value:hex(init[2])},
+        tc1:{value:hex(init[0])}, tc2:{value:hex(init[1])}, tc3:{value:hex(init[2])},
+      };
+      const mat = new THREE.ShaderMaterial({
+        uniforms,
+        vertexShader:`void main(){ gl_Position=vec4(position,1.0); }`,
+        fragmentShader:`
+          precision highp float;
+          uniform float u_time; uniform vec2 u_res; uniform vec3 c1,c2,c3;
+          float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+          float noise(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.0-2.0*f);
+            return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y); }
+          float fbm(vec2 p){ float v=0.0,a=0.5; for(int i=0;i<5;i++){ v+=a*noise(p); p*=2.02; a*=0.5; } return v; }
+          void main(){
+            vec2 uv=gl_FragCoord.xy/u_res; vec2 p=uv*2.0-1.0; p.x*=u_res.x/u_res.y;
+            float t=u_time*0.05;
+            float n=fbm(p*1.4+vec2(t,-t*0.6));
+            float m=fbm(p*2.3-vec2(t*0.7,t)+n);
+            vec3 col=mix(c3*0.3, c1, smoothstep(0.05,0.95,n));
+            col=mix(col, c2, smoothstep(0.25,0.95,m));
+            col*=1.0-0.45*length(p*0.55);
+            col=mix(vec3(0.03,0.02,0.05), col, 0.9);
+            gl_FragColor=vec4(col,1.0);
+          }`,
+      });
+      scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2), mat));
+
+      function resize(){ const w=innerWidth,h=innerHeight; renderer.setSize(w,h,false); uniforms.u_res.value.set(w*Math.min(devicePixelRatio,2),h*Math.min(devicePixelRatio,2)); }
+      addEventListener('resize', resize); resize();
+      document.body.classList.add('gl');
+
+      // smooth color transitions when the album changes
+      window.__setPoptifyColors = (a,b,c)=>{ uniforms.tc1.value.copy(hex(a)); uniforms.tc2.value.copy(hex(b)); uniforms.tc3.value.copy(hex(c)); };
+
+      let last=performance.now();
+      (function loop(now){
+        const dt=Math.min(0.05,(now-last)/1000); last=now;
+        uniforms.u_time.value+=dt;
+        uniforms.c1.value.lerp(uniforms.tc1.value, dt*1.5);
+        uniforms.c2.value.lerp(uniforms.tc2.value, dt*1.5);
+        uniforms.c3.value.lerp(uniforms.tc3.value, dt*1.5);
+        renderer.render(scene,camera);
+        requestAnimationFrame(loop);
+      })(last);
+    } catch(e){ console.warn('WebGL bg off:', e); /* CSS blobs remain as fallback */ }
+  }
 </script>
 </body>
 </html>
