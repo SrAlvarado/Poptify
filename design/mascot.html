@@ -3,126 +3,158 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Poptify · Mascota (rubber-hose)</title>
+<title>Poptify · Mascota (demonio · baggy)</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,system-ui,sans-serif;background:#0c0c12;color:#fff;min-height:100vh;padding:40px 24px 80px;
-    background-image:radial-gradient(900px 600px at 15% -10%,#2a1740,transparent),radial-gradient(800px 600px at 110% 10%,#06243a,transparent)}
+  body{font-family:-apple-system,system-ui,sans-serif;background:#070608;color:#fff;min-height:100vh;padding:40px 24px 80px;
+    background-image:radial-gradient(900px 600px at 15% -10%,#1a0a22,transparent),radial-gradient(800px 600px at 110% 10%,#04161f,transparent)}
   h1{font-size:24px;font-weight:800;letter-spacing:-.02em}
-  p.sub{color:rgba(255,255,255,.6);font-size:14px;margin-top:6px;max-width:700px}
+  p.sub{color:rgba(255,255,255,.55);font-size:14px;margin-top:6px;max-width:700px}
   .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;margin-top:36px;max-width:980px}
-  .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:24px;text-align:center}
-  .card.light{background:#f3f1ea}
-  .stage{height:420px;display:grid;place-items:center}
-  svg{height:400px;width:auto;overflow:visible}
+  .card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:24px;text-align:center}
+  .stage{height:470px;display:grid;place-items:center}
+  svg{height:450px;width:auto;overflow:visible}
   .nm{font-size:20px;font-weight:800;margin-top:10px}
-  .card.light .nm{color:#15141b}
-  .ds{color:rgba(255,255,255,.6);font-size:13px;margin-top:6px;line-height:1.5}
-  .card.light .ds{color:#5a586a}
-  .char{transform-box:fill-box;transform-origin:center bottom;animation:bob 2.6s ease-in-out infinite}
-  @keyframes bob{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-10px) rotate(1deg)}}
-  .eyes{transform-box:fill-box;transform-origin:center;animation:blink 4s infinite}
-  @keyframes blink{0%,93%,100%{transform:scaleY(1)}96.5%{transform:scaleY(.08)}}
-  .wave{transform-box:fill-box;transform-origin:60% 90%;animation:wave 2.2s ease-in-out infinite}
-  @keyframes wave{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(10deg)}}
+  .ds{color:rgba(255,255,255,.55);font-size:13px;margin-top:6px;line-height:1.5}
+  .char{transform-box:fill-box;transform-origin:center bottom;animation:bob 3s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-7px) rotate(1deg)}}
+  .tail{transform-box:fill-box;transform-origin:top left;animation:tail 2.6s ease-in-out infinite}
+  @keyframes tail{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(9deg)}}
+  .eyes{animation:flick 4s steps(1) infinite}
+  @keyframes flick{0%,7%,9%,100%{opacity:1}8%{opacity:.4}}
+  .arm{transform-box:fill-box;transform-origin:30% 8%;animation:claw 2.4s ease-in-out infinite}
+  @keyframes claw{0%,100%{transform:rotate(5deg)}50%{transform:rotate(-7deg)}}
 </style>
 </head>
 <body>
-  <h1>🎵 Poptify — mascota estilo cartoon clásico</h1>
-  <p class="sub">Personaje ORIGINAL en estilo “rubber hose”: contorno negro grueso, guantes blancos, extremidades de manguera, ojos pie-cut. Tema Poptify (cabeza-blob con cascos + play). Misma figura en neón y en tinta B/N.</p>
+  <h1>😈 Poptify — demonio sin camiseta + baggy</h1>
+  <p class="sub">Personaje ORIGINAL y sombrío: demonio con cuernos, cola, garras y <b>bocaza dentada</b>, <b>torso desnudo</b> (con tatuaje de play en el pecho + cadena) y <b>pantalón baggy</b> vaquero con cinturón y botas. Glow neón. Dos colores.</p>
 
   <div class="grid">
 
-    <!-- NEÓN -->
+    <!-- MAGENTA -->
     <div class="card">
       <div class="stage">
-        <svg viewBox="0 0 260 400">
-          <g class="char" stroke="#111" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
-            <!-- back leg -->
-            <path d="M150 250 C160 292 164 312 162 336" fill="none" stroke="#111" stroke-width="34"/>
-            <path d="M150 250 C160 292 164 312 162 336" fill="none" stroke="#00e5ff" stroke-width="22"/>
-            <ellipse cx="170" cy="344" rx="34" ry="17" fill="#fff"/>
-            <!-- front leg -->
-            <path d="M112 250 C102 294 98 314 102 338" fill="none" stroke="#111" stroke-width="34"/>
-            <path d="M112 250 C102 294 98 314 102 338" fill="none" stroke="#00e5ff" stroke-width="22"/>
-            <ellipse cx="92" cy="346" rx="36" ry="18" fill="#fff"/>
-            <!-- down arm -->
-            <path d="M92 192 C76 214 72 236 80 256" fill="none" stroke="#111" stroke-width="30"/>
-            <path d="M92 192 C76 214 72 236 80 256" fill="none" stroke="#ff2d9b" stroke-width="18"/>
-            <circle cx="80" cy="262" r="18" fill="#fff"/>
-            <!-- body -->
-            <path d="M94 176 C94 160 116 152 130 152 C144 152 166 160 166 176 L170 244 C170 262 148 268 130 268 C112 268 90 262 90 244 Z" fill="#ff2d9b"/>
-            <path d="M130 198 L130 224 L150 211 Z" fill="#fff" stroke="none"/>
-            <!-- raised arm + glove -->
-            <g class="wave">
-              <path d="M166 188 C190 176 204 160 208 140" fill="none" stroke="#111" stroke-width="30"/>
-              <path d="M166 188 C190 176 204 160 208 140" fill="none" stroke="#ff2d9b" stroke-width="18"/>
-              <circle cx="210" cy="134" r="19" fill="#fff"/>
-              <rect x="206" y="108" width="9" height="20" rx="4" fill="#fff"/>
+        <svg viewBox="0 0 280 470">
+          <defs>
+            <filter id="gM" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="4.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <g class="char" filter="url(#gM)" stroke-linejoin="round" stroke-linecap="round">
+            <!-- tail -->
+            <g class="tail">
+              <path d="M152 300 C208 314 226 360 190 376 C168 386 160 364 180 356" fill="none" stroke="#ff2d9b" stroke-width="12"/>
+              <path d="M180 342 L198 354 L184 368 L170 356 Z" fill="#ff2d9b"/>
+            </g>
+            <!-- down arm + claw -->
+            <g>
+              <path d="M94 198 C74 216 68 240 76 260" fill="#0d0c14" stroke="#ff2d9b" stroke-width="22"/>
+              <path d="M64 256 q18 -6 30 2 l-4 17 -8 -9 -6 9 -8 -9 -4 9 Z" fill="#0d0c14" stroke="#ff2d9b" stroke-width="4"/>
+            </g>
+            <!-- BOOTS (under jean hems) -->
+            <path d="M64 356 q-8 18 10 28 l44 0 0 -26 Z" fill="#b89b6e" stroke="#0a0a10" stroke-width="5"/>
+            <path d="M64 378 l60 0" stroke="#0a0a10" stroke-width="4" fill="none"/>
+            <path d="M158 356 q-2 26 0 26 l46 0 q14 -10 8 -26 Z" fill="#b89b6e" stroke="#0a0a10" stroke-width="5"/>
+            <path d="M160 378 l52 0" stroke="#0a0a10" stroke-width="4" fill="none"/>
+            <!-- bare torso -->
+            <path d="M100 178 C100 164 120 158 140 158 C160 158 180 164 180 178 L178 250 L102 250 Z" fill="#140e16" stroke="#ff2d9b" stroke-width="5"/>
+            <path d="M140 198 L140 246" stroke="#ff2d9b" stroke-width="3" opacity=".4" fill="none"/>
+            <path d="M118 196 q22 12 44 0" stroke="#ff2d9b" stroke-width="3" opacity=".4" fill="none"/>
+            <!-- BAGGY jeans -->
+            <path d="M96 244 L184 244 L186 262 C160 270 120 270 94 262 Z" fill="#4a4e63" stroke="#0a0a10" stroke-width="5"/>
+            <rect x="96" y="248" width="88" height="11" rx="3" fill="#16131b" stroke="none"/>
+            <ellipse cx="140" cy="253" rx="11" ry="7" fill="#ff2d9b" stroke="#0a0a10" stroke-width="3"/>
+            <path d="M100 260 C86 304 60 348 58 364 L130 364 L134 260 Z" fill="#4a4e63" stroke="#0a0a10" stroke-width="5"/>
+            <path d="M134 260 L130 364 L204 364 C202 348 180 304 166 260 Z" fill="#4a4e63" stroke="#0a0a10" stroke-width="5"/>
+            <path d="M122 276 q-12 12 -20 34" stroke="#737892" stroke-width="3" fill="none" opacity=".7"/>
+            <path d="M150 276 q12 12 20 34" stroke="#737892" stroke-width="3" fill="none" opacity=".7"/>
+            <path d="M96 300 L92 360" stroke="#2f3242" stroke-width="3" fill="none"/>
+            <path d="M188 300 L192 360" stroke="#2f3242" stroke-width="3" fill="none"/>
+            <!-- chain -->
+            <path d="M112 168 q28 24 56 0" fill="none" stroke="#ff2d9b" stroke-width="3.5"/>
+            <circle cx="140" cy="186" r="5" fill="#ff2d9b" stroke="none"/>
+            <!-- chest play tattoo -->
+            <path d="M132 206 L132 230 L154 218 Z" fill="#ff2d9b" stroke="none" opacity=".9"/>
+            <!-- raised arm + claw -->
+            <g class="arm">
+              <path d="M186 198 C206 216 212 240 204 260" fill="#0d0c14" stroke="#ff2d9b" stroke-width="22"/>
+              <path d="M174 174 C196 162 210 150 214 132" fill="#0d0c14" stroke="#ff2d9b" stroke-width="24"/>
+              <path d="M198 132 q18 -8 30 -2 l-2 18 -10 -7 -5 9 -9 -7 -6 8 Z" fill="#0d0c14" stroke="#ff2d9b" stroke-width="4"/>
             </g>
             <!-- head -->
             <g class="head">
-              <ellipse cx="130" cy="96" rx="80" ry="72" fill="#8b2bff"/>
-              <!-- headphones -->
-              <path d="M52 92 C62 30 198 30 208 92" fill="none" stroke="#111" stroke-width="15"/>
-              <rect x="40" y="84" width="30" height="56" rx="15" fill="#111" stroke="none"/>
-              <rect x="190" y="84" width="30" height="56" rx="15" fill="#111" stroke="none"/>
-              <circle cx="55" cy="112" r="8" fill="#00e5ff" stroke="none"/><circle cx="205" cy="112" r="8" fill="#00e5ff" stroke="none"/>
-              <!-- eyes (pie-cut) -->
-              <g class="eyes">
-                <circle cx="106" cy="86" r="22" fill="#fff"/><circle cx="154" cy="86" r="22" fill="#fff"/>
-                <path d="M106 86 L106 64 A22 22 0 0 1 124 90 Z" fill="#111" stroke="none"/>
-                <path d="M154 86 L154 64 A22 22 0 0 1 172 90 Z" fill="#111" stroke="none"/>
-              </g>
-              <!-- grin -->
-              <path d="M100 126 Q130 152 160 126" fill="none" stroke="#111" stroke-width="7"/>
+              <path d="M86 54 C66 26 58 8 70 6 C84 4 96 32 100 58 Z" fill="#0d0c14" stroke="#ff2d9b" stroke-width="5"/>
+              <path d="M194 54 C214 26 222 8 210 6 C196 4 184 32 180 58 Z" fill="#0d0c14" stroke="#ff2d9b" stroke-width="5"/>
+              <ellipse cx="140" cy="98" rx="86" ry="74" fill="#140e16" stroke="#ff2d9b" stroke-width="5"/>
+              <rect x="44" y="88" width="26" height="48" rx="13" fill="#0d0c14" stroke="#ff2d9b" stroke-width="4"/>
+              <rect x="210" y="88" width="26" height="48" rx="13" fill="#0d0c14" stroke="#ff2d9b" stroke-width="4"/>
+              <circle cx="57" cy="112" r="6" fill="#ff2d9b" stroke="none"/><circle cx="223" cy="112" r="6" fill="#ff2d9b" stroke="none"/>
+              <g class="eyes" fill="#ff5ec0" stroke="none"><path d="M92 80 L132 94 L96 102 Z"/><path d="M188 80 L148 94 L184 102 Z"/></g>
+              <path d="M56 120 C90 172 190 172 224 120 C224 120 198 152 140 152 C82 152 56 120 56 120 Z" fill="#08070c" stroke="#ff2d9b" stroke-width="5"/>
+              <path d="M62 126 L82 152 L102 128 L122 154 L140 128 L158 154 L178 128 L198 152 L218 126 C182 152 98 152 62 126 Z" fill="#fff" stroke="none"/>
             </g>
           </g>
         </svg>
       </div>
-      <div class="nm">Versión neón</div>
-      <div class="ds">Cuerpo magenta, cabeza violeta, suela/altavoces cian, guantes blancos. Contorno grueso. Saluda y parpadea.</div>
+      <div class="nm">Demonio · magenta</div>
+      <div class="ds">Torso desnudo (cadena + tatuaje play), baggy vaquero con cinturón y botas, cuernos, cola y bocaza. Glow magenta.</div>
     </div>
 
-    <!-- B/N TINTA -->
-    <div class="card light">
+    <!-- CYAN -->
+    <div class="card">
       <div class="stage">
-        <svg viewBox="0 0 260 400">
-          <g class="char" stroke="#111" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M150 250 C160 292 164 312 162 336" fill="none" stroke="#111" stroke-width="34"/>
-            <path d="M150 250 C160 292 164 312 162 336" fill="none" stroke="#fff" stroke-width="22"/>
-            <ellipse cx="170" cy="344" rx="34" ry="17" fill="#111"/>
-            <path d="M112 250 C102 294 98 314 102 338" fill="none" stroke="#111" stroke-width="34"/>
-            <path d="M112 250 C102 294 98 314 102 338" fill="none" stroke="#fff" stroke-width="22"/>
-            <ellipse cx="92" cy="346" rx="36" ry="18" fill="#111"/>
-            <path d="M92 192 C76 214 72 236 80 256" fill="none" stroke="#111" stroke-width="30"/>
-            <path d="M92 192 C76 214 72 236 80 256" fill="none" stroke="#fff" stroke-width="18"/>
-            <circle cx="80" cy="262" r="18" fill="#fff"/>
-            <path d="M94 176 C94 160 116 152 130 152 C144 152 166 160 166 176 L170 244 C170 262 148 268 130 268 C112 268 90 262 90 244 Z" fill="#fff"/>
-            <path d="M130 198 L130 224 L150 211 Z" fill="#111" stroke="none"/>
-            <g class="wave">
-              <path d="M166 188 C190 176 204 160 208 140" fill="none" stroke="#111" stroke-width="30"/>
-              <path d="M166 188 C190 176 204 160 208 140" fill="none" stroke="#fff" stroke-width="18"/>
-              <circle cx="210" cy="134" r="19" fill="#fff"/>
-              <rect x="206" y="108" width="9" height="20" rx="4" fill="#fff"/>
+        <svg viewBox="0 0 280 470">
+          <defs>
+            <filter id="gC" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="4.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <g class="char" filter="url(#gC)" stroke-linejoin="round" stroke-linecap="round">
+            <g class="tail">
+              <path d="M152 300 C208 314 226 360 190 376 C168 386 160 364 180 356" fill="none" stroke="#00e5ff" stroke-width="12"/>
+              <path d="M180 342 L198 354 L184 368 L170 356 Z" fill="#00e5ff"/>
+            </g>
+            <g>
+              <path d="M94 198 C74 216 68 240 76 260" fill="#0a0e12" stroke="#00e5ff" stroke-width="22"/>
+              <path d="M64 256 q18 -6 30 2 l-4 17 -8 -9 -6 9 -8 -9 -4 9 Z" fill="#0a0e12" stroke="#00e5ff" stroke-width="4"/>
+            </g>
+            <path d="M64 356 q-8 18 10 28 l44 0 0 -26 Z" fill="#b89b6e" stroke="#0a0a10" stroke-width="5"/>
+            <path d="M64 378 l60 0" stroke="#0a0a10" stroke-width="4" fill="none"/>
+            <path d="M158 356 q-2 26 0 26 l46 0 q14 -10 8 -26 Z" fill="#b89b6e" stroke="#0a0a10" stroke-width="5"/>
+            <path d="M160 378 l52 0" stroke="#0a0a10" stroke-width="4" fill="none"/>
+            <path d="M100 178 C100 164 120 158 140 158 C160 158 180 164 180 178 L178 250 L102 250 Z" fill="#0c1014" stroke="#00e5ff" stroke-width="5"/>
+            <path d="M140 198 L140 246" stroke="#00e5ff" stroke-width="3" opacity=".4" fill="none"/>
+            <path d="M118 196 q22 12 44 0" stroke="#00e5ff" stroke-width="3" opacity=".4" fill="none"/>
+            <path d="M96 244 L184 244 L186 262 C160 270 120 270 94 262 Z" fill="#4a4e63" stroke="#0a0a10" stroke-width="5"/>
+            <rect x="96" y="248" width="88" height="11" rx="3" fill="#16131b" stroke="none"/>
+            <ellipse cx="140" cy="253" rx="11" ry="7" fill="#00e5ff" stroke="#0a0a10" stroke-width="3"/>
+            <path d="M100 260 C86 304 60 348 58 364 L130 364 L134 260 Z" fill="#4a4e63" stroke="#0a0a10" stroke-width="5"/>
+            <path d="M134 260 L130 364 L204 364 C202 348 180 304 166 260 Z" fill="#4a4e63" stroke="#0a0a10" stroke-width="5"/>
+            <path d="M122 276 q-12 12 -20 34" stroke="#737892" stroke-width="3" fill="none" opacity=".7"/>
+            <path d="M150 276 q12 12 20 34" stroke="#737892" stroke-width="3" fill="none" opacity=".7"/>
+            <path d="M96 300 L92 360" stroke="#2f3242" stroke-width="3" fill="none"/>
+            <path d="M188 300 L192 360" stroke="#2f3242" stroke-width="3" fill="none"/>
+            <path d="M112 168 q28 24 56 0" fill="none" stroke="#00e5ff" stroke-width="3.5"/>
+            <circle cx="140" cy="186" r="5" fill="#00e5ff" stroke="none"/>
+            <path d="M132 206 L132 230 L154 218 Z" fill="#00e5ff" stroke="none" opacity=".9"/>
+            <g class="arm">
+              <path d="M186 198 C206 216 212 240 204 260" fill="#0a0e12" stroke="#00e5ff" stroke-width="22"/>
+              <path d="M174 174 C196 162 210 150 214 132" fill="#0a0e12" stroke="#00e5ff" stroke-width="24"/>
+              <path d="M198 132 q18 -8 30 -2 l-2 18 -10 -7 -5 9 -9 -7 -6 8 Z" fill="#0a0e12" stroke="#00e5ff" stroke-width="4"/>
             </g>
             <g class="head">
-              <ellipse cx="130" cy="96" rx="80" ry="72" fill="#fff"/>
-              <path d="M52 92 C62 30 198 30 208 92" fill="none" stroke="#111" stroke-width="15"/>
-              <rect x="40" y="84" width="30" height="56" rx="15" fill="#111" stroke="none"/>
-              <rect x="190" y="84" width="30" height="56" rx="15" fill="#111" stroke="none"/>
-              <g class="eyes">
-                <circle cx="106" cy="86" r="22" fill="#fff"/><circle cx="154" cy="86" r="22" fill="#fff"/>
-                <path d="M106 86 L106 64 A22 22 0 0 1 124 90 Z" fill="#111" stroke="none"/>
-                <path d="M154 86 L154 64 A22 22 0 0 1 172 90 Z" fill="#111" stroke="none"/>
-              </g>
-              <path d="M100 126 Q130 152 160 126" fill="none" stroke="#111" stroke-width="7"/>
+              <path d="M86 54 C66 26 58 8 70 6 C84 4 96 32 100 58 Z" fill="#0a0e12" stroke="#00e5ff" stroke-width="5"/>
+              <path d="M194 54 C214 26 222 8 210 6 C196 4 184 32 180 58 Z" fill="#0a0e12" stroke="#00e5ff" stroke-width="5"/>
+              <ellipse cx="140" cy="98" rx="86" ry="74" fill="#0c1014" stroke="#00e5ff" stroke-width="5"/>
+              <rect x="44" y="88" width="26" height="48" rx="13" fill="#0a0e12" stroke="#00e5ff" stroke-width="4"/>
+              <rect x="210" y="88" width="26" height="48" rx="13" fill="#0a0e12" stroke="#00e5ff" stroke-width="4"/>
+              <circle cx="57" cy="112" r="6" fill="#00e5ff" stroke="none"/><circle cx="223" cy="112" r="6" fill="#00e5ff" stroke="none"/>
+              <g class="eyes" fill="#7df9ff" stroke="none"><path d="M92 80 L132 94 L96 102 Z"/><path d="M188 80 L148 94 L184 102 Z"/></g>
+              <path d="M56 120 C90 172 190 172 224 120 C224 120 198 152 140 152 C82 152 56 120 56 120 Z" fill="#06090c" stroke="#00e5ff" stroke-width="5"/>
+              <path d="M62 126 L82 152 L102 128 L122 154 L140 128 L158 154 L178 128 L198 152 L218 126 C182 152 98 152 62 126 Z" fill="#fff" stroke="none"/>
             </g>
           </g>
         </svg>
       </div>
-      <div class="nm">Versión tinta B/N</div>
-      <div class="ds">Solo contorno negro + rellenos blancos (estilo entintado clásico). Ideal para sticker, sello o icono monocromo.</div>
+      <div class="nm">Demonio · cian</div>
+      <div class="ds">Misma figura con glow cian/eléctrico. Más tóxico/fantasmal.</div>
     </div>
 
   </div>
