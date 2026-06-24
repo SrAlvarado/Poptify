@@ -302,6 +302,44 @@
   .socials a:hover{transform:translateY(-4px);background:rgba(255,255,255,.12)}
   .socials svg{width:20px;height:20px;fill:#fff}
 
+  /* ===== Mercury-style light product showcase ===== */
+  .showcase{position:relative;overflow:hidden;color:#16151c;border-radius:42px;
+    margin:40px clamp(12px,4vw,46px);padding:clamp(54px,8vw,116px) clamp(22px,6vw,80px);
+    background:linear-gradient(180deg,#f5f4fa,#e9eaf3)}
+  .showcase::before{content:"";position:absolute;inset:-25%;z-index:0;filter:blur(10px);
+    background:radial-gradient(38% 38% at 18% 22%,rgba(122,92,255,.28),transparent 70%),
+      radial-gradient(40% 40% at 82% 26%,rgba(255,110,196,.24),transparent 70%),
+      radial-gradient(46% 46% at 60% 96%,rgba(0,200,255,.20),transparent 70%)}
+  .sc-inner{position:relative;z-index:1;max-width:880px;margin:0 auto;text-align:center}
+  .kicker.dark{color:#7a5cff}
+  .sc-h{font-family:'Syne';font-weight:800;font-size:clamp(34px,6vw,68px);line-height:1.02;letter-spacing:-.02em;color:#15141b;margin:8px 0}
+  .sc-h em{font-style:normal;background:linear-gradient(120deg,#7a5cff,#ff5fa2);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sc-lead{color:#56546a;font-size:clamp(16px,2.2vw,20px);line-height:1.6;max-width:560px;margin:0 auto}
+  .sc-window{max-width:740px;margin:48px auto 0;background:#fff;border-radius:18px;overflow:hidden;
+    box-shadow:0 50px 100px -34px rgba(40,28,90,.45),0 0 0 1px rgba(20,10,60,.06);transform:perspective(1400px) rotateX(4deg);transition:transform .5s}
+  .sc-window:hover{transform:perspective(1400px) rotateX(0deg)}
+  .sc-bar{display:flex;align-items:center;gap:8px;padding:14px 16px;background:#fafafb;border-bottom:1px solid #eceaf2}
+  .sc-bar span{width:12px;height:12px;border-radius:50%;background:#e0e0ea}
+  .sc-bar span:nth-child(1){background:#ff5f57}.sc-bar span:nth-child(2){background:#febc2e}.sc-bar span:nth-child(3){background:#28c840}
+  .sc-stage{padding:clamp(34px,6vw,68px);display:grid;place-items:center;background:radial-gradient(120% 90% at 50% 0,#f1effb,#fcfcfe)}
+  /* the popup itself (light-stage version) */
+  .sc-pop{width:286px;border-radius:30px;overflow:hidden;color:#fff;box-shadow:0 30px 60px -22px rgba(30,20,70,.55);position:relative}
+  .sc-pop .p-bg{position:absolute;inset:0}
+  .sc-pop .p-sc{position:absolute;inset:0;background:rgba(0,0,0,.26)}
+  .sc-pop .p-in{position:relative;padding:20px}
+  .sc-pop .p-grip{width:38px;height:5px;border-radius:99px;background:rgba(255,255,255,.5);margin:0 auto 16px}
+  .sc-pop .p-art{aspect-ratio:1;border-radius:18px;box-shadow:0 18px 40px -14px rgba(0,0,0,.6)}
+  .sc-pop .p-t{font-family:'Syne';font-weight:800;font-size:21px;margin-top:18px;letter-spacing:-.01em}
+  .sc-pop .p-a{font-size:14px;color:rgba(255,255,255,.78);margin-top:2px}
+  .sc-pop .p-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.3);margin-top:16px;overflow:hidden}
+  .sc-pop .p-bar i{display:block;height:100%;width:46%;background:#fff;border-radius:99px}
+  .sc-pop .p-ct{display:flex;justify-content:center;align-items:center;gap:26px;margin-top:16px}
+  .sc-pop .p-ct svg{width:24px;height:24px;fill:#fff}
+  .sc-pop .p-ct .pp{width:52px;height:52px;border-radius:50%;background:#fff;display:grid;place-items:center}
+  .sc-pop .p-ct .pp svg{fill:#111;width:22px;height:22px}
+  .sc-pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:40px}
+  .sc-pills span{background:#fff;border:1px solid #e4e2ee;color:#3a3850;border-radius:99px;padding:9px 16px;font-weight:700;font-size:14px;box-shadow:0 8px 20px -12px rgba(40,28,90,.3)}
+
   /* ===== command palette (⌘K) — Mercury Command style ===== */
   .kbtn{display:inline-flex;align-items:center;gap:5px;padding:8px 11px;border-radius:99px;border:1px solid var(--line);
     background:rgba(255,255,255,.06);color:var(--dim);font-weight:700;font-size:12px;cursor:pointer;transition:color .2s,background .2s}
@@ -490,6 +528,40 @@
       <p class="lead">Poptify saca tu canción del reproductor y la convierte en un popup vivo: portada, artista, progreso y controles, con un fondo que cambia de color según el álbum. Ligero, flotante y movible por todo el escritorio.</p>
     </div>
     <div class="grid" id="features"></div>
+  </section>
+
+  <section class="showcase" id="showcase">
+    <div class="sc-inner">
+      <div class="reveal">
+        <div class="kicker dark">El producto</div>
+        <h2 class="sc-h">Tu canción, <em>impecable</em></h2>
+        <p class="sc-lead">Un popup ligero y nítido que se siente nativo: portada, controles y color, sin estorbar a nada.</p>
+      </div>
+      <div class="sc-window reveal">
+        <div class="sc-bar"><span></span><span></span><span></span></div>
+        <div class="sc-stage">
+          <div class="sc-pop">
+            <div class="p-bg" style="background:radial-gradient(120% 80% at 30% 10%,#ff5e62,transparent 60%),radial-gradient(120% 90% at 80% 100%,#ff9966,transparent 55%),linear-gradient(160deg,#2b1055,#05050a)"></div>
+            <div class="p-sc"></div>
+            <div class="p-in">
+              <div class="p-grip"></div>
+              <div class="p-art" style="background:linear-gradient(135deg,#ff5e62,#ff9966 55%,#2b1055)"></div>
+              <div class="p-t">Midnight City</div>
+              <div class="p-a">M83</div>
+              <div class="p-bar"><i></i></div>
+              <div class="p-ct">
+                <svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5L9 12l11 7z"/></svg>
+                <span class="pp"><svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></span>
+                <svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5l11 7L4 19z"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sc-pills reveal">
+        <span>Sin marco</span><span>Siempre encima</span><span>Arrástralo libre</span><span>Color reactivo</span>
+      </div>
+    </div>
   </section>
 
   <section id="como">
