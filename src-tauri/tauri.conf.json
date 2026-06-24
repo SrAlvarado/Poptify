@@ -29,7 +29,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; script-src 'self' https://w.soundcloud.com https://connect.soundcloud.com; frame-src https://w.soundcloud.com; connect-src 'self' ipc: http://ipc.localhost https://api-widget.soundcloud.com https://api.soundcloud.com"
+      "csp": "default-src 'self'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval' https://w.soundcloud.com https://connect.soundcloud.com; frame-src https://w.soundcloud.com; connect-src 'self' ipc: http://ipc.localhost https://api-widget.soundcloud.com https://api.soundcloud.com"
     }
   },
   "bundle": {
