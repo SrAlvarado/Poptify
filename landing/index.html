@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Poptify · Tu música, en una nube de color</title>
+<meta name="description" content="Poptify — el popup flotante que muestra lo que suena en Spotify con estética de pantalla de bloqueo iOS, fondo reactivo y skins retro. Para Mac y Android." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --c1:#ff2d9b; --c2:#8b2bff; --c3:#00e5ff; --c4:#c6ff3a; --c5:#ff7a00;
+    --bg:#07060c; --text:#fff; --dim:rgba(255,255,255,.66);
+    --glass:rgba(255,255,255,.06); --line:rgba(255,255,255,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:Inter,-apple-system,system-ui,sans-serif;
+    background:var(--bg); color:var(--text); overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--c1);color:#fff}
+
+  /* ===== animated neon background ===== */
+  .bg{position:fixed; inset:0; z-index:-3; overflow:hidden; background:var(--bg)}
+  .blob{position:absolute; border-radius:50%; filter:blur(70px); opacity:.55; mix-blend-mode:screen; will-change:transform}
+  .b1{width:46vw;height:46vw;background:var(--c1);top:-8vw;left:-6vw;animation:drift1 18s ease-in-out infinite}
+  .b2{width:42vw;height:42vw;background:var(--c3);top:30vh;right:-10vw;animation:drift2 22s ease-in-out infinite}
+  .b3{width:40vw;height:40vw;background:var(--c2);bottom:-12vw;left:18vw;animation:drift3 20s ease-in-out infinite}
+  .b4{width:30vw;height:30vw;background:var(--c4);top:55vh;left:-6vw;animation:drift2 26s ease-in-out infinite reverse}
+  .b5{width:34vw;height:34vw;background:var(--c5);top:8vh;left:42vw;animation:drift1 24s ease-in-out infinite reverse}
+  @keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(14vw,10vh) scale(1.25)}}
+  @keyframes drift2{0%,100%{transform:translate(0,0) scale(1.1)}50%{transform:translate(-12vw,12vh) scale(.85)}}
+  @keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(10vw,-12vh) scale(1.2)}}
+  .grain{position:fixed;inset:0;z-index:-2;opacity:.05;pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .cursor{position:fixed;width:520px;height:520px;border-radius:50%;left:0;top:0;z-index:-1;pointer-events:none;
+    background:radial-gradient(circle, rgba(255,45,155,.22), transparent 60%);transform:translate(-50%,-50%);transition:opacity .3s}
+
+  /* ===== nav ===== */
+  nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
+    padding:18px clamp(18px,5vw,56px);transition:background .3s,backdrop-filter .3s}
+  nav.scrolled{background:rgba(7,6,12,.6);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  .brand{font-family:Anton;font-size:26px;letter-spacing:.04em;display:flex;align-items:center;gap:10px}
+  .brand .dot{width:14px;height:14px;border-radius:50%;background:conic-gradient(from 0deg,var(--c1),var(--c3),var(--c4),var(--c5),var(--c1));animation:spin 4s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .nav-links{display:flex;gap:26px;align-items:center}
+  .nav-links a{color:var(--dim);text-decoration:none;font-weight:600;font-size:14px;transition:color .2s}
+  .nav-links a:hover{color:#fff}
+  .nav-cta{padding:10px 20px;border-radius:99px;background:#fff;color:#111;font-weight:800;font-size:14px;text-decoration:none;transition:transform .15s}
+  .nav-cta:hover{transform:scale(1.06)}
+  @media(max-width:760px){.nav-links a:not(.nav-cta){display:none}}
+
+  /* ===== hero ===== */
+  .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:120px 20px 60px;position:relative}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:99px;border:1px solid var(--line);
+    background:var(--glass);font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);
+    backdrop-filter:blur(8px)}
+  .eyebrow .live{width:8px;height:8px;border-radius:50%;background:var(--c4);box-shadow:0 0 12px var(--c4);animation:pulse 1.4s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.5)}}
+  h1.title{font-family:Anton;font-size:clamp(64px,17vw,230px);line-height:.86;letter-spacing:-.01em;margin:22px 0 0;
+    background:linear-gradient(100deg,var(--c1),var(--c5),var(--c4),var(--c3),var(--c2),var(--c1));
+    background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:flow 8s linear infinite;filter:drop-shadow(0 8px 40px rgba(255,45,155,.35))}
+  @keyframes flow{to{background-position:300% 0}}
+  .tagline{font-size:clamp(18px,3.4vw,30px);font-weight:800;margin-top:18px;letter-spacing:-.01em}
+  .sub{color:var(--dim);max-width:560px;margin:16px auto 0;font-size:clamp(15px,2vw,18px);line-height:1.6}
+  .hero-cta{margin-top:34px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+  .btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:12px;padding:17px 28px;border-radius:18px;
+    font-weight:800;font-size:16px;text-decoration:none;color:#fff;border:1px solid var(--line);transition:transform .18s, box-shadow .3s}
+  .btn svg{width:22px;height:22px}
+  .btn .lbl small{display:block;font-size:11px;font-weight:600;opacity:.7;letter-spacing:.04em}
+  .btn.mac{background:linear-gradient(120deg,var(--c1),var(--c2));box-shadow:0 16px 50px -12px var(--c1)}
+  .btn.android{background:linear-gradient(120deg,var(--c3),var(--c4));color:#06140c;box-shadow:0 16px 50px -12px var(--c3)}
+  .btn:hover{transform:translateY(-4px) scale(1.03)}
+  .btn::after{content:"";position:absolute;top:0;left:-120%;width:60%;height:100%;
+    background:linear-gradient(120deg,transparent,rgba(255,255,255,.5),transparent);transform:skewX(-20deg);transition:left .6s}
+  .btn:hover::after{left:140%}
+
+  /* floating product mock */
+  .mock-wrap{margin-top:60px;perspective:1200px;display:flex;justify-content:center}
+  .mock{width:300px;border-radius:30px;overflow:hidden;position:relative;will-change:transform;
+    box-shadow:0 50px 120px -30px rgba(0,0,0,.9), 0 0 0 1px rgba(255,255,255,.08);animation:floaty 6s ease-in-out infinite}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+  .mock .m-bg{position:absolute;inset:0;transition:background .6s}
+  .mock .m-noise{position:absolute;inset:0;background:rgba(0,0,0,.28)}
+  .mock .m-in{position:relative;padding:20px}
+  .mock .m-top{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;opacity:.85;margin-bottom:14px}
+  .mock .m-top .d{width:7px;height:7px;border-radius:50%;background:var(--c4);box-shadow:0 0 8px var(--c4)}
+  .mock .m-art{aspect-ratio:1;border-radius:18px;box-shadow:0 20px 50px -14px rgba(0,0,0,.7);transition:background .6s}
+  .mock .m-row{display:flex;justify-content:space-between;align-items:flex-start;margin-top:18px}
+  .mock .m-title{font-size:20px;font-weight:800;letter-spacing:-.02em}
+  .mock .m-artist{font-size:14px;color:rgba(255,255,255,.7)}
+  .mock .heart{width:30px;height:30px;cursor:pointer;transition:transform .2s}
+  .mock .heart.on{color:var(--c1)}
+  .mock .m-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.25);margin-top:16px;overflow:hidden}
+  .mock .m-fill{height:100%;width:42%;background:#fff;border-radius:99px}
+  .mock .m-ctrls{display:flex;justify-content:center;align-items:center;gap:26px;margin-top:18px}
+  .mock .m-ctrls button{background:none;border:none;color:#fff;cursor:pointer;display:grid;place-items:center}
+  .mock .m-ctrls .play{width:56px;height:56px;border-radius:50%;background:#fff;color:#111}
+  .mock .m-ctrls .play:active{transform:scale(.92)}
+  .eq{display:flex;gap:3px;align-items:flex-end;height:16px}
+  .eq span{width:4px;background:var(--c4);border-radius:2px;animation:eq .9s ease-in-out infinite}
+  .eq span:nth-child(2){animation-delay:.15s}.eq span:nth-child(3){animation-delay:.3s}.eq span:nth-child(4){animation-delay:.45s}
+  .eq.paused span{animation-play-state:paused;height:4px!important}
+  @keyframes eq{0%,100%{height:4px}50%{height:16px}}
+
+  /* ===== marquee ===== */
+  .marquee{overflow:hidden;white-space:nowrap;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    padding:18px 0;background:var(--glass);transform:rotate(-2deg) scale(1.04);margin:50px 0}
+  .marquee .track{display:inline-block;animation:scroll 22s linear infinite}
+  .marquee.rev .track{animation-direction:reverse}
+  .marquee span{font-family:Anton;font-size:34px;letter-spacing:.02em;margin:0 26px;
+    background:linear-gradient(90deg,var(--c3),var(--c1));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .marquee span.alt{background:linear-gradient(90deg,var(--c4),var(--c5));-webkit-background-clip:text;background-clip:text;color:transparent}
+  @keyframes scroll{to{transform:translateX(-50%)}}
+
+  /* ===== sections ===== */
+  section{padding:clamp(50px,9vw,120px) clamp(20px,6vw,80px);max-width:1200px;margin:0 auto}
+  .kicker{font-family:Anton;font-size:14px;letter-spacing:.3em;text-transform:uppercase;color:var(--c3)}
+  h2{font-family:Anton;font-size:clamp(36px,7vw,84px);line-height:.95;margin:10px 0 8px;letter-spacing:-.01em}
+  h2 em{font-style:normal;background:linear-gradient(100deg,var(--c1),var(--c5),var(--c4));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--dim);font-size:clamp(16px,2.2vw,20px);max-width:680px;line-height:1.6;margin-top:8px}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:46px}
+  .card{padding:28px;border-radius:24px;background:var(--glass);border:1px solid var(--line);
+    transition:transform .3s,border-color .3s,background .3s;position:relative;overflow:hidden}
+  .card:hover{transform:translateY(-8px);border-color:transparent;background:rgba(255,255,255,.09)}
+  .card::before{content:"";position:absolute;inset:0;border-radius:24px;padding:1px;opacity:0;transition:opacity .3s;
+    background:linear-gradient(120deg,var(--c1),var(--c3),var(--c4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+  .card:hover::before{opacity:1}
+  .card .ico{font-size:38px;display:inline-block;transition:transform .3s}
+  .card:hover .ico{transform:rotate(-10deg) scale(1.15)}
+  .card h3{font-size:20px;font-weight:900;margin:14px 0 8px;letter-spacing:-.01em}
+  .card p{color:var(--dim);font-size:15px;line-height:1.6}
+
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(40px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}
+  .reveal.in{opacity:1;transform:none}
+
+  /* stats */
+  .stats{display:flex;gap:30px;flex-wrap:wrap;justify-content:center;margin-top:46px}
+  .stat{text-align:center;min-width:130px}
+  .stat .n{font-family:Anton;font-size:clamp(44px,8vw,80px);line-height:1;
+    background:linear-gradient(120deg,var(--c3),var(--c1));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .stat .l{color:var(--dim);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:12px;margin-top:6px}
+
+  /* skins strip */
+  .skins{display:flex;gap:16px;overflow-x:auto;padding:46px 4px 10px;scroll-snap-type:x mandatory;scrollbar-width:none}
+  .skins::-webkit-scrollbar{display:none}
+  .skin{flex:0 0 200px;scroll-snap-align:center;border-radius:22px;padding:22px 18px;background:var(--glass);border:1px solid var(--line);
+    text-align:center;transition:transform .3s}
+  .skin:hover{transform:translateY(-8px) rotate(-1.5deg)}
+  .skin .face{height:150px;border-radius:16px;display:grid;place-items:center;font-size:54px;margin-bottom:14px;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+  .skin .nm{font-weight:800}
+  .skin .ds{color:var(--dim);font-size:13px;margin-top:4px}
+
+  /* download */
+  .download{text-align:center}
+  .dl-card{margin-top:40px;border-radius:30px;padding:clamp(30px,6vw,64px);position:relative;overflow:hidden;
+    background:linear-gradient(120deg,rgba(255,45,155,.18),rgba(0,229,255,.16));border:1px solid var(--line)}
+  .dl-card .hero-cta{margin-top:28px}
+  .req{color:var(--dim);font-size:13px;margin-top:18px}
+
+  footer{text-align:center;padding:60px 20px;border-top:1px solid var(--line);color:var(--dim)}
+  footer .brand{justify-content:center;margin-bottom:14px;color:#fff}
+  footer a{color:var(--dim);text-decoration:none;margin:0 10px}
+  footer a:hover{color:#fff}
+
+  .confetti{position:fixed;width:10px;height:14px;z-index:100;pointer-events:none;border-radius:2px}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+  <div class="bg" id="bg">
+    <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+    <div class="blob b4"></div><div class="blob b5"></div>
+  </div>
+  <div class="grain"></div>
+  <div class="cursor" id="cursor"></div>
+
+  <nav id="nav">
+    <div class="brand"><span class="dot"></span>POPTIFY</div>
+    <div class="nav-links">
+      <a href="#que-es">Qué es</a>
+      <a href="#skins">Skins</a>
+      <a href="#descargar">Descargar</a>
+      <a href="#descargar" class="nav-cta">Descargar ↓</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <span class="eyebrow"><span class="live"></span> Reproduciendo ahora</span>
+      <h1 class="title">POPTIFY</h1>
+      <div class="tagline">Tu música, en una nube de color.</div>
+      <p class="sub">El popup flotante que muestra lo que suena en Spotify con estética de pantalla de bloqueo de iOS, <b>fondo reactivo al color del álbum</b> y skins retro. Móvelo por toda la pantalla. Para Mac y Android.</p>
+      <div class="hero-cta">
+        <a class="btn mac" data-dl href="#" id="dlMacHero">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.7c0-2.2 1.8-3.3 1.9-3.4-1-1.5-2.6-1.7-3.2-1.7-1.4-.1-2.7.8-3.3.8-.7 0-1.7-.8-2.8-.8-1.4 0-2.8.8-3.5 2.1-1.5 2.6-.4 6.5 1.1 8.6.7 1 1.5 2.2 2.6 2.1 1-.1 1.4-.7 2.7-.7s1.6.7 2.7.6c1.1 0 1.8-1 2.5-2 .8-1.2 1.1-2.3 1.1-2.3 0 0-2.1-.8-2.1-3.2zM14.3 5.9c.6-.7 1-1.7.9-2.7-.9 0-1.9.6-2.5 1.3-.5.6-1 1.6-.9 2.6 1 .1 2-.5 2.5-1.2z"/></svg>
+          <span class="lbl">Descargar<small>para macOS · .dmg</small></span>
+        </a>
+        <a class="btn android" data-dl href="#" id="dlAndroidHero">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 9.5l1.4-2.4c.1-.2 0-.4-.1-.5-.2-.1-.4 0-.5.1l-1.4 2.5C15.4 8.1 13.8 7.7 12 7.7s-3.4.4-4.5 1l-1.4-2.5c-.1-.2-.3-.2-.5-.1-.2.1-.2.3-.1.5L6.9 9C4.6 10.3 3 12.6 3 15.3h18c0-2.7-1.6-5-3.4-5.8zM8 13.4c-.4 0-.7-.3-.7-.7s.3-.7.7-.7.7.3.7.7-.3.7-.7.7zm8 0c-.4 0-.7-.3-.7-.7s.3-.7.7-.7.7.3.7.7-.3.7-.7.7z"/></svg>
+          <span class="lbl">Descargar<small>para Android · .apk</small></span>
+        </a>
+      </div>
+
+      <div class="mock-wrap">
+        <div class="mock" id="mock">
+          <div class="m-bg" id="mBg"></div>
+          <div class="m-noise"></div>
+          <div class="m-in">
+            <div class="m-top"><span class="d"></span> Reproduciendo ahora <span class="eq" style="margin-left:auto"><span></span><span></span><span></span><span></span></span></div>
+            <div class="m-art" id="mArt"></div>
+            <div class="m-row">
+              <div><div class="m-title" id="mTitle">Midnight City</div><div class="m-artist" id="mArtist">M83</div></div>
+              <svg class="heart" id="mHeart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+            </div>
+            <div class="m-bar"><div class="m-fill" id="mFill"></div></div>
+            <div class="m-ctrls">
+              <button id="mPrev"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5L9 12l11 7z"/></svg></button>
+              <button class="play" id="mPlay"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></button>
+              <button id="mNext"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5l11 7L4 19z"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="marquee"><div class="track" id="mq1"></div></div>
+
+  <section id="que-es">
+    <div class="reveal">
+      <div class="kicker">Qué es</div>
+      <h2>Un trozo de <em>fiesta</em> en tu pantalla</h2>
+      <p class="lead">Poptify saca tu canción del reproductor y la convierte en un popup vivo: portada, artista, progreso y controles, con un fondo que cambia de color según el álbum. Ligero, flotante y movible por todo el escritorio.</p>
+    </div>
+    <div class="grid" id="features"></div>
+  </section>
+
+  <section>
+    <div class="stats">
+      <div class="stat reveal"><div class="n" data-count="7">0</div><div class="l">Skins</div></div>
+      <div class="stat reveal"><div class="n" data-count="2">0</div><div class="l">Plataformas</div></div>
+      <div class="stat reveal"><div class="n" data-count="2">0</div><div class="l">Fuentes</div></div>
+      <div class="stat reveal"><div class="n" data-suffix="∞">∞</div><div class="l">Colores</div></div>
+    </div>
+  </section>
+
+  <div class="marquee rev"><div class="track" id="mq2"></div></div>
+
+  <section id="skins">
+    <div class="reveal">
+      <div class="kicker">Elige tu vibe</div>
+      <h2>Siete <em>skins</em>, un mood</h2>
+      <p class="lead">Desde la pantalla de bloqueo de iOS hasta una Game Boy, una PSP o un vinilo girando. Cámbialas al vuelo desde los ajustes.</p>
+    </div>
+    <div class="skins" id="skinStrip"></div>
+  </section>
+
+  <section id="descargar" class="download">
+    <div class="reveal">
+      <div class="kicker">Gratis · Mac & Android</div>
+      <h2>Dale al <em>play</em></h2>
+    </div>
+    <div class="dl-card reveal">
+      <p class="lead" style="margin-inline:auto">Descárgalo, conéctalo a Spotify y deja que la música pinte tu pantalla.</p>
+      <div class="hero-cta">
+        <a class="btn mac" data-dl href="#" id="dlMac">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.7c0-2.2 1.8-3.3 1.9-3.4-1-1.5-2.6-1.7-3.2-1.7-1.4-.1-2.7.8-3.3.8-.7 0-1.7-.8-2.8-.8-1.4 0-2.8.8-3.5 2.1-1.5 2.6-.4 6.5 1.1 8.6.7 1 1.5 2.2 2.6 2.1 1-.1 1.4-.7 2.7-.7s1.6.7 2.7.6c1.1 0 1.8-1 2.5-2 .8-1.2 1.1-2.3 1.1-2.3 0 0-2.1-.8-2.1-3.2zM14.3 5.9c.6-.7 1-1.7.9-2.7-.9 0-1.9.6-2.5 1.3-.5.6-1 1.6-.9 2.6 1 .1 2-.5 2.5-1.2z"/></svg>
+          <span class="lbl">Descargar<small>para macOS · .dmg</small></span>
+        </a>
+        <a class="btn android" data-dl href="#" id="dlAndroid">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 9.5l1.4-2.4c.1-.2 0-.4-.1-.5-.2-.1-.4 0-.5.1l-1.4 2.5C15.4 8.1 13.8 7.7 12 7.7s-3.4.4-4.5 1l-1.4-2.5c-.1-.2-.3-.2-.5-.1-.2.1-.2.3-.1.5L6.9 9C4.6 10.3 3 12.6 3 15.3h18c0-2.7-1.6-5-3.4-5.8zM8 13.4c-.4 0-.7-.3-.7-.7s.3-.7.7-.7.7.3.7.7-.3.7-.7.7zm8 0c-.4 0-.7-.3-.7-.7s.3-.7.7-.7.7.3.7.7-.3.7-.7.7z"/></svg>
+          <span class="lbl">Descargar<small>para Android · .apk</small></span>
+        </a>
+      </div>
+      <p class="req">macOS Apple Silicon · Android 8+ · Requiere cuenta de Spotify (controles con Premium)</p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="brand"><span class="dot"></span>POPTIFY</div>
+    <p>Hecho con buena música y demasiados colores.</p>
+    <p style="margin-top:14px">
+      <a href="https://github.com/SrAlvarado/Poptify" target="_blank" rel="noopener">GitHub</a> ·
+      <a href="#que-es">Qué es</a> ·
+      <a href="#descargar">Descargar</a>
+    </p>
+  </footer>
+
+<script>
+  // ===== download links (point to GitHub releases; edit when you publish) =====
+  const RELEASES = "https://github.com/SrAlvarado/Poptify/releases/latest";
+  document.querySelectorAll('[data-dl]').forEach(a=>{ a.href = RELEASES; });
+
+  // ===== nav scrolled state =====
+  const nav = document.getElementById('nav');
+  addEventListener('scroll', ()=> nav.classList.toggle('scrolled', scrollY>20));
+
+  // ===== cursor glow + parallax blobs =====
+  const cursor = document.getElementById('cursor'), bg = document.getElementById('bg');
+  addEventListener('pointermove', e=>{
+    cursor.style.left = e.clientX+'px'; cursor.style.top = e.clientY+'px';
+    const dx=(e.clientX/innerWidth-.5), dy=(e.clientY/innerHeight-.5);
+    bg.style.transform = `translate(${dx*-30}px,${dy*-30}px)`;
+  });
+
+  // ===== albums (palettes drive the mock + reactive bg) =====
+  const ALBUMS=[
+    {t:"Midnight City",a:"M83",p:["#ff5e62","#ff9966","#2b1055"]},
+    {t:"Currents",a:"Tame Impala",p:["#ff6ec4","#7873f5","#0f0c29"]},
+    {t:"Discovery",a:"Daft Punk",p:["#f7971e","#ffd200","#3a1c00"]},
+    {t:"In Rainbows",a:"Radiohead",p:["#00c6ff","#0072ff","#020111"]},
+    {t:"Blonde",a:"Frank Ocean",p:["#f6d365","#fda085","#5a3f37"]},
+    {t:"good kid",a:"Kendrick Lamar",p:["#1ed760","#0f5132","#06140c"]},
+  ];
+  let idx=0;
+  const mBg=document.getElementById('mBg'),mArt=document.getElementById('mArt'),
+        mTitle=document.getElementById('mTitle'),mArtist=document.getElementById('mArtist');
+  function paint(i){
+    const al=ALBUMS[i];
+    const art=`linear-gradient(135deg,${al.p[0]},${al.p[1]} 55%,${al.p[2]})`;
+    mArt.style.background=art;
+    mBg.style.background=`radial-gradient(120% 80% at 30% 10%,${al.p[0]},transparent 60%),radial-gradient(120% 90% at 80% 100%,${al.p[1]},transparent 55%),linear-gradient(160deg,${al.p[2]},#05050a)`;
+    mTitle.textContent=al.t; mArtist.textContent=al.a;
+  }
+  paint(0);
+  document.getElementById('mNext').onclick=()=>{idx=(idx+1)%ALBUMS.length;paint(idx);bump()};
+  document.getElementById('mPrev').onclick=()=>{idx=(idx-1+ALBUMS.length)%ALBUMS.length;paint(idx);bump()};
+  function bump(){mArt.animate([{transform:'scale(.96)'},{transform:'scale(1)'}],{duration:300,easing:'cubic-bezier(.34,1.56,.64,1)'})}
+
+  // play / heart
+  let playing=true;
+  const eqs=document.querySelectorAll('.eq');
+  document.getElementById('mPlay').onclick=function(){
+    playing=!playing;
+    this.querySelector('svg').innerHTML = playing?'<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>':'<path d="M8 5l12 7-12 7z"/>';
+    eqs.forEach(e=>e.classList.toggle('paused',!playing));
+  };
+  const heart=document.getElementById('mHeart');
+  heart.onclick=()=>{heart.classList.toggle('on');heart.setAttribute('fill',heart.classList.contains('on')?'currentColor':'none');
+    heart.animate([{transform:'scale(1)'},{transform:'scale(1.4)'},{transform:'scale(1)'}],{duration:420,easing:'ease'})};
+
+  // animated progress
+  const fill=document.getElementById('mFill'); let pct=42;
+  setInterval(()=>{ if(playing){ pct=(pct+0.4)%100; fill.style.width=pct+'%'; } },120);
+
+  // auto-cycle album every few seconds for life
+  setInterval(()=>{ idx=(idx+1)%ALBUMS.length; paint(idx); bump(); }, 4500);
+
+  // ===== 3D tilt on the mock =====
+  const mock=document.getElementById('mock');
+  const hero=document.querySelector('.hero');
+  hero.addEventListener('pointermove',e=>{
+    const r=mock.getBoundingClientRect();
+    const px=(e.clientX-(r.left+r.width/2))/innerWidth, py=(e.clientY-(r.top+r.height/2))/innerHeight;
+    mock.style.transform=`rotateY(${px*16}deg) rotateX(${-py*16}deg)`;
+  });
+  hero.addEventListener('pointerleave',()=>{mock.style.transform=''});
+
+  // ===== marquees =====
+  const words=["REPRODUCIENDO AHORA","TU MÚSICA EN COLOR","SPOTIFY · SOUNDCLOUD","FONDO REACTIVO","MUÉVELO LIBRE","iOS · GAME BOY · PSP","✦","DALE AL PLAY"];
+  function fillMq(el,alt){ let h=''; for(let k=0;k<2;k++){ words.forEach((w,i)=> h+=`<span class="${(i+ (alt?1:0))%2?'alt':''}">${w} ✦</span>`);} el.innerHTML=h; }
+  fillMq(document.getElementById('mq1'),false);
+  fillMq(document.getElementById('mq2'),true);
+
+  // ===== features =====
+  const FEATURES=[
+    ["🎨","Fondo reactivo","El color del popup late con la portada del álbum. Modo difuminado, vivo o el caótico fondo Hydra."],
+    ["📱","Como el lock screen de iOS","Portada grande, título, artista, progreso y controles. Bonito de serie."],
+    ["🕹️","7 skins retro","iOS, iPod, Game Boy, PSP, MP4, Vinilo y modo Notch que rodea la cámara del Mac."],
+    ["🖱️","Movible y flotante","Arrástralo por toda la pantalla. Siempre encima, sin marco, ligero."],
+    ["🎤","Letras sincronizadas","Karaoke en directo que sigue el ritmo de la canción."],
+    ["🔊","Spotify + SoundCloud","Refleja Spotify o reproduce SoundCloud. Cambia de fuente al vuelo."],
+  ];
+  document.getElementById('features').innerHTML = FEATURES.map(f=>
+    `<div class="card reveal"><span class="ico">${f[0]}</span><h3>${f[1]}</h3><p>${f[2]}</p></div>`).join('');
+
+  // ===== skins strip =====
+  const SKINS=[
+    ["📱","iOS","Pantalla de bloqueo","linear-gradient(135deg,#ff5e62,#2b1055)"],
+    ["🎧","iPod","Rueda de clic","linear-gradient(135deg,#fafafa,#c9ccd2)"],
+    ["🎮","Game Boy","LCD verde","linear-gradient(135deg,#9bbc0f,#306230)"],
+    ["🕹️","PSP","Widescreen","linear-gradient(135deg,#2a2a30,#0c0c10)"],
+    ["📺","MP4","Reproductor","linear-gradient(135deg,#1c1f26,#0a0c10)"],
+    ["💿","Vinilo","Disco girando","linear-gradient(135deg,#1a120b,#e9b872)"],
+    ["📷","Notch","Rodea la cámara","linear-gradient(135deg,#00e5ff,#8b2bff)"],
+  ];
+  document.getElementById('skinStrip').innerHTML = SKINS.map(s=>
+    `<div class="skin reveal"><div class="face" style="background:${s[3]}">${s[0]}</div><div class="nm">${s[1]}</div><div class="ds">${s[2]}</div></div>`).join('');
+
+  // ===== scroll reveal =====
+  const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }),{threshold:.15});
+  document.querySelectorAll('.reveal').forEach((el,i)=>{ el.style.transitionDelay=(i%6*60)+'ms'; io.observe(el); });
+
+  // ===== count-up stats =====
+  const cio=new IntersectionObserver(es=>es.forEach(e=>{
+    if(!e.isIntersecting) return; const el=e.target; const target=+el.dataset.count;
+    if(!target){cio.unobserve(el);return;}
+    let n=0; const step=Math.max(1,Math.round(target/30));
+    const t=setInterval(()=>{ n+=step; if(n>=target){n=target;clearInterval(t);} el.textContent=n; },28);
+    cio.unobserve(el);
+  }),{threshold:.6});
+  document.querySelectorAll('.stat .n').forEach(el=>cio.observe(el));
+
+  // ===== confetti on download =====
+  const COLORS=['#ff2d9b','#8b2bff','#00e5ff','#c6ff3a','#ff7a00'];
+  function confetti(x,y){
+    for(let i=0;i<46;i++){
+      const c=document.createElement('div'); c.className='confetti';
+      c.style.background=COLORS[i%COLORS.length]; c.style.left=x+'px'; c.style.top=y+'px';
+      document.body.appendChild(c);
+      const ang=Math.random()*Math.PI*2, sp=180+Math.random()*260;
+      c.animate([
+        {transform:`translate(0,0) rotate(0deg)`,opacity:1},
+        {transform:`translate(${Math.cos(ang)*sp}px,${Math.sin(ang)*sp+260}px) rotate(${Math.random()*720}deg)`,opacity:0}
+      ],{duration:900+Math.random()*700,easing:'cubic-bezier(.2,.7,.3,1)'}).onfinish=()=>c.remove();
+    }
+  }
+  document.querySelectorAll('[data-dl]').forEach(a=>a.addEventListener('click',e=>{
+    confetti(e.clientX,e.clientY);
+  }));
+</script>
+</body>
+</html>
