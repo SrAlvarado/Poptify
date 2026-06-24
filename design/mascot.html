@@ -3,171 +3,126 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Poptify · Mascotas (figuras)</title>
+<title>Poptify · Mascota (rubber-hose)</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,system-ui,sans-serif;background:#0c0c12;color:#fff;min-height:100vh;padding:40px 24px 80px;
     background-image:radial-gradient(900px 600px at 15% -10%,#2a1740,transparent),radial-gradient(800px 600px at 110% 10%,#06243a,transparent)}
   h1{font-size:24px;font-weight:800;letter-spacing:-.02em}
-  p.sub{color:rgba(255,255,255,.6);font-size:14px;margin-top:6px;max-width:680px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;margin-top:36px;max-width:1100px}
+  p.sub{color:rgba(255,255,255,.6);font-size:14px;margin-top:6px;max-width:700px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;margin-top:36px;max-width:980px}
   .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:24px;text-align:center}
-  .stage{height:400px;display:grid;place-items:center}
-  svg{height:380px;width:auto;overflow:visible}
+  .card.light{background:#f3f1ea}
+  .stage{height:420px;display:grid;place-items:center}
+  svg{height:400px;width:auto;overflow:visible}
   .nm{font-size:20px;font-weight:800;margin-top:10px}
+  .card.light .nm{color:#15141b}
   .ds{color:rgba(255,255,255,.6);font-size:13px;margin-top:6px;line-height:1.5}
-  .char{transform-box:fill-box;transform-origin:center bottom;animation:bob 3.2s ease-in-out infinite}
-  @keyframes bob{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-9px) rotate(-1deg)}}
-  .head{transform-box:fill-box;transform-origin:center bottom;animation:nod 3.2s ease-in-out infinite}
-  @keyframes nod{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
-  .headbang{transform-box:fill-box;transform-origin:center bottom;animation:bang 1.1s ease-in-out infinite}
-  @keyframes bang{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(8deg)}}
-  .eyes{transform-box:fill-box;transform-origin:center;animation:blink 4.4s infinite}
-  @keyframes blink{0%,92%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
-  .tap{transform-box:fill-box;transform-origin:top center;animation:tap 1.6s ease-in-out infinite}
-  @keyframes tap{0%,70%,100%{transform:translateY(0)}82%{transform:translateY(-7px)}}
+  .card.light .ds{color:#5a586a}
+  .char{transform-box:fill-box;transform-origin:center bottom;animation:bob 2.6s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-10px) rotate(1deg)}}
+  .eyes{transform-box:fill-box;transform-origin:center;animation:blink 4s infinite}
+  @keyframes blink{0%,93%,100%{transform:scaleY(1)}96.5%{transform:scaleY(.08)}}
+  .wave{transform-box:fill-box;transform-origin:60% 90%;animation:wave 2.2s ease-in-out infinite}
+  @keyframes wave{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(10deg)}}
 </style>
 </head>
 <body>
-  <h1>🎵 Poptify — mascota (figuras streetwear)</h1>
-  <p class="sub">Figuras jóvenes con actitud — humanoides pero abstractas (cabeza-blob, sin cara realista). Líneas fluidas, neón. Originales. Mira el movimiento.</p>
+  <h1>🎵 Poptify — mascota estilo cartoon clásico</h1>
+  <p class="sub">Personaje ORIGINAL en estilo “rubber hose”: contorno negro grueso, guantes blancos, extremidades de manguera, ojos pie-cut. Tema Poptify (cabeza-blob con cascos + play). Misma figura en neón y en tinta B/N.</p>
 
   <div class="grid">
 
-    <!-- POP — skater -->
+    <!-- NEÓN -->
     <div class="card">
       <div class="stage">
-        <svg viewBox="0 0 220 380">
-          <defs>
-            <linearGradient id="hoodA" gradientUnits="userSpaceOnUse" x1="40" y1="150" x2="190" y2="300">
-              <stop offset="0" stop-color="#ff2d9b"/><stop offset=".5" stop-color="#8b2bff"/><stop offset="1" stop-color="#00e5ff"/>
-              <animateTransform attributeName="gradientTransform" type="translate" values="0 0;60 0;0 0" dur="5s" repeatCount="indefinite"/>
-            </linearGradient>
-            <linearGradient id="headA" gradientUnits="userSpaceOnUse" x1="70" y1="60" x2="150" y2="150">
-              <stop offset="0" stop-color="#00e5ff"/><stop offset="1" stop-color="#8b2bff"/>
-            </linearGradient>
-          </defs>
-          <g class="char">
-            <!-- skateboard -->
-            <g>
-              <rect x="34" y="350" width="152" height="13" rx="6" fill="#16151c"/>
-              <circle cx="64" cy="370" r="9" fill="#c6ff3a"/><circle cx="156" cy="370" r="9" fill="#c6ff3a"/>
+        <svg viewBox="0 0 260 400">
+          <g class="char" stroke="#111" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+            <!-- back leg -->
+            <path d="M150 250 C160 292 164 312 162 336" fill="none" stroke="#111" stroke-width="34"/>
+            <path d="M150 250 C160 292 164 312 162 336" fill="none" stroke="#00e5ff" stroke-width="22"/>
+            <ellipse cx="170" cy="344" rx="34" ry="17" fill="#fff"/>
+            <!-- front leg -->
+            <path d="M112 250 C102 294 98 314 102 338" fill="none" stroke="#111" stroke-width="34"/>
+            <path d="M112 250 C102 294 98 314 102 338" fill="none" stroke="#00e5ff" stroke-width="22"/>
+            <ellipse cx="92" cy="346" rx="36" ry="18" fill="#fff"/>
+            <!-- down arm -->
+            <path d="M92 192 C76 214 72 236 80 256" fill="none" stroke="#111" stroke-width="30"/>
+            <path d="M92 192 C76 214 72 236 80 256" fill="none" stroke="#ff2d9b" stroke-width="18"/>
+            <circle cx="80" cy="262" r="18" fill="#fff"/>
+            <!-- body -->
+            <path d="M94 176 C94 160 116 152 130 152 C144 152 166 160 166 176 L170 244 C170 262 148 268 130 268 C112 268 90 262 90 244 Z" fill="#ff2d9b"/>
+            <path d="M130 198 L130 224 L150 211 Z" fill="#fff" stroke="none"/>
+            <!-- raised arm + glove -->
+            <g class="wave">
+              <path d="M166 188 C190 176 204 160 208 140" fill="none" stroke="#111" stroke-width="30"/>
+              <path d="M166 188 C190 176 204 160 208 140" fill="none" stroke="#ff2d9b" stroke-width="18"/>
+              <circle cx="210" cy="134" r="19" fill="#fff"/>
+              <rect x="206" y="108" width="9" height="20" rx="4" fill="#fff"/>
             </g>
-            <!-- legs (baggy) -->
-            <path d="M84 250 C70 290 70 320 76 348 L104 348 C104 318 104 286 106 250 Z" fill="#23264a"/>
-            <path d="M116 250 C118 286 118 318 118 348 L146 348 C152 320 152 290 138 250 Z" fill="#2b2f5a"/>
-            <!-- sneakers -->
-            <rect x="58" y="344" width="52" height="20" rx="10" fill="#f0f0f5"/><rect x="58" y="358" width="52" height="6" rx="3" fill="#00e5ff"/>
-            <rect x="112" y="344" width="52" height="20" rx="10" fill="#f0f0f5"/><rect x="112" y="358" width="52" height="6" rx="3" fill="#00e5ff"/>
-            <!-- arms -->
-            <rect x="36" y="168" width="30" height="96" rx="15" fill="#7a23a8"/>
-            <rect x="154" y="168" width="30" height="96" rx="15" fill="#7a23a8"/>
-            <!-- hoodie torso -->
-            <path d="M62 168 C62 150 86 140 110 140 C134 140 158 150 158 168 L162 250 C162 268 138 276 110 276 C82 276 58 268 58 250 Z" fill="url(#hoodA)"/>
-            <!-- pocket -->
-            <path d="M84 232 q26 18 52 0" fill="none" stroke="#0b0b14" stroke-width="5" opacity=".35"/>
-            <!-- hood collar -->
-            <path d="M82 150 q28 26 56 0" fill="none" stroke="#0b0b14" stroke-width="8" opacity=".3"/>
             <!-- head -->
             <g class="head">
-              <path d="M110 56 C144 56 162 80 162 104 C162 134 138 150 110 150 C82 150 58 134 58 104 C58 80 76 56 110 56 Z" fill="url(#headA)"/>
-              <ellipse cx="88" cy="92" rx="20" ry="13" fill="#fff" opacity=".18"/>
-              <!-- backwards cap -->
-              <path d="M58 86 C70 64 150 64 162 86 L162 92 C140 80 80 80 58 92 Z" fill="#16151c"/>
-              <rect x="150" y="84" width="22" height="12" rx="6" fill="#16151c"/>
+              <ellipse cx="130" cy="96" rx="80" ry="72" fill="#8b2bff"/>
               <!-- headphones -->
-              <rect x="48" y="100" width="16" height="30" rx="8" fill="#16151c"/>
-              <rect x="156" y="100" width="16" height="30" rx="8" fill="#16151c"/>
-              <!-- eyes -->
-              <g class="eyes" fill="#0b0b14"><ellipse cx="96" cy="112" rx="8" ry="11"/><ellipse cx="130" cy="112" rx="8" ry="11"/></g>
+              <path d="M52 92 C62 30 198 30 208 92" fill="none" stroke="#111" stroke-width="15"/>
+              <rect x="40" y="84" width="30" height="56" rx="15" fill="#111" stroke="none"/>
+              <rect x="190" y="84" width="30" height="56" rx="15" fill="#111" stroke="none"/>
+              <circle cx="55" cy="112" r="8" fill="#00e5ff" stroke="none"/><circle cx="205" cy="112" r="8" fill="#00e5ff" stroke="none"/>
+              <!-- eyes (pie-cut) -->
+              <g class="eyes">
+                <circle cx="106" cy="86" r="22" fill="#fff"/><circle cx="154" cy="86" r="22" fill="#fff"/>
+                <path d="M106 86 L106 64 A22 22 0 0 1 124 90 Z" fill="#111" stroke="none"/>
+                <path d="M154 86 L154 64 A22 22 0 0 1 172 90 Z" fill="#111" stroke="none"/>
+              </g>
+              <!-- grin -->
+              <path d="M100 126 Q130 152 160 126" fill="none" stroke="#111" stroke-width="7"/>
             </g>
           </g>
         </svg>
       </div>
-      <div class="nm">Pop · el skater</div>
-      <div class="ds">Hoodie, pantalón baggy, sneakers y monopatín. Gorra hacia atrás + cascos. Cabeza-blob neón. Joven y chill.</div>
+      <div class="nm">Versión neón</div>
+      <div class="ds">Cuerpo magenta, cabeza violeta, suela/altavoces cian, guantes blancos. Contorno grueso. Saluda y parpadea.</div>
     </div>
 
-    <!-- RIFF — rocker -->
-    <div class="card">
+    <!-- B/N TINTA -->
+    <div class="card light">
       <div class="stage">
-        <svg viewBox="0 0 220 380">
-          <defs>
-            <linearGradient id="jktB" gradientUnits="userSpaceOnUse" x1="40" y1="150" x2="190" y2="300">
-              <stop offset="0" stop-color="#ff7a00"/><stop offset=".5" stop-color="#ff2d9b"/><stop offset="1" stop-color="#8b2bff"/>
-              <animateTransform attributeName="gradientTransform" type="translate" values="0 0;0 -40;0 0" dur="4.5s" repeatCount="indefinite"/>
-            </linearGradient>
-            <linearGradient id="headB" gradientUnits="userSpaceOnUse" x1="70" y1="50" x2="150" y2="150">
-              <stop offset="0" stop-color="#ff2d9b"/><stop offset="1" stop-color="#ff7a00"/>
-            </linearGradient>
-          </defs>
-          <g class="char">
-            <!-- legs ripped baggy -->
-            <path d="M82 250 C68 292 70 322 78 348 L104 348 C104 316 104 284 104 250 Z" fill="#181821"/>
-            <path d="M116 250 C116 284 116 316 116 348 L142 348 C150 322 152 292 138 250 Z" fill="#20202b"/>
-            <rect x="80" y="296" width="24" height="6" rx="3" fill="#0b0b14"/><rect x="118" y="312" width="24" height="6" rx="3" fill="#0b0b14"/>
-            <!-- boots -->
-            <rect x="60" y="342" width="50" height="22" rx="8" fill="#0e0e16"/><rect x="112" y="342" width="50" height="22" rx="8" fill="#0e0e16"/>
-            <!-- arms -->
-            <rect x="34" y="166" width="30" height="92" rx="15" fill="#101019"/>
-            <rect x="156" y="166" width="30" height="92" rx="15" fill="#101019"/>
-            <!-- torso jacket open over tee -->
-            <path d="M64 166 C64 148 86 140 110 140 C134 140 156 148 156 166 L160 252 C160 270 136 278 110 278 C84 278 60 270 60 252 Z" fill="url(#jktB)"/>
-            <path d="M104 142 L116 142 L116 276 L104 276 Z" fill="#0b0b14" opacity=".5"/>
-            <!-- head with spiky melty hair -->
-            <g class="headbang">
-              <path d="M110 58 C142 58 160 82 160 106 C160 134 138 150 110 150 C82 150 60 134 60 106 C60 82 78 58 110 58 Z" fill="url(#headB)"/>
-              <path d="M62 92 C58 60 74 64 80 84 C84 56 100 58 102 82 C108 54 124 58 124 84 C132 60 150 62 150 92 C150 92 110 78 62 92 Z" fill="#16151c"/>
-              <ellipse cx="90" cy="96" rx="18" ry="11" fill="#fff" opacity=".16"/>
-              <g class="eyes" fill="#0b0b14"><ellipse cx="96" cy="114" rx="8" ry="11"/><ellipse cx="130" cy="114" rx="8" ry="11"/></g>
-              <path d="M98 134 q12 8 24 0" fill="none" stroke="#0b0b14" stroke-width="5" stroke-linecap="round"/>
+        <svg viewBox="0 0 260 400">
+          <g class="char" stroke="#111" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M150 250 C160 292 164 312 162 336" fill="none" stroke="#111" stroke-width="34"/>
+            <path d="M150 250 C160 292 164 312 162 336" fill="none" stroke="#fff" stroke-width="22"/>
+            <ellipse cx="170" cy="344" rx="34" ry="17" fill="#111"/>
+            <path d="M112 250 C102 294 98 314 102 338" fill="none" stroke="#111" stroke-width="34"/>
+            <path d="M112 250 C102 294 98 314 102 338" fill="none" stroke="#fff" stroke-width="22"/>
+            <ellipse cx="92" cy="346" rx="36" ry="18" fill="#111"/>
+            <path d="M92 192 C76 214 72 236 80 256" fill="none" stroke="#111" stroke-width="30"/>
+            <path d="M92 192 C76 214 72 236 80 256" fill="none" stroke="#fff" stroke-width="18"/>
+            <circle cx="80" cy="262" r="18" fill="#fff"/>
+            <path d="M94 176 C94 160 116 152 130 152 C144 152 166 160 166 176 L170 244 C170 262 148 268 130 268 C112 268 90 262 90 244 Z" fill="#fff"/>
+            <path d="M130 198 L130 224 L150 211 Z" fill="#111" stroke="none"/>
+            <g class="wave">
+              <path d="M166 188 C190 176 204 160 208 140" fill="none" stroke="#111" stroke-width="30"/>
+              <path d="M166 188 C190 176 204 160 208 140" fill="none" stroke="#fff" stroke-width="18"/>
+              <circle cx="210" cy="134" r="19" fill="#fff"/>
+              <rect x="206" y="108" width="9" height="20" rx="4" fill="#fff"/>
             </g>
-          </g>
-        </svg>
-      </div>
-      <div class="nm">Riff · el rockero</div>
-      <div class="ds">Chupa abierta sobre camiseta, baggy roto y botas. Pelo-pincho líquido y headbang. Actitud sin pasarse.</div>
-    </div>
-
-    <!-- DRIP — streetwear hooded -->
-    <div class="card">
-      <div class="stage">
-        <svg viewBox="0 0 220 380">
-          <defs>
-            <linearGradient id="hoodC" gradientUnits="userSpaceOnUse" x1="40" y1="120" x2="190" y2="320">
-              <stop offset="0" stop-color="#c6ff3a"/><stop offset=".5" stop-color="#00e5ff"/><stop offset="1" stop-color="#8b2bff"/>
-              <animateTransform attributeName="gradientTransform" type="translate" values="0 0;50 20;0 0" dur="5.5s" repeatCount="indefinite"/>
-            </linearGradient>
-            <linearGradient id="headC" gradientUnits="userSpaceOnUse" x1="80" y1="90" x2="150" y2="180">
-              <stop offset="0" stop-color="#00e5ff"/><stop offset="1" stop-color="#c6ff3a"/>
-            </linearGradient>
-          </defs>
-          <g class="char">
-            <!-- legs -->
-            <path d="M82 270 C70 304 72 330 80 352 L106 352 C106 322 106 296 106 270 Z" fill="#23264a"/>
-            <path d="M116 270 C116 296 116 322 116 352 L142 352 C150 330 152 304 140 270 Z" fill="#2b2f5a"/>
-            <!-- sneakers -->
-            <g class="tap"><rect x="58" y="348" width="52" height="20" rx="10" fill="#f0f0f5"/><rect x="58" y="362" width="52" height="6" rx="3" fill="#ff2d9b"/></g>
-            <rect x="112" y="348" width="52" height="20" rx="10" fill="#f0f0f5"/><rect x="112" y="362" width="52" height="6" rx="3" fill="#ff2d9b"/>
-            <!-- big hoodie (hands in pocket) -->
-            <path d="M52 200 C52 168 80 150 110 150 C140 150 168 168 168 200 L168 270 C168 290 140 298 110 298 C80 298 52 290 52 270 Z" fill="url(#hoodC)"/>
-            <!-- pocket slit -->
-            <path d="M86 250 q24 16 48 0" fill="none" stroke="#0b0b14" stroke-width="6" opacity=".35"/>
-            <!-- hood up around head -->
-            <path d="M64 150 C64 96 156 96 156 150 C156 150 150 120 110 120 C70 120 64 150 64 150 Z" fill="url(#hoodC)"/>
-            <!-- head (droplet peeking from hood) -->
             <g class="head">
-              <path d="M110 96 C136 96 152 116 152 138 C152 164 132 178 110 178 C88 178 68 164 68 138 C68 116 84 96 110 96 Z" fill="url(#headC)"/>
-              <!-- hood shadow over forehead -->
-              <path d="M68 138 C68 112 152 112 152 138 C152 124 132 116 110 116 C88 116 68 124 68 138 Z" fill="#0b0b14" opacity=".22"/>
-              <g class="eyes" fill="#0b0b14"><ellipse cx="96" cy="142" rx="8" ry="11"/><ellipse cx="130" cy="142" rx="8" ry="11"/></g>
-              <ellipse cx="92" cy="128" rx="16" ry="9" fill="#fff" opacity=".16"/>
+              <ellipse cx="130" cy="96" rx="80" ry="72" fill="#fff"/>
+              <path d="M52 92 C62 30 198 30 208 92" fill="none" stroke="#111" stroke-width="15"/>
+              <rect x="40" y="84" width="30" height="56" rx="15" fill="#111" stroke="none"/>
+              <rect x="190" y="84" width="30" height="56" rx="15" fill="#111" stroke="none"/>
+              <g class="eyes">
+                <circle cx="106" cy="86" r="22" fill="#fff"/><circle cx="154" cy="86" r="22" fill="#fff"/>
+                <path d="M106 86 L106 64 A22 22 0 0 1 124 90 Z" fill="#111" stroke="none"/>
+                <path d="M154 86 L154 64 A22 22 0 0 1 172 90 Z" fill="#111" stroke="none"/>
+              </g>
+              <path d="M100 126 Q130 152 160 126" fill="none" stroke="#111" stroke-width="7"/>
             </g>
           </g>
         </svg>
       </div>
-      <div class="nm">Drip · streetwear</div>
-      <div class="ds">Hoodie XL con capucha puesta, manos en el bolsillo, cabeza-gota asomando. Sneaker que marca el ritmo. Cero esfuerzo, mucho flow.</div>
+      <div class="nm">Versión tinta B/N</div>
+      <div class="ds">Solo contorno negro + rellenos blancos (estilo entintado clásico). Ideal para sticker, sello o icono monocromo.</div>
     </div>
 
   </div>
