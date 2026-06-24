@@ -3,129 +3,173 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Poptify · Mascotas (conceptos)</title>
+<title>Poptify · Mascotas (figuras)</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,system-ui,sans-serif;background:#0c0c12;color:#fff;
-    min-height:100vh;padding:40px 24px 80px;
+  body{font-family:-apple-system,system-ui,sans-serif;background:#0c0c12;color:#fff;min-height:100vh;padding:40px 24px 80px;
     background-image:radial-gradient(900px 600px at 15% -10%,#2a1740,transparent),radial-gradient(800px 600px at 110% 10%,#06243a,transparent)}
   h1{font-size:24px;font-weight:800;letter-spacing:-.02em}
-  p.sub{color:rgba(255,255,255,.6);font-size:14px;margin-top:6px;max-width:640px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;margin-top:36px;max-width:1100px}
+  p.sub{color:rgba(255,255,255,.6);font-size:14px;margin-top:6px;max-width:680px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;margin-top:36px;max-width:1100px}
   .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:24px;text-align:center}
-  .stage{height:300px;display:grid;place-items:center}
-  svg{width:230px;height:auto;overflow:visible}
-  .nm{font-size:20px;font-weight:800;margin-top:8px}
+  .stage{height:400px;display:grid;place-items:center}
+  svg{height:380px;width:auto;overflow:visible}
+  .nm{font-size:20px;font-weight:800;margin-top:10px}
   .ds{color:rgba(255,255,255,.6);font-size:13px;margin-top:6px;line-height:1.5}
-  /* shared motion */
-  .floaty{transform-box:fill-box;transform-origin:center;animation:floaty 3.4s ease-in-out infinite}
-  @keyframes floaty{0%,100%{transform:translateY(0) scale(1,1)}25%{transform:translateY(-10px) scale(1.03,.97)}50%{transform:translateY(0) scale(1,1)}75%{transform:translateY(7px) scale(.97,1.03)}}
-  .eyes{transform-box:fill-box;transform-origin:center;animation:blink 4.6s infinite}
-  @keyframes blink{0%,93%,100%{transform:scaleY(1)}96.5%{transform:scaleY(.08)}}
-  .spin{transform-box:fill-box;transform-origin:center;animation:spin 3.2s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .bob{transform-box:fill-box;transform-origin:center;animation:bob 3s ease-in-out infinite}
-  @keyframes bob{0%,100%{transform:translateY(0) scale(1,1)}50%{transform:translateY(-12px) scale(.98,1.02)}}
+  .char{transform-box:fill-box;transform-origin:center bottom;animation:bob 3.2s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-9px) rotate(-1deg)}}
+  .head{transform-box:fill-box;transform-origin:center bottom;animation:nod 3.2s ease-in-out infinite}
+  @keyframes nod{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+  .headbang{transform-box:fill-box;transform-origin:center bottom;animation:bang 1.1s ease-in-out infinite}
+  @keyframes bang{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(8deg)}}
+  .eyes{transform-box:fill-box;transform-origin:center;animation:blink 4.4s infinite}
+  @keyframes blink{0%,92%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+  .tap{transform-box:fill-box;transform-origin:top center;animation:tap 1.6s ease-in-out infinite}
+  @keyframes tap{0%,70%,100%{transform:translateY(0)}82%{transform:translateY(-7px)}}
 </style>
 </head>
 <body>
-  <h1>🎵 Poptify — conceptos de mascota</h1>
-  <p class="sub">Estilo fluido/orgánico, líneas suaves y degradado neón. Originales (inspirados en ese lenguaje, sin copiar a nadie). Pasa el ratón y mira el movimiento.</p>
+  <h1>🎵 Poptify — mascota (figuras streetwear)</h1>
+  <p class="sub">Figuras jóvenes con actitud — humanoides pero abstractas (cabeza-blob, sin cara realista). Líneas fluidas, neón. Originales. Mira el movimiento.</p>
 
   <div class="grid">
-    <!-- POPPY -->
+
+    <!-- POP — skater -->
     <div class="card">
       <div class="stage">
-        <svg viewBox="0 0 300 320">
+        <svg viewBox="0 0 220 380">
           <defs>
-            <linearGradient id="gP" gradientUnits="userSpaceOnUse" x1="60" y1="70" x2="250" y2="270">
+            <linearGradient id="hoodA" gradientUnits="userSpaceOnUse" x1="40" y1="150" x2="190" y2="300">
               <stop offset="0" stop-color="#ff2d9b"/><stop offset=".5" stop-color="#8b2bff"/><stop offset="1" stop-color="#00e5ff"/>
-              <animateTransform attributeName="gradientTransform" type="translate" values="0 0;70 -20;0 0" dur="4.5s" repeatCount="indefinite"/>
-            </linearGradient>
-          </defs>
-          <g class="floaty">
-            <!-- headphone band -->
-            <path d="M70 150 C70 70 230 70 230 150" fill="none" stroke="#101019" stroke-width="20" stroke-linecap="round"/>
-            <!-- ear cups -->
-            <rect x="48" y="135" width="46" height="86" rx="22" fill="#101019"/>
-            <circle cx="71" cy="178" r="13" fill="#00e5ff" opacity=".85"/>
-            <rect x="206" y="135" width="46" height="86" rx="22" fill="#101019"/>
-            <circle cx="229" cy="178" r="13" fill="#ff2d9b" opacity=".85"/>
-            <!-- body blob -->
-            <path d="M150 96 C214 96 250 150 250 196 C250 256 206 286 150 286 C94 286 50 256 50 196 C50 150 86 96 150 96 Z" fill="url(#gP)"/>
-            <!-- gloss -->
-            <ellipse cx="112" cy="150" rx="42" ry="26" fill="#fff" opacity=".18"/>
-            <!-- eyes -->
-            <g class="eyes" fill="#0b0b14">
-              <ellipse cx="120" cy="186" rx="12" ry="16"/>
-              <ellipse cx="180" cy="186" rx="12" ry="16"/>
-            </g>
-            <!-- play mouth -->
-            <path d="M135 220 L135 252 L168 236 Z" fill="#fff" opacity=".9"/>
-          </g>
-        </svg>
-      </div>
-      <div class="nm">Poppy</div>
-      <div class="ds">Blob líquido con auriculares y triángulo de play. La cara de Poptify: amistoso, gelatinoso, neón.</div>
-    </div>
-
-    <!-- DROPI -->
-    <div class="card">
-      <div class="stage">
-        <svg viewBox="0 0 300 320">
-          <defs>
-            <linearGradient id="gD" gradientUnits="userSpaceOnUse" x1="80" y1="40" x2="220" y2="290">
-              <stop offset="0" stop-color="#00e5ff"/><stop offset=".5" stop-color="#8b2bff"/><stop offset="1" stop-color="#ff2d9b"/>
-              <animateTransform attributeName="gradientTransform" type="translate" values="0 0;0 -50;0 0" dur="4s" repeatCount="indefinite"/>
-            </linearGradient>
-          </defs>
-          <g class="bob">
-            <!-- teardrop -->
-            <path d="M150 40 C150 40 232 168 232 214 C232 264 196 296 150 296 C104 296 68 264 68 214 C68 168 150 40 150 40 Z" fill="url(#gD)"/>
-            <ellipse cx="120" cy="170" rx="26" ry="40" fill="#fff" opacity=".15"/>
-            <g class="eyes" fill="#0b0b14">
-              <circle cx="126" cy="210" r="11"/>
-              <circle cx="178" cy="210" r="11"/>
-            </g>
-            <path d="M132 244 Q152 262 172 244" fill="none" stroke="#0b0b14" stroke-width="7" stroke-linecap="round"/>
-          </g>
-        </svg>
-      </div>
-      <div class="nm">Dropi</div>
-      <div class="ds">Una gota de color con carita. Conecta directo con el “fondo reactivo”: la app que pinta tu pantalla.</div>
-    </div>
-
-    <!-- ASTRO-POP -->
-    <div class="card">
-      <div class="stage">
-        <svg viewBox="0 0 300 320">
-          <defs>
-            <linearGradient id="gA" gradientUnits="userSpaceOnUse" x1="60" y1="80" x2="240" y2="280">
-              <stop offset="0" stop-color="#c6ff3a"/><stop offset=".5" stop-color="#00e5ff"/><stop offset="1" stop-color="#8b2bff"/>
               <animateTransform attributeName="gradientTransform" type="translate" values="0 0;60 0;0 0" dur="5s" repeatCount="indefinite"/>
             </linearGradient>
+            <linearGradient id="headA" gradientUnits="userSpaceOnUse" x1="70" y1="60" x2="150" y2="150">
+              <stop offset="0" stop-color="#00e5ff"/><stop offset="1" stop-color="#8b2bff"/>
+            </linearGradient>
           </defs>
-          <g class="floaty">
-            <!-- body blob -->
-            <path d="M150 150 C206 150 236 196 236 234 C236 282 200 300 150 300 C100 300 64 282 64 234 C64 196 94 150 150 150 Z" fill="url(#gA)"/>
-            <!-- helmet -->
-            <circle cx="150" cy="118" r="78" fill="#e9ecf5"/>
-            <circle cx="150" cy="118" r="78" fill="none" stroke="#fff" stroke-width="4" opacity=".6"/>
-            <!-- visor -->
-            <rect x="92" y="86" width="116" height="74" rx="34" fill="#0b0b14"/>
-            <!-- spinning vinyl reflected in visor -->
-            <g class="spin">
-              <circle cx="150" cy="123" r="26" fill="none" stroke="#ff2d9b" stroke-width="3"/>
-              <circle cx="150" cy="123" r="16" fill="none" stroke="#00e5ff" stroke-width="3"/>
-              <circle cx="150" cy="123" r="4" fill="#fff"/>
+          <g class="char">
+            <!-- skateboard -->
+            <g>
+              <rect x="34" y="350" width="152" height="13" rx="6" fill="#16151c"/>
+              <circle cx="64" cy="370" r="9" fill="#c6ff3a"/><circle cx="156" cy="370" r="9" fill="#c6ff3a"/>
             </g>
-            <ellipse cx="120" cy="104" rx="20" ry="12" fill="#fff" opacity=".18"/>
+            <!-- legs (baggy) -->
+            <path d="M84 250 C70 290 70 320 76 348 L104 348 C104 318 104 286 106 250 Z" fill="#23264a"/>
+            <path d="M116 250 C118 286 118 318 118 348 L146 348 C152 320 152 290 138 250 Z" fill="#2b2f5a"/>
+            <!-- sneakers -->
+            <rect x="58" y="344" width="52" height="20" rx="10" fill="#f0f0f5"/><rect x="58" y="358" width="52" height="6" rx="3" fill="#00e5ff"/>
+            <rect x="112" y="344" width="52" height="20" rx="10" fill="#f0f0f5"/><rect x="112" y="358" width="52" height="6" rx="3" fill="#00e5ff"/>
+            <!-- arms -->
+            <rect x="36" y="168" width="30" height="96" rx="15" fill="#7a23a8"/>
+            <rect x="154" y="168" width="30" height="96" rx="15" fill="#7a23a8"/>
+            <!-- hoodie torso -->
+            <path d="M62 168 C62 150 86 140 110 140 C134 140 158 150 158 168 L162 250 C162 268 138 276 110 276 C82 276 58 268 58 250 Z" fill="url(#hoodA)"/>
+            <!-- pocket -->
+            <path d="M84 232 q26 18 52 0" fill="none" stroke="#0b0b14" stroke-width="5" opacity=".35"/>
+            <!-- hood collar -->
+            <path d="M82 150 q28 26 56 0" fill="none" stroke="#0b0b14" stroke-width="8" opacity=".3"/>
+            <!-- head -->
+            <g class="head">
+              <path d="M110 56 C144 56 162 80 162 104 C162 134 138 150 110 150 C82 150 58 134 58 104 C58 80 76 56 110 56 Z" fill="url(#headA)"/>
+              <ellipse cx="88" cy="92" rx="20" ry="13" fill="#fff" opacity=".18"/>
+              <!-- backwards cap -->
+              <path d="M58 86 C70 64 150 64 162 86 L162 92 C140 80 80 80 58 92 Z" fill="#16151c"/>
+              <rect x="150" y="84" width="22" height="12" rx="6" fill="#16151c"/>
+              <!-- headphones -->
+              <rect x="48" y="100" width="16" height="30" rx="8" fill="#16151c"/>
+              <rect x="156" y="100" width="16" height="30" rx="8" fill="#16151c"/>
+              <!-- eyes -->
+              <g class="eyes" fill="#0b0b14"><ellipse cx="96" cy="112" rx="8" ry="11"/><ellipse cx="130" cy="112" rx="8" ry="11"/></g>
+            </g>
           </g>
         </svg>
       </div>
-      <div class="nm">Astro-Pop</div>
-      <div class="ds">Figura flotante lisa con casco; en el visor, un vinilo girando. Surrealista y limpio (guiño espacial).</div>
+      <div class="nm">Pop · el skater</div>
+      <div class="ds">Hoodie, pantalón baggy, sneakers y monopatín. Gorra hacia atrás + cascos. Cabeza-blob neón. Joven y chill.</div>
     </div>
+
+    <!-- RIFF — rocker -->
+    <div class="card">
+      <div class="stage">
+        <svg viewBox="0 0 220 380">
+          <defs>
+            <linearGradient id="jktB" gradientUnits="userSpaceOnUse" x1="40" y1="150" x2="190" y2="300">
+              <stop offset="0" stop-color="#ff7a00"/><stop offset=".5" stop-color="#ff2d9b"/><stop offset="1" stop-color="#8b2bff"/>
+              <animateTransform attributeName="gradientTransform" type="translate" values="0 0;0 -40;0 0" dur="4.5s" repeatCount="indefinite"/>
+            </linearGradient>
+            <linearGradient id="headB" gradientUnits="userSpaceOnUse" x1="70" y1="50" x2="150" y2="150">
+              <stop offset="0" stop-color="#ff2d9b"/><stop offset="1" stop-color="#ff7a00"/>
+            </linearGradient>
+          </defs>
+          <g class="char">
+            <!-- legs ripped baggy -->
+            <path d="M82 250 C68 292 70 322 78 348 L104 348 C104 316 104 284 104 250 Z" fill="#181821"/>
+            <path d="M116 250 C116 284 116 316 116 348 L142 348 C150 322 152 292 138 250 Z" fill="#20202b"/>
+            <rect x="80" y="296" width="24" height="6" rx="3" fill="#0b0b14"/><rect x="118" y="312" width="24" height="6" rx="3" fill="#0b0b14"/>
+            <!-- boots -->
+            <rect x="60" y="342" width="50" height="22" rx="8" fill="#0e0e16"/><rect x="112" y="342" width="50" height="22" rx="8" fill="#0e0e16"/>
+            <!-- arms -->
+            <rect x="34" y="166" width="30" height="92" rx="15" fill="#101019"/>
+            <rect x="156" y="166" width="30" height="92" rx="15" fill="#101019"/>
+            <!-- torso jacket open over tee -->
+            <path d="M64 166 C64 148 86 140 110 140 C134 140 156 148 156 166 L160 252 C160 270 136 278 110 278 C84 278 60 270 60 252 Z" fill="url(#jktB)"/>
+            <path d="M104 142 L116 142 L116 276 L104 276 Z" fill="#0b0b14" opacity=".5"/>
+            <!-- head with spiky melty hair -->
+            <g class="headbang">
+              <path d="M110 58 C142 58 160 82 160 106 C160 134 138 150 110 150 C82 150 60 134 60 106 C60 82 78 58 110 58 Z" fill="url(#headB)"/>
+              <path d="M62 92 C58 60 74 64 80 84 C84 56 100 58 102 82 C108 54 124 58 124 84 C132 60 150 62 150 92 C150 92 110 78 62 92 Z" fill="#16151c"/>
+              <ellipse cx="90" cy="96" rx="18" ry="11" fill="#fff" opacity=".16"/>
+              <g class="eyes" fill="#0b0b14"><ellipse cx="96" cy="114" rx="8" ry="11"/><ellipse cx="130" cy="114" rx="8" ry="11"/></g>
+              <path d="M98 134 q12 8 24 0" fill="none" stroke="#0b0b14" stroke-width="5" stroke-linecap="round"/>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <div class="nm">Riff · el rockero</div>
+      <div class="ds">Chupa abierta sobre camiseta, baggy roto y botas. Pelo-pincho líquido y headbang. Actitud sin pasarse.</div>
+    </div>
+
+    <!-- DRIP — streetwear hooded -->
+    <div class="card">
+      <div class="stage">
+        <svg viewBox="0 0 220 380">
+          <defs>
+            <linearGradient id="hoodC" gradientUnits="userSpaceOnUse" x1="40" y1="120" x2="190" y2="320">
+              <stop offset="0" stop-color="#c6ff3a"/><stop offset=".5" stop-color="#00e5ff"/><stop offset="1" stop-color="#8b2bff"/>
+              <animateTransform attributeName="gradientTransform" type="translate" values="0 0;50 20;0 0" dur="5.5s" repeatCount="indefinite"/>
+            </linearGradient>
+            <linearGradient id="headC" gradientUnits="userSpaceOnUse" x1="80" y1="90" x2="150" y2="180">
+              <stop offset="0" stop-color="#00e5ff"/><stop offset="1" stop-color="#c6ff3a"/>
+            </linearGradient>
+          </defs>
+          <g class="char">
+            <!-- legs -->
+            <path d="M82 270 C70 304 72 330 80 352 L106 352 C106 322 106 296 106 270 Z" fill="#23264a"/>
+            <path d="M116 270 C116 296 116 322 116 352 L142 352 C150 330 152 304 140 270 Z" fill="#2b2f5a"/>
+            <!-- sneakers -->
+            <g class="tap"><rect x="58" y="348" width="52" height="20" rx="10" fill="#f0f0f5"/><rect x="58" y="362" width="52" height="6" rx="3" fill="#ff2d9b"/></g>
+            <rect x="112" y="348" width="52" height="20" rx="10" fill="#f0f0f5"/><rect x="112" y="362" width="52" height="6" rx="3" fill="#ff2d9b"/>
+            <!-- big hoodie (hands in pocket) -->
+            <path d="M52 200 C52 168 80 150 110 150 C140 150 168 168 168 200 L168 270 C168 290 140 298 110 298 C80 298 52 290 52 270 Z" fill="url(#hoodC)"/>
+            <!-- pocket slit -->
+            <path d="M86 250 q24 16 48 0" fill="none" stroke="#0b0b14" stroke-width="6" opacity=".35"/>
+            <!-- hood up around head -->
+            <path d="M64 150 C64 96 156 96 156 150 C156 150 150 120 110 120 C70 120 64 150 64 150 Z" fill="url(#hoodC)"/>
+            <!-- head (droplet peeking from hood) -->
+            <g class="head">
+              <path d="M110 96 C136 96 152 116 152 138 C152 164 132 178 110 178 C88 178 68 164 68 138 C68 116 84 96 110 96 Z" fill="url(#headC)"/>
+              <!-- hood shadow over forehead -->
+              <path d="M68 138 C68 112 152 112 152 138 C152 124 132 116 110 116 C88 116 68 124 68 138 Z" fill="#0b0b14" opacity=".22"/>
+              <g class="eyes" fill="#0b0b14"><ellipse cx="96" cy="142" rx="8" ry="11"/><ellipse cx="130" cy="142" rx="8" ry="11"/></g>
+              <ellipse cx="92" cy="128" rx="16" ry="9" fill="#fff" opacity=".16"/>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <div class="nm">Drip · streetwear</div>
+      <div class="ds">Hoodie XL con capucha puesta, manos en el bolsillo, cabeza-gota asomando. Sneaker que marca el ritmo. Cero esfuerzo, mucho flow.</div>
+    </div>
+
   </div>
 </body>
 </html>
