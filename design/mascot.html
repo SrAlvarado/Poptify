@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Poptify · Mascotas (conceptos)</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,system-ui,sans-serif;background:#0c0c12;color:#fff;
+    min-height:100vh;padding:40px 24px 80px;
+    background-image:radial-gradient(900px 600px at 15% -10%,#2a1740,transparent),radial-gradient(800px 600px at 110% 10%,#06243a,transparent)}
+  h1{font-size:24px;font-weight:800;letter-spacing:-.02em}
+  p.sub{color:rgba(255,255,255,.6);font-size:14px;margin-top:6px;max-width:640px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;margin-top:36px;max-width:1100px}
+  .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:24px;text-align:center}
+  .stage{height:300px;display:grid;place-items:center}
+  svg{width:230px;height:auto;overflow:visible}
+  .nm{font-size:20px;font-weight:800;margin-top:8px}
+  .ds{color:rgba(255,255,255,.6);font-size:13px;margin-top:6px;line-height:1.5}
+  /* shared motion */
+  .floaty{transform-box:fill-box;transform-origin:center;animation:floaty 3.4s ease-in-out infinite}
+  @keyframes floaty{0%,100%{transform:translateY(0) scale(1,1)}25%{transform:translateY(-10px) scale(1.03,.97)}50%{transform:translateY(0) scale(1,1)}75%{transform:translateY(7px) scale(.97,1.03)}}
+  .eyes{transform-box:fill-box;transform-origin:center;animation:blink 4.6s infinite}
+  @keyframes blink{0%,93%,100%{transform:scaleY(1)}96.5%{transform:scaleY(.08)}}
+  .spin{transform-box:fill-box;transform-origin:center;animation:spin 3.2s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .bob{transform-box:fill-box;transform-origin:center;animation:bob 3s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0) scale(1,1)}50%{transform:translateY(-12px) scale(.98,1.02)}}
+</style>
+</head>
+<body>
+  <h1>🎵 Poptify — conceptos de mascota</h1>
+  <p class="sub">Estilo fluido/orgánico, líneas suaves y degradado neón. Originales (inspirados en ese lenguaje, sin copiar a nadie). Pasa el ratón y mira el movimiento.</p>
+
+  <div class="grid">
+    <!-- POPPY -->
+    <div class="card">
+      <div class="stage">
+        <svg viewBox="0 0 300 320">
+          <defs>
+            <linearGradient id="gP" gradientUnits="userSpaceOnUse" x1="60" y1="70" x2="250" y2="270">
+              <stop offset="0" stop-color="#ff2d9b"/><stop offset=".5" stop-color="#8b2bff"/><stop offset="1" stop-color="#00e5ff"/>
+              <animateTransform attributeName="gradientTransform" type="translate" values="0 0;70 -20;0 0" dur="4.5s" repeatCount="indefinite"/>
+            </linearGradient>
+          </defs>
+          <g class="floaty">
+            <!-- headphone band -->
+            <path d="M70 150 C70 70 230 70 230 150" fill="none" stroke="#101019" stroke-width="20" stroke-linecap="round"/>
+            <!-- ear cups -->
+            <rect x="48" y="135" width="46" height="86" rx="22" fill="#101019"/>
+            <circle cx="71" cy="178" r="13" fill="#00e5ff" opacity=".85"/>
+            <rect x="206" y="135" width="46" height="86" rx="22" fill="#101019"/>
+            <circle cx="229" cy="178" r="13" fill="#ff2d9b" opacity=".85"/>
+            <!-- body blob -->
+            <path d="M150 96 C214 96 250 150 250 196 C250 256 206 286 150 286 C94 286 50 256 50 196 C50 150 86 96 150 96 Z" fill="url(#gP)"/>
+            <!-- gloss -->
+            <ellipse cx="112" cy="150" rx="42" ry="26" fill="#fff" opacity=".18"/>
+            <!-- eyes -->
+            <g class="eyes" fill="#0b0b14">
+              <ellipse cx="120" cy="186" rx="12" ry="16"/>
+              <ellipse cx="180" cy="186" rx="12" ry="16"/>
+            </g>
+            <!-- play mouth -->
+            <path d="M135 220 L135 252 L168 236 Z" fill="#fff" opacity=".9"/>
+          </g>
+        </svg>
+      </div>
+      <div class="nm">Poppy</div>
+      <div class="ds">Blob líquido con auriculares y triángulo de play. La cara de Poptify: amistoso, gelatinoso, neón.</div>
+    </div>
+
+    <!-- DROPI -->
+    <div class="card">
+      <div class="stage">
+        <svg viewBox="0 0 300 320">
+          <defs>
+            <linearGradient id="gD" gradientUnits="userSpaceOnUse" x1="80" y1="40" x2="220" y2="290">
+              <stop offset="0" stop-color="#00e5ff"/><stop offset=".5" stop-color="#8b2bff"/><stop offset="1" stop-color="#ff2d9b"/>
+              <animateTransform attributeName="gradientTransform" type="translate" values="0 0;0 -50;0 0" dur="4s" repeatCount="indefinite"/>
+            </linearGradient>
+          </defs>
+          <g class="bob">
+            <!-- teardrop -->
+            <path d="M150 40 C150 40 232 168 232 214 C232 264 196 296 150 296 C104 296 68 264 68 214 C68 168 150 40 150 40 Z" fill="url(#gD)"/>
+            <ellipse cx="120" cy="170" rx="26" ry="40" fill="#fff" opacity=".15"/>
+            <g class="eyes" fill="#0b0b14">
+              <circle cx="126" cy="210" r="11"/>
+              <circle cx="178" cy="210" r="11"/>
+            </g>
+            <path d="M132 244 Q152 262 172 244" fill="none" stroke="#0b0b14" stroke-width="7" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </div>
+      <div class="nm">Dropi</div>
+      <div class="ds">Una gota de color con carita. Conecta directo con el “fondo reactivo”: la app que pinta tu pantalla.</div>
+    </div>
+
+    <!-- ASTRO-POP -->
+    <div class="card">
+      <div class="stage">
+        <svg viewBox="0 0 300 320">
+          <defs>
+            <linearGradient id="gA" gradientUnits="userSpaceOnUse" x1="60" y1="80" x2="240" y2="280">
+              <stop offset="0" stop-color="#c6ff3a"/><stop offset=".5" stop-color="#00e5ff"/><stop offset="1" stop-color="#8b2bff"/>
+              <animateTransform attributeName="gradientTransform" type="translate" values="0 0;60 0;0 0" dur="5s" repeatCount="indefinite"/>
+            </linearGradient>
+          </defs>
+          <g class="floaty">
+            <!-- body blob -->
+            <path d="M150 150 C206 150 236 196 236 234 C236 282 200 300 150 300 C100 300 64 282 64 234 C64 196 94 150 150 150 Z" fill="url(#gA)"/>
+            <!-- helmet -->
+            <circle cx="150" cy="118" r="78" fill="#e9ecf5"/>
+            <circle cx="150" cy="118" r="78" fill="none" stroke="#fff" stroke-width="4" opacity=".6"/>
+            <!-- visor -->
+            <rect x="92" y="86" width="116" height="74" rx="34" fill="#0b0b14"/>
+            <!-- spinning vinyl reflected in visor -->
+            <g class="spin">
+              <circle cx="150" cy="123" r="26" fill="none" stroke="#ff2d9b" stroke-width="3"/>
+              <circle cx="150" cy="123" r="16" fill="none" stroke="#00e5ff" stroke-width="3"/>
+              <circle cx="150" cy="123" r="4" fill="#fff"/>
+            </g>
+            <ellipse cx="120" cy="104" rx="20" ry="12" fill="#fff" opacity=".18"/>
+          </g>
+        </svg>
+      </div>
+      <div class="nm">Astro-Pop</div>
+      <div class="ds">Figura flotante lisa con casco; en el visor, un vinilo girando. Surrealista y limpio (guiño espacial).</div>
+    </div>
+  </div>
+</body>
+</html>
