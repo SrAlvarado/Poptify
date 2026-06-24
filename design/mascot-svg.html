@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Poptify · Mascota en SVG (line-art)</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,system-ui,sans-serif;background:#222;color:#fff;min-height:100vh;padding:36px 24px 80px}
+  h1{font-size:22px;font-weight:800}
+  p.sub{color:rgba(255,255,255,.6);font-size:14px;margin-top:6px;max-width:680px}
+  .grid{display:flex;flex-wrap:wrap;gap:22px;margin-top:30px;align-items:flex-start}
+  .card{background:#fff;border-radius:20px;padding:18px;text-align:center}
+  .card .lbl{color:#333;font-weight:700;font-size:13px;margin-top:8px}
+  svg{display:block}
+  /* line-art shared */
+  .ink{fill:none;stroke:#141414;stroke-width:3.4;stroke-linejoin:round;stroke-linecap:round}
+  .fillw{fill:#fff;stroke:#141414;stroke-width:3.4;stroke-linejoin:round;stroke-linecap:round}
+  .fillk{fill:#141414;stroke:none}
+  .thin{fill:none;stroke:#141414;stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round}
+</style>
+</head>
+<body>
+  <h1>🖊️ Poptify — mascota redibujada en SVG (line-art, sin color)</h1>
+  <p class="sub">Versión vectorial editable partiendo de tu personaje: demonio con cuernos, cascos con la “P”, bocaza dentada, torso al aire, baggy con cinturón POPTIFY, cola y botas. A la derecha, un badge de la cara para logo/avatar.</p>
+
+  <div class="grid">
+    <!-- FULL BODY -->
+    <div class="card">
+      <svg width="360" height="540" viewBox="0 0 420 630">
+        <!-- TAIL -->
+        <path class="ink" d="M250 360 C330 372 360 300 345 250 C336 218 360 215 372 240"/>
+        <path class="fillw" d="M372 218 L392 240 L372 262 L356 240 Z"/>
+
+        <!-- HEAD GROUP -->
+        <!-- horns -->
+        <path class="fillw" d="M150 96 C126 56 122 26 140 24 C158 30 162 66 170 104 C160 104 154 100 150 96 Z"/>
+        <path class="fillw" d="M270 96 C294 56 298 26 280 24 C262 30 258 66 250 104 C260 104 266 100 270 96 Z"/>
+        <!-- ears -->
+        <path class="fillw" d="M118 158 L92 146 L116 178"/>
+        <path class="fillw" d="M302 158 L328 146 L304 178"/>
+        <!-- head -->
+        <path class="fillw" d="M120 156 C112 92 308 92 300 156 C298 198 290 214 262 230 C242 240 232 244 210 244 C188 244 178 240 158 230 C130 214 122 198 120 156 Z"/>
+        <!-- headphone band -->
+        <path class="ink" d="M150 96 C176 58 244 58 270 96"/>
+        <path class="ink" d="M158 104 C180 72 240 72 262 104"/>
+        <!-- cups -->
+        <ellipse class="fillw" cx="116" cy="158" rx="22" ry="32"/>
+        <ellipse class="fillw" cx="304" cy="158" rx="22" ry="32"/>
+        <text x="304" y="166" text-anchor="middle" font-family="Arial Black, Arial" font-size="26" font-weight="900" fill="#141414">P</text>
+        <!-- brow -->
+        <path class="thin" d="M150 150 C168 140 186 142 196 152"/>
+        <path class="thin" d="M270 150 C252 140 234 142 224 152"/>
+        <!-- eyes (angry) -->
+        <path class="fillk" d="M150 152 L196 166 L154 176 Z"/>
+        <path class="fillk" d="M270 152 L224 166 L266 176 Z"/>
+        <circle cx="170" cy="162" r="3" fill="#fff"/><circle cx="250" cy="162" r="3" fill="#fff"/>
+        <!-- HUGE grin -->
+        <path class="fillw" d="M148 188 C176 244 244 244 272 188 C272 188 248 214 210 214 C172 214 148 188 148 188 Z"/>
+        <!-- teeth -->
+        <path class="thin" d="M156 192 L172 214 L188 194 L204 216 L210 196 L218 216 L232 194 L248 214 L264 192"/>
+        <path class="thin" d="M168 214 L178 200 M196 216 L206 202 M222 216 L232 202 M246 214 L256 202"/>
+
+        <!-- NECK + TORSO -->
+        <path class="ink" d="M186 244 C188 258 188 268 184 278 M234 244 C232 258 232 268 236 278"/>
+        <!-- chain -->
+        <path class="thin" d="M186 256 C200 270 220 270 234 256"/>
+        <circle cx="210" cy="272" r="4" class="fillw"/>
+        <!-- torso outline (lean, shirtless) -->
+        <path class="ink" d="M178 278 C160 290 150 310 152 340 L160 366 C176 360 200 360 210 360 C220 360 244 360 260 366 L268 340 C270 310 260 290 242 278"/>
+        <!-- abs -->
+        <path class="thin" d="M210 300 L210 352"/>
+        <path class="thin" d="M186 312 q24 10 48 0 M188 330 q22 9 44 0"/>
+        <path class="thin" d="M170 300 q10 14 16 30 M250 300 q-10 14 -16 30"/>
+
+        <!-- ARMS -->
+        <!-- left raised + claw -->
+        <path class="ink" d="M178 282 C150 286 128 270 118 248"/>
+        <path class="ink" d="M118 248 C112 238 110 230 116 226"/>
+        <path class="fillw" d="M104 252 C96 234 100 224 110 226 C112 236 118 242 124 246 C120 232 126 224 134 228 C136 240 140 246 144 250 C142 238 150 232 156 238 C158 252 152 266 140 272 C126 276 112 268 104 252 Z"/>
+        <!-- right hand on hip -->
+        <path class="ink" d="M242 282 C266 288 282 300 286 322 C288 338 278 350 262 352"/>
+        <path class="fillw" d="M250 344 C268 338 282 344 282 356 C282 368 266 372 252 366 C244 362 244 348 250 344 Z"/>
+
+        <!-- BELT -->
+        <path class="ink" d="M158 366 C176 360 244 360 262 366 L264 384 C244 392 176 392 158 384 Z"/>
+        <ellipse class="fillw" cx="210" cy="378" rx="34" ry="16"/>
+        <text x="210" y="383" text-anchor="middle" font-family="Arial Black, Arial" font-size="11" font-weight="900" fill="#141414">POPTIFY</text>
+        <path class="thin" d="M250 372 q6 4 6 10"/>
+
+        <!-- BAGGY JEANS -->
+        <path class="ink" d="M158 384 C140 440 124 506 130 540 C148 548 176 548 188 540 C192 500 196 446 210 392"/>
+        <path class="ink" d="M262 384 C282 440 296 506 290 540 C272 548 244 548 232 540 C228 500 224 446 210 392"/>
+        <!-- cuffs -->
+        <path class="ink" d="M126 524 C148 534 176 534 190 524 M232 524 C246 534 274 534 294 524"/>
+        <path class="thin" d="M126 540 C148 548 176 548 190 540 M232 540 C246 548 274 548 294 540"/>
+        <!-- pocket + fly -->
+        <path class="thin" d="M196 392 C188 410 184 430 186 452"/>
+        <path class="thin" d="M170 398 q-6 16 -8 34"/>
+
+        <!-- BOOTS -->
+        <path class="fillw" d="M124 540 C112 548 110 568 124 580 C140 590 172 590 190 582 L190 540 C176 548 148 548 124 540 Z"/>
+        <path class="fillw" d="M232 540 C218 548 192 548 188 540 L188 582 C206 590 240 590 256 580 C270 570 268 550 256 542 Z" transform="translate(40,0)"/>
+        <path class="thin" d="M134 560 l44 0 M132 572 l48 0"/>
+        <path class="thin" d="M236 560 l44 0 M234 572 l48 0"/>
+      </svg>
+      <div class="lbl">Cuerpo completo (vector)</div>
+    </div>
+
+    <!-- FACE BADGE -->
+    <div class="card">
+      <svg width="260" height="260" viewBox="0 0 260 260">
+        <circle class="fillw" cx="130" cy="130" r="120"/>
+        <!-- horns -->
+        <path class="fillw" d="M86 86 C66 52 64 28 80 28 C96 34 98 66 104 96 Z"/>
+        <path class="fillw" d="M174 86 C194 52 196 28 180 28 C164 34 162 66 156 96 Z"/>
+        <!-- head -->
+        <path class="fillw" d="M64 132 C58 78 202 78 196 132 C194 168 186 182 162 196 C146 204 140 206 130 206 C120 206 114 204 98 196 C74 182 66 168 64 132 Z"/>
+        <!-- band + cups -->
+        <path class="ink" d="M92 80 C112 50 148 50 168 80"/>
+        <path class="ink" d="M98 88 C116 62 144 62 162 88"/>
+        <ellipse class="fillw" cx="64" cy="134" rx="18" ry="26"/>
+        <ellipse class="fillw" cx="196" cy="134" rx="18" ry="26"/>
+        <text x="196" y="141" text-anchor="middle" font-family="Arial Black, Arial" font-size="22" font-weight="900" fill="#141414">P</text>
+        <!-- eyes -->
+        <path class="fillk" d="M92 128 L130 140 L96 150 Z"/>
+        <path class="fillk" d="M168 128 L130 140 L164 150 Z"/>
+        <circle cx="110" cy="137" r="2.6" fill="#fff"/><circle cx="150" cy="137" r="2.6" fill="#fff"/>
+        <!-- grin -->
+        <path class="fillw" d="M80 160 C104 206 156 206 180 160 C180 160 158 182 130 182 C102 182 80 160 80 160 Z"/>
+        <path class="thin" d="M86 164 L100 184 L114 166 L128 186 L132 168 L140 186 L154 166 L168 184 L176 164"/>
+      </svg>
+      <div class="lbl">Badge cara (logo / avatar)</div>
+    </div>
+  </div>
+</body>
+</html>
