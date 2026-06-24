@@ -234,7 +234,11 @@
   .download{text-align:center}
   .dl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;margin:46px auto 0;max-width:880px;perspective:1300px}
   .dl{position:relative;border-radius:28px;padding:34px 30px 30px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));
-    border:1px solid var(--line);overflow:hidden;transform-style:preserve-3d;transition:box-shadow .35s,border-color .35s}
+    border:1px solid var(--line);overflow:hidden;transform-style:preserve-3d;transition:box-shadow .35s,border-color .35s;
+    display:flex;flex-direction:column;align-items:center;text-align:center}
+  .dl .dev{height:238px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+  .dl h3{margin-top:6px}
+  .dl .go{margin-top:auto}
   .dl .glow{position:absolute;inset:0;opacity:0;transition:opacity .35s;pointer-events:none;
     background:radial-gradient(80% 70% at 50% 0,rgba(255,255,255,.14),transparent 70%)}
   .dl:hover .glow{opacity:1}
@@ -427,25 +431,25 @@
     <div class="brand"><span class="eqm"><i></i><i></i><i></i></span>poptify</div>
     <div class="nav-links" id="navLinks">
       <span class="nav-ind" id="navInd"></span>
-      <a href="#que-es" data-sec="que-es">Qué es</a>
-      <a href="#como" data-sec="como">Cómo</a>
-      <a href="#skins" data-sec="skins">Skins</a>
-      <a href="#faq" data-sec="faq">FAQ</a>
+      <a href="#que-es" data-sec="que-es" data-en="About">Qué es</a>
+      <a href="#como" data-sec="como" data-en="How">Cómo</a>
+      <a href="#skins" data-sec="skins" data-en="Skins">Skins</a>
+      <a href="#faq" data-sec="faq" data-en="FAQ">FAQ</a>
     </div>
     <a href="#descargar" class="nav-cta" id="navCta">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12M7 12l5 5 5-5M5 20h14"/></svg>
-      Descargar
+      <span data-en="Download">Descargar</span>
     </a>
     <button class="kbtn" id="cmdOpen" title="Comandos"><kbd>⌘</kbd>K</button>
     <div class="lang"><span class="on">ES</span><span>EN</span></div>
     <button class="burger" id="burger" aria-label="Menú"><i></i><i></i><i></i></button>
   </nav>
   <div class="menu" id="menu">
-    <a href="#que-es">Qué es</a>
-    <a href="#como">Cómo</a>
-    <a href="#skins">Skins</a>
-    <a href="#faq">FAQ</a>
-    <a href="#descargar">Descargar</a>
+    <a href="#que-es" data-en="About">Qué es</a>
+    <a href="#como" data-en="How">Cómo</a>
+    <a href="#skins" data-en="Skins">Skins</a>
+    <a href="#faq" data-en="FAQ">FAQ</a>
+    <a href="#descargar" data-en="Download">Descargar</a>
   </div>
 
   <div class="cmdk-bg" id="cmdkBg"></div>
@@ -461,8 +465,8 @@
   <header class="hero">
     <div>
       <h1 class="title">POPTIFY</h1>
-      <div class="tagline">Tu música, en una nube de color.</div>
-      <p class="sub">El popup flotante que muestra lo que suena en Spotify con estética de pantalla de bloqueo de iOS, <b>fondo reactivo al color del álbum</b> y skins retro. Móvelo por toda la pantalla. Para Mac y Android.</p>
+      <div class="tagline" data-en="Your music, in a cloud of color.">Tu música, en una nube de color.</div>
+      <p class="sub" data-en="The floating popup that shows what's playing on Spotify with an iOS lock-screen look, a <b>background reactive to the album color</b> and retro skins. Drag it anywhere. For Mac and Android.">El popup flotante que muestra lo que suena en Spotify con estética de pantalla de bloqueo de iOS, <b>fondo reactivo al color del álbum</b> y skins retro. Móvelo por toda la pantalla. Para Mac y Android.</p>
       <div class="hero-cta">
         <a class="btn mac" data-dl href="#" id="dlMacHero">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.7c0-2.2 1.8-3.3 1.9-3.4-1-1.5-2.6-1.7-3.2-1.7-1.4-.1-2.7.8-3.3.8-.7 0-1.7-.8-2.8-.8-1.4 0-2.8.8-3.5 2.1-1.5 2.6-.4 6.5 1.1 8.6.7 1 1.5 2.2 2.6 2.1 1-.1 1.4-.7 2.7-.7s1.6.7 2.7.6c1.1 0 1.8-1 2.5-2 .8-1.2 1.1-2.3 1.1-2.3 0 0-2.1-.8-2.1-3.2zM14.3 5.9c.6-.7 1-1.7.9-2.7-.9 0-1.9.6-2.5 1.3-.5.6-1 1.6-.9 2.6 1 .1 2-.5 2.5-1.2z"/></svg>
@@ -495,9 +499,9 @@
         </div>
       </div>
     </div>
-    <span class="sticker s1" data-par="-0.14">Gratis</span>
+    <span class="sticker s1" data-par="-0.14" data-en="Free">Gratis</span>
     <span class="sticker s2" data-par="0.2">Mac + Android</span>
-    <span class="sticker s3" data-par="0.12">★ Reactivo</span>
+    <span class="sticker s3" data-par="0.12" data-en="★ Reactive">★ Reactivo</span>
     <span class="sticker s4" data-par="-0.24">v0.1.0</span>
     <svg class="rbadge hero" data-par="0.26" viewBox="0 0 120 120" aria-hidden="true">
       <g class="ring">
@@ -514,9 +518,9 @@
 
   <section id="reactive">
     <div class="reveal">
-      <div class="kicker">Reactivo</div>
-      <h2>El color <em>lo pone tu música</em></h2>
-      <p class="lead">Toca un álbum y mira cómo se tiñe toda la página — así reacciona Poptify a la portada de lo que suena.</p>
+      <div class="kicker" data-en="Reactive">Reactivo</div>
+      <h2 data-en="The color <em>comes from your music</em>">El color <em>lo pone tu música</em></h2>
+      <p class="lead" data-en="Tap an album and watch the whole page change color — that's how Poptify reacts to your cover art.">Toca un álbum y mira cómo se tiñe toda la página — así reacciona Poptify a la portada de lo que suena.</p>
     </div>
     <div class="album-chips" id="albumChips"></div>
   </section>
@@ -525,31 +529,31 @@
 
   <section id="que-es">
     <div class="reveal">
-      <div class="kicker">Qué es</div>
-      <h2>Un trozo de <em>fiesta</em> en tu pantalla</h2>
-      <p class="lead">Poptify saca tu canción del reproductor y la convierte en un popup vivo: portada, artista, progreso y controles, con un fondo que cambia de color según el álbum. Ligero, flotante y movible por todo el escritorio.</p>
+      <div class="kicker" data-en="What it is">Qué es</div>
+      <h2 data-en="A piece of the <em>party</em> on your screen">Un trozo de <em>fiesta</em> en tu pantalla</h2>
+      <p class="lead" data-en="Poptify pulls your song out of the player into a living popup: cover, artist, progress and controls, with a background that shifts color with the album. Light, floating and movable across your desktop.">Poptify saca tu canción del reproductor y la convierte en un popup vivo: portada, artista, progreso y controles, con un fondo que cambia de color según el álbum. Ligero, flotante y movible por todo el escritorio.</p>
     </div>
     <div class="grid" id="features"></div>
   </section>
 
   <section id="como">
     <div class="reveal">
-      <div class="kicker">En 30 segundos</div>
-      <h2>Cómo <em>funciona</em></h2>
+      <div class="kicker" data-en="In 30 seconds">En 30 segundos</div>
+      <h2 data-en="How it <em>works</em>">Cómo <em>funciona</em></h2>
     </div>
     <div class="steps">
-      <div class="step reveal"><div class="num">01</div><h3>Descarga e instala</h3><p>Coge la app para Mac o Android. Pesa poco y se instala en segundos.</p></div>
-      <div class="step reveal"><div class="num">02</div><h3>Conecta Spotify</h3><p>Un clic, autorizas tu cuenta y Poptify ya sabe qué estás escuchando.</p></div>
-      <div class="step reveal"><div class="num">03</div><h3>Elige skin y disfruta</h3><p>Cambia de display, muévelo por la pantalla y deja que el color fluya.</p></div>
+      <div class="step reveal"><div class="num">01</div><h3 data-en="Download &amp; install">Descarga e instala</h3><p data-en="Grab the Mac or Android app. Tiny and installs in seconds.">Coge la app para Mac o Android. Pesa poco y se instala en segundos.</p></div>
+      <div class="step reveal"><div class="num">02</div><h3 data-en="Connect Spotify">Conecta Spotify</h3><p data-en="One click, authorize your account and Poptify knows what you're hearing.">Un clic, autorizas tu cuenta y Poptify ya sabe qué estás escuchando.</p></div>
+      <div class="step reveal"><div class="num">03</div><h3 data-en="Pick a skin &amp; enjoy">Elige skin y disfruta</h3><p data-en="Switch display, move it around and let the color flow.">Cambia de display, muévelo por la pantalla y deja que el color fluya.</p></div>
     </div>
   </section>
 
   <section>
     <div class="statbar reveal">
-      <div class="stat"><div class="n" data-count="7">0</div><div class="l">Skins</div><div class="sl">y subiendo</div></div>
-      <div class="stat"><div class="n" data-count="2">0</div><div class="l">Plataformas</div><div class="sl">Mac · Android</div></div>
-      <div class="stat"><div class="n" data-count="2">0</div><div class="l">Fuentes</div><div class="sl">Spotify · SoundCloud</div></div>
-      <div class="stat"><div class="n" data-suffix="∞">∞</div><div class="l">Colores</div><div class="sl">reactivos al álbum</div></div>
+      <div class="stat"><div class="n" data-count="7">0</div><div class="l" data-en="Skins">Skins</div><div class="sl" data-en="and counting">y subiendo</div></div>
+      <div class="stat"><div class="n" data-count="2">0</div><div class="l" data-en="Platforms">Plataformas</div><div class="sl">Mac · Android</div></div>
+      <div class="stat"><div class="n" data-count="2">0</div><div class="l" data-en="Sources">Fuentes</div><div class="sl">Spotify · SoundCloud</div></div>
+      <div class="stat"><div class="n" data-suffix="∞">∞</div><div class="l" data-en="Colors">Colores</div><div class="sl" data-en="reactive to the album">reactivos al álbum</div></div>
     </div>
   </section>
 
@@ -557,12 +561,12 @@
 
   <section id="skins">
     <div class="reveal">
-      <div class="kicker">Elige tu vibe</div>
-      <h2>Siete <em>skins</em>, un mood</h2>
-      <p class="lead">Desde la pantalla de bloqueo de iOS hasta una Game Boy, una PSP o un vinilo girando. Cámbialas al vuelo desde los ajustes.</p>
+      <div class="kicker" data-en="Pick your vibe">Elige tu vibe</div>
+      <h2 data-en="Seven <em>skins</em>, one mood">Siete <em>skins</em>, un mood</h2>
+      <p class="lead" data-en="From the iOS lock screen to a Game Boy, a PSP or a spinning vinyl. Switch on the fly from settings.">Desde la pantalla de bloqueo de iOS hasta una Game Boy, una PSP o un vinilo girando. Cámbialas al vuelo desde los ajustes.</p>
     </div>
     <div class="carousel" id="carousel"><div class="car-track" id="skinStrip"></div></div>
-    <p class="drag-hint">← arrastra →</p>
+    <p class="drag-hint" data-en="← drag →">← arrastra →</p>
   </section>
 
   <section id="liquid">
@@ -572,17 +576,17 @@
 
   <section id="faq">
     <div class="reveal">
-      <div class="kicker">Dudas</div>
-      <h2>Preguntas <em>frecuentes</em></h2>
+      <div class="kicker" data-en="FAQ">Dudas</div>
+      <h2 data-en="<em>Frequently</em> asked">Preguntas <em>frecuentes</em></h2>
     </div>
     <div class="faq" id="faqList"></div>
   </section>
 
   <section id="descargar" class="download">
     <div class="reveal">
-      <div class="kicker">Gratis · v0.1.0</div>
-      <h2>Dale al <em>play</em></h2>
-      <p class="lead" style="margin-inline:auto">Descárgalo, conéctalo a Spotify y deja que la música pinte tu pantalla.</p>
+      <div class="kicker" data-en="Free · v0.1.0">Gratis · v0.1.0</div>
+      <h2 data-en="Hit <em>play</em>">Dale al <em>play</em></h2>
+      <p class="lead" style="margin-inline:auto" data-en="Download it, connect Spotify and let the music paint your screen.">Descárgalo, conéctalo a Spotify y deja que la música pinte tu pantalla.</p>
     </div>
     <div class="dl-grid reveal">
       <div class="dl macc" id="dlMacCard">
@@ -594,9 +598,9 @@
           </div>
           <div class="base"></div>
         </div>
-        <h3>Para Mac</h3>
+        <h3 data-en="For Mac">Para Mac</h3>
         <div class="fmt">.dmg · Apple Silicon · macOS 11+</div>
-        <a class="go" data-dl href="#"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M5 21h14"/></svg>Descargar</a>
+        <a class="go" data-dl href="#"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M5 21h14"/></svg><span data-en="Download">Descargar</span></a>
       </div>
       <div class="dl andd" id="dlAndCard">
         <span class="tag">Android</span>
@@ -607,26 +611,26 @@
             <div class="mp"><div class="mp-art" style="background:linear-gradient(135deg,#00e5ff,#7873f5 55%,#0f0c29)"></div><div class="mp-l1"></div><div class="mp-l2"></div><div class="mp-bar"></div></div>
           </div>
         </div>
-        <h3>Para Android</h3>
+        <h3 data-en="For Android">Para Android</h3>
         <div class="fmt">.apk · Android 8+</div>
-        <a class="go" data-dl href="#"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M5 21h14"/></svg>Descargar</a>
+        <a class="go" data-dl href="#"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M5 21h14"/></svg><span data-en="Download">Descargar</span></a>
       </div>
     </div>
-    <p class="req">Requiere cuenta de Spotify · controles con Premium · código abierto en GitHub</p>
+    <p class="req" data-en="Requires a Spotify account · controls need Premium · open source on GitHub">Requiere cuenta de Spotify · controles con Premium · código abierto en GitHub</p>
   </section>
 
   <footer>
     <div class="brand"><span class="dot"></span>POPTIFY</div>
-    <p>Hecho con buena música y demasiados colores.</p>
+    <p data-en="Made with good music and too many colors.">Hecho con buena música y demasiados colores.</p>
     <div class="socials">
       <a href="https://github.com/SrAlvarado/Poptify" target="_blank" rel="noopener" title="GitHub"><svg viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.6 2 12.2c0 4.5 2.9 8.3 6.8 9.6.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.4-3.4-1.4-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.5-1.3.1-2.7 0 0 .8-.3 2.7 1a9.3 9.3 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .6 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5 3.9-1.3 6.8-5.1 6.8-9.6C22 6.6 17.5 2 12 2z"/></svg></a>
       <a href="https://open.spotify.com" target="_blank" rel="noopener" title="Spotify"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.6 14.4c-.2.3-.6.4-.9.2-2.4-1.5-5.5-1.8-9.1-1-.4.1-.7-.2-.8-.5-.1-.4.2-.7.5-.8 3.9-.9 7.4-.5 10.1 1.1.4.2.4.6.2 1zm1.2-2.7c-.2.4-.7.5-1.1.3-2.8-1.7-7-2.2-10.3-1.2-.4.1-.9-.1-1-.6-.1-.4.1-.9.6-1 3.8-1.1 8.4-.6 11.6 1.4.3.2.5.7.2 1.1zm.1-2.8C14.6 8.9 9.3 8.7 6.2 9.7c-.5.2-1.1-.1-1.3-.6-.2-.5.1-1.1.6-1.3 3.6-1.1 9.5-.9 13.2 1.3.5.3.6.9.4 1.4-.3.4-.9.6-1.4.4z"/></svg></a>
       <a href="https://soundcloud.com" target="_blank" rel="noopener" title="SoundCloud"><svg viewBox="0 0 24 24" style="fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M4 13v4M7 11v6M10 9.5v7.5M13 11v6c4.5 0 7.5.3 7.5-2.5S17.5 12 13 12c0-3 .5-5.5-2.5-5.5"/></svg></a>
     </div>
     <p style="margin-top:6px">
-      <a href="#que-es">Qué es</a> ·
-      <a href="#como">Cómo funciona</a> ·
-      <a href="#descargar">Descargar</a> ·
+      <a href="#que-es" data-en="About">Qué es</a> ·
+      <a href="#como" data-en="How it works">Cómo funciona</a> ·
+      <a href="#descargar" data-en="Download">Descargar</a> ·
       <a href="#faq">FAQ</a>
     </p>
   </footer>
@@ -642,7 +646,7 @@
     const isAndroid=/android/i.test(ua);
     const isMac=/Macintosh|Mac OS X/i.test(ua) && !isAndroid;
     const card = isAndroid?document.getElementById('dlAndCard'):isMac?document.getElementById('dlMacCard'):null;
-    if(card){ card.classList.add('you'); card.querySelector('.tag').textContent='Tu sistema'; }
+    if(card){ const tg=card.querySelector('.tag'); card.classList.add('you'); tg.textContent='Tu sistema'; tg.setAttribute('data-en','Your system'); }
   })();
 
   // 3D tilt on the download device cards
@@ -773,15 +777,15 @@
     sources:'<line x1="4" y1="10" x2="4" y2="14"/><line x1="8" y1="7" x2="8" y2="17"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="16" y1="8" x2="16" y2="16"/><line x1="20" y1="10.5" x2="20" y2="13.5"/>',
   };
   const FEATURES=[
-    ["reactive","Fondo reactivo","El color del popup late con la portada del álbum. Modo difuminado, vivo o el caótico fondo Hydra."],
-    ["ios","Como el lock screen de iOS","Portada grande, título, artista, progreso y controles. Bonito de serie."],
-    ["skins","7 skins retro","iOS, iPod, Game Boy, PSP, MP4, Vinilo y modo Notch que rodea la cámara del Mac."],
-    ["move","Movible y flotante","Arrástralo por toda la pantalla. Siempre encima, sin marco, ligero."],
-    ["lyrics","Letras sincronizadas","Karaoke en directo que sigue el ritmo de la canción."],
-    ["sources","Spotify + SoundCloud","Refleja Spotify o reproduce SoundCloud. Cambia de fuente al vuelo."],
+    ["reactive","Fondo reactivo","El color del popup late con la portada del álbum. Modo difuminado, vivo o el caótico fondo Hydra.","Reactive background","The popup color pulses with the album cover. Blurred, vivid or the chaotic Hydra mode."],
+    ["ios","Como el lock screen de iOS","Portada grande, título, artista, progreso y controles. Bonito de serie.","Like the iOS lock screen","Big cover, title, artist, progress and controls. Beautiful out of the box."],
+    ["skins","7 skins retro","iOS, iPod, Game Boy, PSP, MP4, Vinilo y modo Notch que rodea la cámara del Mac.","7 retro skins","iOS, iPod, Game Boy, PSP, MP4, Vinyl and a Notch mode that wraps the Mac camera."],
+    ["move","Movible y flotante","Arrástralo por toda la pantalla. Siempre encima, sin marco, ligero.","Movable & floating","Drag it anywhere. Always on top, frameless, light."],
+    ["lyrics","Letras sincronizadas","Karaoke en directo que sigue el ritmo de la canción.","Synced lyrics","Live karaoke that follows the song."],
+    ["sources","Spotify + SoundCloud","Refleja Spotify o reproduce SoundCloud. Cambia de fuente al vuelo.","Spotify + SoundCloud","Mirror Spotify or play SoundCloud. Switch source on the fly."],
   ];
   document.getElementById('features').innerHTML = FEATURES.map(f=>
-    `<div class="card reveal"><span class="ico"><svg viewBox="0 0 24 24">${ICONS[f[0]]}</svg></span><h3>${f[1]}</h3><p>${f[2]}</p></div>`).join('');
+    `<div class="card reveal"><span class="ico"><svg viewBox="0 0 24 24">${ICONS[f[0]]}</svg></span><h3 data-en="${f[3]}">${f[1]}</h3><p data-en="${f[4]}">${f[2]}</p></div>`).join('');
 
   // ===== skins strip =====
   const GLYPH={
@@ -794,17 +798,17 @@
     notch:'<rect x="6" y="11" width="36" height="20" rx="6"/><rect x="18" y="11" width="12" height="6" rx="3"/>',
   };
   const SKINS=[
-    ["ios","iOS","Pantalla de bloqueo","linear-gradient(135deg,#ff5e62,#2b1055)","#fff","#ff5e62"],
-    ["ipod","iPod","Rueda de clic","linear-gradient(135deg,#fafafa,#c9ccd2)","#444","#d6dae0"],
-    ["gb","Game Boy","LCD verde","linear-gradient(135deg,#9bbc0f,#306230)","#0f380f","#9bbc0f"],
-    ["psp","PSP","Widescreen","linear-gradient(135deg,#3a3a44,#0c0c10)","#fff","#7a7cff"],
-    ["mp4","MP4","Reproductor","linear-gradient(135deg,#1c2330,#0a0c10)","#5ad1a0","#5ad1a0"],
-    ["vinyl","Vinilo","Disco girando","linear-gradient(135deg,#2a1c0b,#e9b872)","#fff","#e9b872"],
-    ["notch","Notch","Rodea la cámara","linear-gradient(135deg,#00e5ff,#8b2bff)","#fff","#00e5ff"],
+    ["ios","iOS","Pantalla de bloqueo","linear-gradient(135deg,#ff5e62,#2b1055)","#fff","#ff5e62","Lock screen"],
+    ["ipod","iPod","Rueda de clic","linear-gradient(135deg,#fafafa,#c9ccd2)","#444","#d6dae0","Click wheel"],
+    ["gb","Game Boy","LCD verde","linear-gradient(135deg,#9bbc0f,#306230)","#0f380f","#9bbc0f","Green LCD"],
+    ["psp","PSP","Widescreen","linear-gradient(135deg,#3a3a44,#0c0c10)","#fff","#7a7cff","Widescreen"],
+    ["mp4","MP4","Reproductor","linear-gradient(135deg,#1c2330,#0a0c10)","#5ad1a0","#5ad1a0","Player"],
+    ["vinyl","Vinilo","Disco girando","linear-gradient(135deg,#2a1c0b,#e9b872)","#fff","#e9b872","Spinning disc"],
+    ["notch","Notch","Rodea la cámara","linear-gradient(135deg,#00e5ff,#8b2bff)","#fff","#00e5ff","Wraps the camera"],
   ];
   const PT=["LOCK SCREEN","CLICK WHEEL","8-BIT","WIDESCREEN","VIDEO","ANALOG","DYNAMIC"];
   document.getElementById('skinStrip').innerHTML = SKINS.map((s,i)=>
-    `<div class="skin" data-rot="${i%2?1.4:-1.4}" style="--g:${s[5]}"><span class="ptag">${PT[i]}</span><span class="pno">0${i+1}</span><div class="face" style="background:${s[3]}"><svg viewBox="0 0 48 48" fill="none" stroke="${s[4]}" stroke-width="1.7" stroke-linejoin="round">${GLYPH[s[0]]}</svg></div><div class="nm">${s[1]}</div><div class="ds">${s[2]}</div></div>`).join('');
+    `<div class="skin" data-rot="${i%2?1.4:-1.4}" style="--g:${s[5]}"><span class="ptag">${PT[i]}</span><span class="pno">0${i+1}</span><div class="face" style="background:${s[3]}"><svg viewBox="0 0 48 48" fill="none" stroke="${s[4]}" stroke-width="1.7" stroke-linejoin="round">${GLYPH[s[0]]}</svg></div><div class="nm">${s[1]}</div><div class="ds" data-en="${s[6]}">${s[2]}</div></div>`).join('');
 
   // ===== 3D coverflow carousel: infinite auto-scroll + drag inertia + bend =====
   (function(){
@@ -875,15 +879,15 @@
 
   // ===== FAQ accordion =====
   const FAQ=[
-    ["¿Es gratis?","Sí. Poptify es gratuito y de código abierto."],
-    ["¿Necesito Spotify Premium?","Para ver la canción y marcar favoritos, no. Para controlar la reproducción (play, siguiente, seek) sí — es una limitación de la API de Spotify."],
-    ["¿Funciona con SoundCloud?","Sí, como fuente alternativa: pegas una URL y Poptify la reproduce. Spotify se refleja automáticamente."],
-    ["¿Qué pasa con mis datos?","Poptify habla directamente con Spotify desde tu dispositivo. No hay servidores propios ni se guarda tu actividad."],
-    ["¿En qué sistemas funciona?","macOS (Apple Silicon) y Android 8+. En Mac es una ventana flotante; en Android muestra la info sobre el móvil."],
+    ["¿Es gratis?","Sí. Poptify es gratuito y de código abierto.","Is it free?","Yes. Poptify is free and open source."],
+    ["¿Necesito Spotify Premium?","Para ver la canción y marcar favoritos, no. Para controlar la reproducción (play, siguiente, seek) sí — es una limitación de la API de Spotify.","Do I need Spotify Premium?","To see the song and save favorites, no. To control playback (play, next, seek), yes — it's a Spotify API limitation."],
+    ["¿Funciona con SoundCloud?","Sí, como fuente alternativa: pegas una URL y Poptify la reproduce. Spotify se refleja automáticamente.","Does it work with SoundCloud?","Yes, as an alternative source: paste a URL and Poptify plays it. Spotify is mirrored automatically."],
+    ["¿Qué pasa con mis datos?","Poptify habla directamente con Spotify desde tu dispositivo. No hay servidores propios ni se guarda tu actividad.","What about my data?","Poptify talks straight to Spotify from your device. No servers of our own, no activity stored."],
+    ["¿En qué sistemas funciona?","macOS (Apple Silicon) y Android 8+. En Mac es una ventana flotante; en Android muestra la info sobre el móvil.","Which systems are supported?","macOS (Apple Silicon) and Android 8+. On Mac it's a floating window; on Android it shows the info on your phone."],
   ];
   const QACC=['#ff2d9b','#00e5ff','#c6ff3a','#ff7a00','#8b2bff'];
   document.getElementById('faqList').innerHTML = FAQ.map((q,n)=>
-    `<div class="qa" style="--qa:${QACC[n%QACC.length]}"><button><span class="qn">0${n+1}</span><span class="qq">${q[0]}</span><span class="pm"></span></button><div class="ans"><p>${q[1]}</p></div></div>`).join('');
+    `<div class="qa" style="--qa:${QACC[n%QACC.length]}"><button><span class="qn">0${n+1}</span><span class="qq" data-en="${q[2]}">${q[0]}</span><span class="pm"></span></button><div class="ans"><p data-en="${q[3]}">${q[1]}</p></div></div>`).join('');
   document.querySelectorAll('.qa>button').forEach(b=>b.addEventListener('click',()=>{
     const qa=b.parentElement; const open=qa.classList.contains('open');
     document.querySelectorAll('.qa.open').forEach(o=>o.classList.remove('open'));
@@ -905,6 +909,19 @@
       html+=`<div class="wrow ${r%2?'r':''} ${r%3===1?'o':''}"><span class="t">${line}</span><span class="t" aria-hidden="true">${line}</span></div>`;
     }
     wall.innerHTML=html;
+  })();
+
+  // ===== i18n (ES / EN) =====
+  (function(){
+    const pills=[...document.querySelectorAll('.lang span')];
+    document.querySelectorAll('[data-en]').forEach(el=>{ el.dataset.es=el.innerHTML; });
+    function apply(lang){
+      document.querySelectorAll('[data-en]').forEach(el=>{ el.innerHTML = lang==='en'?el.dataset.en:el.dataset.es; });
+      pills.forEach(p=>p.classList.toggle('on', p.textContent.trim().toLowerCase()===lang));
+      document.documentElement.lang=lang; localStorage.setItem('lang',lang);
+    }
+    pills.forEach(p=>p.addEventListener('click',()=>apply(p.textContent.trim().toLowerCase())));
+    apply(localStorage.getItem('lang')||'es');
   })();
 
   // ===== command palette (⌘K) — Mercury Command style =====
