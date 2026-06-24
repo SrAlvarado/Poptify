@@ -284,8 +284,10 @@
   .help-toggle:hover{background:rgba(255,255,255,.1)}
   .help-toggle .chev{transition:transform .3s;color:var(--dim)}
   .dl-help.open .help-toggle .chev{transform:rotate(180deg)}
-  .help-body{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.4,0,.2,1)}
-  .dl-help.open .help-body{max-height:420px}
+  .dl-help+.dl-help{margin-top:12px}
+  .help-body{max-height:0;overflow:hidden;transition:max-height .45s cubic-bezier(.4,0,.2,1)}
+  .dl-help.open .help-body{max-height:720px}
+  .help-body a{color:var(--c3);text-decoration:underline}
   .help-body ol{margin:16px 4px;padding-left:22px;color:var(--dim);line-height:1.7;font-size:14.5px}
   .help-body ol li{margin:4px 0}
   .help-body b{color:#fff}
@@ -636,6 +638,27 @@
     </div>
     <p class="req" data-en="Requires a Spotify account · controls need Premium · open source on GitHub">Requiere cuenta de Spotify · controles con Premium · código abierto en GitHub</p>
 
+    <div class="dl-help" id="spotifyHelp">
+      <button class="help-toggle">
+        <span data-en="🎧 How to connect it to Spotify">🎧 Cómo conectarlo con Spotify</span>
+        <span class="chev">▾</span>
+      </button>
+      <div class="help-body">
+        <ol>
+          <li data-en="Create a free app at <b><a href='https://developer.spotify.com/dashboard' target='_blank' rel='noopener'>Spotify Developer</a></b> and copy its <b>Client ID</b>.">Crea una app gratis en <b><a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener">Spotify Developer</a></b> y copia su <b>Client ID</b>.</li>
+          <li data-en="In that app's <b>Redirect URIs</b>, add — on Mac:">En los <b>Redirect URIs</b> de esa app, añade — en Mac:</li>
+        </ol>
+        <div class="code"><code>http://127.0.0.1:14528/callback</code><button class="copy" data-en="Copy">Copiar</button></div>
+        <p class="help-note" data-en="Add 14529 and 14530 too (in case a port is busy). On Android, add instead:">Añade también 14529 y 14530 (por si un puerto está ocupado). En Android, añade en su lugar:</p>
+        <div class="code"><code>poptify://callback</code><button class="copy" data-en="Copy">Copiar</button></div>
+        <ol start="3">
+          <li data-en="Tick <b>Web API</b> and save the app settings.">Marca <b>Web API</b> y guarda los ajustes de la app.</li>
+          <li data-en="Open Poptify, paste your <b>Client ID</b> and hit <b>Connect with Spotify</b> — authorize and done.">Abre Poptify, pega tu <b>Client ID</b> y pulsa <b>Conectar con Spotify</b> — autoriza y listo.</li>
+        </ol>
+        <p class="help-note" data-en="You use your own Spotify app, so there's no user limit and nothing is shared with anyone.">Usas tu propia app de Spotify, así que no hay límite de usuarios ni se comparte nada con nadie.</p>
+      </div>
+    </div>
+
     <div class="dl-help" id="dlHelp">
       <button class="help-toggle" id="helpToggle">
         <span data-en="⚠︎ Does macOS block the app when opening it?">⚠︎ ¿macOS bloquea la app al abrirla?</span>
@@ -950,15 +973,15 @@
     wall.innerHTML=html;
   })();
 
-  // ===== macOS help: toggle + copy command =====
+  // ===== help blocks: toggle + copy =====
   (function(){
-    const help=document.getElementById('dlHelp'), tog=document.getElementById('helpToggle');
-    if(tog) tog.addEventListener('click',()=>help.classList.toggle('open'));
-    const copy=document.getElementById('copyCmd');
-    if(copy) copy.addEventListener('click',async()=>{
-      try{ await navigator.clipboard.writeText(document.getElementById('xattrCmd').textContent); }catch(e){}
-      const prev=copy.textContent; copy.textContent='✓'; setTimeout(()=>copy.textContent=prev,1400);
-    });
+    document.querySelectorAll('.help-toggle').forEach(t=>t.addEventListener('click',()=>t.closest('.dl-help').classList.toggle('open')));
+    document.querySelectorAll('.copy').forEach(btn=>btn.addEventListener('click',async()=>{
+      const code=btn.parentElement.querySelector('code'); if(!code) return;
+      try{ await navigator.clipboard.writeText(code.textContent.trim()); }catch(e){}
+      btn.textContent='✓';
+      setTimeout(()=>{ btn.textContent = document.documentElement.lang==='en' ? (btn.dataset.en||'Copy') : (btn.dataset.es||'Copiar'); },1400);
+    }));
   })();
 
   // ===== i18n (ES / EN) =====
