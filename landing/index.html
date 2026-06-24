@@ -303,8 +303,9 @@
   .socials svg{width:20px;height:20px;fill:#fff}
 
   /* ===== liquid wordmark (three.js) ===== */
-  #liquid{padding:clamp(36px,7vw,90px) 16px;display:flex;justify-content:center;align-items:center;position:relative;min-height:30vw}
-  #liquid canvas{width:100%;max-width:1400px;display:none}
+  #liquid{padding:clamp(40px,8vw,110px) 16px;display:flex;justify-content:center;align-items:center;position:relative;min-height:26vw;
+    background:radial-gradient(70% 100% at 50% 50%, rgba(0,0,0,.66), transparent 75%)}
+  #liquid canvas{width:100%;max-width:1300px;display:none}
   #liquid.gl canvas{display:block}
   #liquid.gl .liquid-fallback{display:none}
   .liquid-fallback{font-family:'Syne';font-weight:800;font-size:clamp(48px,13vw,170px);letter-spacing:-.04em;line-height:1;
@@ -318,17 +319,18 @@
   .kbtn kbd{font-family:inherit;font-size:11px}
   .cmdk-bg{position:fixed;inset:0;z-index:90;background:rgba(5,4,10,.55);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .2s}
   .cmdk-bg.open{opacity:1;pointer-events:auto}
-  .cmdk{position:fixed;z-index:91;top:16vh;left:50%;transform:translateX(-50%) scale(.96) translateY(-6px);width:min(560px,92vw);
+  .cmdk{position:fixed;z-index:91;top:11vh;left:50%;transform:translateX(-50%) scale(.96) translateY(-6px);width:min(560px,92vw);
+    max-height:80vh;display:flex;flex-direction:column;
     background:rgba(18,16,26,.92);backdrop-filter:blur(26px) saturate(160%);border-radius:20px;border:1px solid var(--line);
     box-shadow:0 50px 110px -24px rgba(0,0,0,.85);opacity:0;pointer-events:none;overflow:hidden;
     transition:opacity .2s,transform .3s cubic-bezier(.34,1.45,.64,1)}
   .cmdk.open{opacity:1;pointer-events:auto;transform:translateX(-50%) scale(1) translateY(0)}
-  .cmdk-top{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line)}
+  .cmdk-top{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line);flex-shrink:0}
   .cmdk-top svg{width:20px;height:20px;fill:none;stroke:var(--dim);stroke-width:2}
   .cmdk-top input{flex:1;background:none;border:none;outline:none;color:#fff;font-size:17px;font-family:inherit}
   .cmdk-top input::placeholder{color:var(--dim)}
   .kbd{font-family:'Space Grotesk',monospace;font-size:11px;background:rgba(255,255,255,.1);border:1px solid var(--line);border-radius:6px;padding:3px 7px;color:var(--dim)}
-  .cmdk-list{max-height:54vh;overflow-y:auto;padding:8px;scrollbar-width:thin}
+  .cmdk-list{flex:1 1 auto;min-height:0;overflow-y:auto;padding:8px;scrollbar-width:thin}
   .cmdk-group{padding:12px 12px 5px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:700}
   .cmd{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;cursor:pointer}
   .cmd.sel{background:rgba(255,255,255,.1)}
@@ -464,11 +466,11 @@
         </div>
       </div>
     </div>
-    <span class="sticker s1" data-par="-0.05">Gratis</span>
-    <span class="sticker s2" data-par="0.08">Mac + Android</span>
-    <span class="sticker s3" data-par="0.05">★ Reactivo</span>
-    <span class="sticker s4" data-par="-0.09">v0.1.0</span>
-    <svg class="rbadge hero" data-par="0.12" viewBox="0 0 120 120" aria-hidden="true">
+    <span class="sticker s1" data-par="-0.14">Gratis</span>
+    <span class="sticker s2" data-par="0.2">Mac + Android</span>
+    <span class="sticker s3" data-par="0.12">★ Reactivo</span>
+    <span class="sticker s4" data-par="-0.24">v0.1.0</span>
+    <svg class="rbadge hero" data-par="0.26" viewBox="0 0 120 120" aria-hidden="true">
       <g class="ring">
         <defs><path id="rc" d="M60,60 m-46,0 a46,46 0 1,1 92,0 a46,46 0 1,1 -92,0"/></defs>
         <circle class="disc" cx="60" cy="60" r="57"/>
@@ -535,7 +537,7 @@
   </section>
 
   <section id="liquid">
-    <div class="liquid-fallback">EN COLOR</div>
+    <div class="liquid-fallback">POPTIFY</div>
     <canvas id="liquidGl"></canvas>
   </section>
 
@@ -897,8 +899,10 @@
     }
     const mark=()=>list.querySelectorAll('.cmd').forEach(el=>el.classList.toggle('sel',+el.dataset.n===sel));
     const vis=()=>{ const el=list.querySelector('.cmd.sel'); if(el) el.scrollIntoView({block:'nearest'}); };
-    function open(){ bg.classList.add('open'); box.classList.add('open'); input.value=''; sel=0; render(); setTimeout(()=>input.focus(),40); }
-    function close(){ bg.classList.remove('open'); box.classList.remove('open'); }
+    function open(){ window.__lenis ? window.__lenis.stop() : document.body.style.overflow='hidden';
+      bg.classList.add('open'); box.classList.add('open'); input.value=''; sel=0; render(); setTimeout(()=>input.focus({preventScroll:true}),40); }
+    function close(){ window.__lenis ? window.__lenis.start() : document.body.style.overflow='';
+      bg.classList.remove('open'); box.classList.remove('open'); }
     const isOpen=()=>box.classList.contains('open');
     document.getElementById('cmdOpen').addEventListener('click',open);
     bg.addEventListener('click',close);
@@ -978,27 +982,37 @@
 </script>
 <!-- Smooth scroll (Lenis) + velocity skew + parallax -->
 <script type="module">
-  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const rows  = [...document.querySelectorAll('.wall .wrow')];
+  const title = document.querySelector('.title');
+  const pars  = [...document.querySelectorAll('[data-par]')];
+  function apply(scroll, vel){
+    window.__scrollVel = vel;
+    const sk = Math.max(-10, Math.min(10, vel*0.5));
+    rows.forEach(r=> r.style.transform=`skewX(${sk.toFixed(2)}deg)`);
+    if(title) title.style.transform=`skewY(${(sk*0.12).toFixed(2)}deg)`;
+    pars.forEach(el=>{ el.style.translate='0 '+(scroll*parseFloat(el.dataset.par)).toFixed(1)+'px'; });
+  }
+  let usedLenis=false;
+  if(!reduce){
     try {
       const Lenis = (await import('https://cdn.jsdelivr.net/npm/lenis@1.1.20/+esm')).default;
       const lenis = new Lenis({ duration:1.15, smoothWheel:true });
-      function raf(t){ lenis.raf(t); requestAnimationFrame(raf); }
+      window.__lenis = lenis;
+      const raf = t => { lenis.raf(t); requestAnimationFrame(raf); };
       requestAnimationFrame(raf);
       document.querySelectorAll('a[href^="#"]').forEach(a=>{
         const href=a.getAttribute('href');
         if(href.length>1) a.addEventListener('click',e=>{ const el=document.querySelector(href); if(el){ e.preventDefault(); lenis.scrollTo(el,{offset:-80}); document.body.classList.remove('menu'); } });
       });
-      const rows=[...document.querySelectorAll('.wall .wrow')];
-      const title=document.querySelector('.title');
-      const pars=[...document.querySelectorAll('[data-par]')];
-      lenis.on('scroll', ({scroll, velocity})=>{
-        window.__scrollVel = velocity;
-        const sk=Math.max(-10,Math.min(10, velocity*0.5));
-        rows.forEach(r=> r.style.transform=`skewX(${sk.toFixed(2)}deg)`);
-        if(title) title.style.transform=`skewY(${(sk*0.12).toFixed(2)}deg)`;
-        pars.forEach(el=>{ el.style.translate='0 '+(scroll*parseFloat(el.dataset.par)).toFixed(1)+'px'; });
-      });
+      lenis.on('scroll', ({scroll, velocity})=> apply(scroll, velocity));
+      usedLenis=true;
     } catch(e){ console.warn('lenis off', e); }
+  }
+  if(!usedLenis){
+    let last=window.scrollY;
+    addEventListener('scroll', ()=>{ const s=window.scrollY; apply(s, s-last); last=s; }, {passive:true});
+    apply(window.scrollY, 0);
   }
 </script>
 
@@ -1012,9 +1026,12 @@
       const TW=1600, TH=400, tc=document.createElement('canvas'); tc.width=TW; tc.height=TH;
       const x=tc.getContext('2d'); x.clearRect(0,0,TW,TH);
       x.fillStyle='#fff'; x.textAlign='center'; x.textBaseline='middle';
-      x.font='800 250px "Syne", system-ui, sans-serif';
-      x.fillText('EN COLOR', TW/2, TH/2+12);
+      let fs=260; x.font=`800 ${fs}px "Syne", system-ui, sans-serif`;
+      const tw0=x.measureText('POPTIFY').width, maxW=TW-260;
+      if(tw0>maxW){ fs=Math.floor(fs*maxW/tw0); x.font=`800 ${fs}px "Syne", system-ui, sans-serif`; }
+      x.fillText('POPTIFY', TW/2, TH/2+fs*0.04);
       const tex=new THREE.CanvasTexture(tc); tex.minFilter=THREE.LinearFilter; tex.magFilter=THREE.LinearFilter;
+      tex.wrapS=tex.wrapT=THREE.ClampToEdgeWrapping;
       const renderer=new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
       renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.setClearColor(0x000000,0);
       const scene=new THREE.Scene(), cam=new THREE.Camera();
@@ -1029,13 +1046,14 @@
           float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*noise(p);p*=2.0;a*=.5;}return v;}
           void main(){
             vec2 uv=vUv;
-            float amp=0.012+min(0.06,abs(u_vel)*0.0015);
+            float amp=0.008+min(0.03,abs(u_vel)*0.0012);
             vec2 d=vec2(fbm(uv*3.0+u_time*0.25), fbm(uv*3.0-u_time*0.2+5.0));
-            vec2 wuv=uv+(d-0.5)*amp*vec2(2.2,1.0);
+            vec2 wuv=clamp(uv+(d-0.5)*amp*vec2(2.0,1.0), 0.0, 1.0);
             float a=texture2D(tex,wuv).a;
-            vec3 base=mix(c1,c2, clamp(uv.x+0.25*sin(u_time*0.6),0.0,1.0));
-            float sheen=smoothstep(0.45,0.62, fbm(uv*5.0 - u_time*0.4));
-            gl_FragColor=vec4(base + sheen*0.7, a);
+            vec3 base=mix(c1,c2, clamp(uv.x+0.25*sin(u_time*0.6),0.0,1.0))*1.25+0.14;
+            float sheen=smoothstep(0.42,0.6, fbm(uv*5.0 - u_time*0.4));
+            vec3 col=base + sheen*0.85;
+            gl_FragColor=vec4(col, a);
           }`});
       scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2), mat));
       function resize(){ const w=Math.min(1400, sec.clientWidth-32), h=w/4; renderer.setSize(w,h,false); canvas.style.width=w+'px'; canvas.style.height=h+'px'; }
