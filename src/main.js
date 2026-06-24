@@ -370,9 +370,15 @@ function renderConnect() {
     <div class="auth-logo">🎵</div>
     <div class="auth-title">Poptify</div>
     ${needId ? `
-      <div class="auth-sub">Pega tu <b>Client ID</b> de la app de Spotify Developer.<br>Redirect URI: <code>http://127.0.0.1:14528/callback</code></div>
+      <div class="auth-sub">Conéctalo a tu cuenta de Spotify en 4 pasos:</div>
+      <ol class="auth-steps">
+        <li>Crea una app gratis en <b>developer.spotify.com/dashboard</b> y copia su <b>Client ID</b>.</li>
+        <li>En <b>Redirect URIs</b> añade <code>http://127.0.0.1:14528/callback</code> (y también <code>:14529</code> y <code>:14530</code>).</li>
+        <li>Marca <b>Web API</b> y guarda los ajustes.</li>
+        <li>Pega aquí tu <b>Client ID</b>:</li>
+      </ol>
       <input id="clientIdInput" class="auth-input" placeholder="Spotify Client ID" />
-      <button class="auth-btn" data-act="save-id">Guardar</button>
+      <button class="auth-btn" data-act="save-id">Guardar y continuar</button>
     ` : `
       <div class="auth-sub">Conecta tu cuenta para ver lo que está sonando.</div>
       <button class="auth-btn spotify" data-act="login">Conectar con Spotify</button>
