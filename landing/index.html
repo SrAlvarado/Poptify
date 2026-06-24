@@ -277,6 +277,24 @@
   .dl.you{border-color:transparent;box-shadow:0 0 0 1.5px var(--c3),0 30px 80px -28px var(--c3)}
   .dl.you .tag{background:var(--c3);color:#06140c}
   .req{color:var(--dim);font-size:13px;margin-top:24px}
+  /* macOS "how to open" help */
+  .dl-help{max-width:580px;margin:26px auto 0;text-align:left}
+  .help-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;
+    background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px 18px;color:#fff;font-weight:700;font-size:14px;transition:background .2s}
+  .help-toggle:hover{background:rgba(255,255,255,.1)}
+  .help-toggle .chev{transition:transform .3s;color:var(--dim)}
+  .dl-help.open .help-toggle .chev{transform:rotate(180deg)}
+  .help-body{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.4,0,.2,1)}
+  .dl-help.open .help-body{max-height:420px}
+  .help-body ol{margin:16px 4px;padding-left:22px;color:var(--dim);line-height:1.7;font-size:14.5px}
+  .help-body ol li{margin:4px 0}
+  .help-body b{color:#fff}
+  .code{display:flex;align-items:center;gap:10px;background:#0c0b12;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:4px}
+  .code code{flex:1;font-family:'Space Grotesk',ui-monospace,monospace;font-size:13px;color:var(--c4);word-break:break-all;user-select:all}
+  .copy{flex-shrink:0;border:none;border-radius:9px;padding:8px 14px;font-weight:800;font-size:12px;cursor:pointer;
+    background:var(--c3);color:#06140c;transition:transform .15s}
+  .copy:hover{transform:scale(1.05)}
+  .help-note{color:var(--dim);font-size:12.5px;margin:12px 4px 18px;line-height:1.5}
 
   footer{text-align:center;padding:60px 20px;border-top:1px solid var(--line);color:var(--dim)}
   footer .brand{justify-content:center;margin-bottom:14px;color:#fff}
@@ -617,6 +635,27 @@
       </div>
     </div>
     <p class="req" data-en="Requires a Spotify account · controls need Premium · open source on GitHub">Requiere cuenta de Spotify · controles con Premium · código abierto en GitHub</p>
+
+    <div class="dl-help" id="dlHelp">
+      <button class="help-toggle" id="helpToggle">
+        <span data-en="⚠︎ Does macOS block the app when opening it?">⚠︎ ¿macOS bloquea la app al abrirla?</span>
+        <span class="chev">▾</span>
+      </button>
+      <div class="help-body">
+        <ol>
+          <li data-en="Drag <b>Poptify</b> into your <b>Applications</b> folder.">Arrastra <b>Poptify</b> a la carpeta <b>Aplicaciones</b>.</li>
+          <li data-en="Open <b>Terminal</b> and paste this command:">Abre <b>Terminal</b> y pega este comando:</li>
+        </ol>
+        <div class="code">
+          <code id="xattrCmd">xattr -dr com.apple.quarantine /Applications/Poptify.app</code>
+          <button class="copy" id="copyCmd" data-en="Copy">Copiar</button>
+        </div>
+        <ol start="3">
+          <li data-en="Open Poptify normally — done.">Abre Poptify normalmente — listo.</li>
+        </ol>
+        <p class="help-note" data-en="You only need to do this once. It happens because the app isn't notarized by Apple yet.">Solo hay que hacerlo una vez. Ocurre porque la app aún no está notarizada por Apple.</p>
+      </div>
+    </div>
   </section>
 
   <footer>
@@ -909,6 +948,17 @@
       html+=`<div class="wrow ${r%2?'r':''} ${r%3===1?'o':''}"><span class="t">${line}</span><span class="t" aria-hidden="true">${line}</span></div>`;
     }
     wall.innerHTML=html;
+  })();
+
+  // ===== macOS help: toggle + copy command =====
+  (function(){
+    const help=document.getElementById('dlHelp'), tog=document.getElementById('helpToggle');
+    if(tog) tog.addEventListener('click',()=>help.classList.toggle('open'));
+    const copy=document.getElementById('copyCmd');
+    if(copy) copy.addEventListener('click',async()=>{
+      try{ await navigator.clipboard.writeText(document.getElementById('xattrCmd').textContent); }catch(e){}
+      const prev=copy.textContent; copy.textContent='✓'; setTimeout(()=>copy.textContent=prev,1400);
+    });
   })();
 
   // ===== i18n (ES / EN) =====
