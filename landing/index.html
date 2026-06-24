@@ -15,7 +15,7 @@
     --glass:rgba(255,255,255,.06); --line:rgba(255,255,255,.12);
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
+  html{scroll-behavior:auto}
   body{
     font-family:'Space Grotesk',-apple-system,system-ui,sans-serif;
     background:var(--bg); color:var(--text); overflow-x:hidden;
@@ -302,6 +302,15 @@
   .socials a:hover{transform:translateY(-4px);background:rgba(255,255,255,.12)}
   .socials svg{width:20px;height:20px;fill:#fff}
 
+  /* ===== liquid wordmark (three.js) ===== */
+  #liquid{padding:clamp(36px,7vw,90px) 16px;display:flex;justify-content:center;align-items:center;position:relative;min-height:30vw}
+  #liquid canvas{width:100%;max-width:1400px;display:none}
+  #liquid.gl canvas{display:block}
+  #liquid.gl .liquid-fallback{display:none}
+  .liquid-fallback{font-family:'Syne';font-weight:800;font-size:clamp(48px,13vw,170px);letter-spacing:-.04em;line-height:1;
+    background:linear-gradient(100deg,var(--c1),var(--c5),var(--c4),var(--c3),var(--c1));background-size:300% 100%;
+    -webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 8s linear infinite}
+
   /* ===== command palette (⌘K) ===== */
   .kbtn{display:inline-flex;align-items:center;gap:5px;padding:8px 11px;border-radius:99px;border:1px solid var(--line);
     background:rgba(255,255,255,.06);color:var(--dim);font-weight:700;font-size:12px;cursor:pointer;transition:color .2s,background .2s}
@@ -455,11 +464,11 @@
         </div>
       </div>
     </div>
-    <span class="sticker s1">Gratis</span>
-    <span class="sticker s2">Mac + Android</span>
-    <span class="sticker s3">★ Reactivo</span>
-    <span class="sticker s4">v0.1.0</span>
-    <svg class="rbadge hero" viewBox="0 0 120 120" aria-hidden="true">
+    <span class="sticker s1" data-par="-0.05">Gratis</span>
+    <span class="sticker s2" data-par="0.08">Mac + Android</span>
+    <span class="sticker s3" data-par="0.05">★ Reactivo</span>
+    <span class="sticker s4" data-par="-0.09">v0.1.0</span>
+    <svg class="rbadge hero" data-par="0.12" viewBox="0 0 120 120" aria-hidden="true">
       <g class="ring">
         <defs><path id="rc" d="M60,60 m-46,0 a46,46 0 1,1 92,0 a46,46 0 1,1 -92,0"/></defs>
         <circle class="disc" cx="60" cy="60" r="57"/>
@@ -523,6 +532,11 @@
     </div>
     <div class="carousel" id="carousel"><div class="car-track" id="skinStrip"></div></div>
     <p class="drag-hint">← arrastra →</p>
+  </section>
+
+  <section id="liquid">
+    <div class="liquid-fallback">EN COLOR</div>
+    <canvas id="liquidGl"></canvas>
   </section>
 
   <section id="faq">
@@ -960,6 +974,81 @@
         requestAnimationFrame(loop);
       })(last);
     } catch(e){ console.warn('WebGL bg off:', e); /* CSS blobs remain as fallback */ }
+  }
+</script>
+<!-- Smooth scroll (Lenis) + velocity skew + parallax -->
+<script type="module">
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    try {
+      const Lenis = (await import('https://cdn.jsdelivr.net/npm/lenis@1.1.20/+esm')).default;
+      const lenis = new Lenis({ duration:1.15, smoothWheel:true });
+      function raf(t){ lenis.raf(t); requestAnimationFrame(raf); }
+      requestAnimationFrame(raf);
+      document.querySelectorAll('a[href^="#"]').forEach(a=>{
+        const href=a.getAttribute('href');
+        if(href.length>1) a.addEventListener('click',e=>{ const el=document.querySelector(href); if(el){ e.preventDefault(); lenis.scrollTo(el,{offset:-80}); document.body.classList.remove('menu'); } });
+      });
+      const rows=[...document.querySelectorAll('.wall .wrow')];
+      const title=document.querySelector('.title');
+      const pars=[...document.querySelectorAll('[data-par]')];
+      lenis.on('scroll', ({scroll, velocity})=>{
+        window.__scrollVel = velocity;
+        const sk=Math.max(-10,Math.min(10, velocity*0.5));
+        rows.forEach(r=> r.style.transform=`skewX(${sk.toFixed(2)}deg)`);
+        if(title) title.style.transform=`skewY(${(sk*0.12).toFixed(2)}deg)`;
+        pars.forEach(el=>{ el.style.translate='0 '+(scroll*parseFloat(el.dataset.par)).toFixed(1)+'px'; });
+      });
+    } catch(e){ console.warn('lenis off', e); }
+  }
+</script>
+
+<!-- Liquid neon wordmark (three.js) -->
+<script type="module">
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    try {
+      await document.fonts.ready;
+      const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
+      const sec=document.getElementById('liquid'), canvas=document.getElementById('liquidGl');
+      const TW=1600, TH=400, tc=document.createElement('canvas'); tc.width=TW; tc.height=TH;
+      const x=tc.getContext('2d'); x.clearRect(0,0,TW,TH);
+      x.fillStyle='#fff'; x.textAlign='center'; x.textBaseline='middle';
+      x.font='800 250px "Syne", system-ui, sans-serif';
+      x.fillText('EN COLOR', TW/2, TH/2+12);
+      const tex=new THREE.CanvasTexture(tc); tex.minFilter=THREE.LinearFilter; tex.magFilter=THREE.LinearFilter;
+      const renderer=new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+      renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.setClearColor(0x000000,0);
+      const scene=new THREE.Scene(), cam=new THREE.Camera();
+      const hex=h=>{const n=parseInt(h.replace('#',''),16);return new THREE.Vector3(((n>>16)&255)/255,((n>>8)&255)/255,(n&255)/255);};
+      const u={tex:{value:tex},u_time:{value:0},u_vel:{value:0},c1:{value:hex('#ff2d9b')},c2:{value:hex('#00e5ff')}};
+      const tc1=hex('#ff2d9b'), tc2=hex('#00e5ff');
+      const mat=new THREE.ShaderMaterial({transparent:true,uniforms:u,
+        vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position,1.0);}`,
+        fragmentShader:`precision highp float; varying vec2 vUv; uniform sampler2D tex; uniform float u_time,u_vel; uniform vec3 c1,c2;
+          float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+          float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);}
+          float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*noise(p);p*=2.0;a*=.5;}return v;}
+          void main(){
+            vec2 uv=vUv;
+            float amp=0.012+min(0.06,abs(u_vel)*0.0015);
+            vec2 d=vec2(fbm(uv*3.0+u_time*0.25), fbm(uv*3.0-u_time*0.2+5.0));
+            vec2 wuv=uv+(d-0.5)*amp*vec2(2.2,1.0);
+            float a=texture2D(tex,wuv).a;
+            vec3 base=mix(c1,c2, clamp(uv.x+0.25*sin(u_time*0.6),0.0,1.0));
+            float sheen=smoothstep(0.45,0.62, fbm(uv*5.0 - u_time*0.4));
+            gl_FragColor=vec4(base + sheen*0.7, a);
+          }`});
+      scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2), mat));
+      function resize(){ const w=Math.min(1400, sec.clientWidth-32), h=w/4; renderer.setSize(w,h,false); canvas.style.width=w+'px'; canvas.style.height=h+'px'; }
+      addEventListener('resize', resize); resize();
+      sec.classList.add('gl');
+      let last=performance.now();
+      (function loop(t){ const dt=Math.min(.05,(t-last)/1000); last=t;
+        u.u_time.value+=dt; u.u_vel.value=window.__scrollVel||0;
+        const pc=window.__poptifyColors; if(pc){ tc1.copy(hex(pc[0])); tc2.copy(hex(pc[2])); }
+        u.c1.value.lerp(tc1,dt*1.5); u.c2.value.lerp(tc2,dt*1.5);
+        renderer.render(scene,cam); requestAnimationFrame(loop);
+      })(last);
+    } catch(e){ console.warn('liquid off', e); }
   }
 </script>
 </body>
