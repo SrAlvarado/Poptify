@@ -246,7 +246,7 @@
     background:linear-gradient(120deg,transparent,rgba(255,255,255,.16),transparent);transform:skewX(-20deg);transition:left .7s}
   .dl:hover::after{left:160%}
   /* device mockups */
-  .dev{margin:6px auto 22px;transform:translateZ(40px)}
+  .dev{position:relative;margin:6px auto 22px;transform:translateZ(40px)}
   .dev-screen{position:relative;overflow:hidden;background:#07060c}
   .mp{position:absolute;inset:0;padding:14px;display:flex;flex-direction:column;justify-content:center;gap:8px}
   .mp .mp-art{aspect-ratio:1;border-radius:12px;box-shadow:0 10px 24px -10px rgba(0,0,0,.7);max-height:54%}
@@ -257,8 +257,8 @@
   /* mac laptop */
   .mac-dev{width:230px}
   .mac-dev .dev-screen{border-radius:12px;border:6px solid #16151c;height:150px;box-shadow:0 0 0 1px #000}
-  .mac-dev .base{width:270px;height:12px;margin:0 auto;background:linear-gradient(#3a3942,#16151c);border-radius:0 0 12px 12px;
-    transform:translateX(-20px);box-shadow:0 8px 16px -6px rgba(0,0,0,.6)}
+  .mac-dev .base{width:270px;height:12px;background:linear-gradient(#3a3942,#16151c);border-radius:0 0 12px 12px;
+    box-shadow:0 8px 16px -6px rgba(0,0,0,.6)}
   .mac-dev .base::after{content:"";display:block;width:60px;height:5px;margin:0 auto;background:#0c0b10;border-radius:0 0 6px 6px}
   /* android phone */
   .phone-dev{width:118px}
