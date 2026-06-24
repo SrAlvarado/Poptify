@@ -201,15 +201,24 @@
   .reveal{opacity:0;transform:translateY(40px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}
   .reveal.in{opacity:1;transform:none}
 
-  /* stats */
-  .stats{display:flex;gap:30px;flex-wrap:wrap;justify-content:center;margin-top:46px}
-  .stat{text-align:center;min-width:130px}
-  .stat .n{font-family:'Syne';font-size:clamp(44px,8vw,80px);line-height:1;
-    background:linear-gradient(120deg,var(--c3),var(--c1));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .stat .l{color:var(--dim);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:12px;margin-top:6px}
+  /* stats bar */
+  .statbar{display:grid;grid-template-columns:repeat(4,1fr);margin-top:8px;border-radius:28px;overflow:hidden;
+    background:rgba(255,255,255,.045);border:1px solid var(--line);position:relative;backdrop-filter:blur(8px)}
+  .statbar::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;z-index:2;
+    background:linear-gradient(90deg,var(--c1),var(--c3),var(--c4),var(--c5),var(--c1));background-size:200% 100%;animation:flow 6s linear infinite}
+  .stat{text-align:center;padding:clamp(30px,5vw,52px) 16px;position:relative;transition:background .3s}
+  .stat+.stat{border-left:1px solid var(--line)}
+  .stat:hover{background:rgba(255,255,255,.06)}
+  .stat .n{font-family:'Syne';font-weight:800;font-size:clamp(46px,7vw,88px);line-height:1;
+    background:linear-gradient(120deg,var(--c1),var(--c3));-webkit-background-clip:text;background-clip:text;color:transparent;
+    transition:transform .35s cubic-bezier(.34,1.5,.64,1);display:inline-block}
+  .stat:hover .n{transform:scale(1.1) rotate(-3deg)}
+  .stat .l{color:#fff;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:12px;margin-top:12px}
+  .stat .sl{color:var(--dim);font-size:12px;margin-top:4px}
+  @media(max-width:680px){.statbar{grid-template-columns:1fr 1fr}.stat:nth-child(3),.stat:nth-child(4){border-top:1px solid var(--line)}.stat:nth-child(3){border-left:0}}
 
   /* blossom-style drag carousel */
-  .carousel{margin:46px -6vw 0;padding:10px 6vw;overflow:hidden;cursor:grab;touch-action:pan-y}
+  .carousel{margin:30px -6vw 0;padding:24px 6vw;overflow:hidden;cursor:grab;touch-action:pan-y}
   .carousel.drag{cursor:grabbing}
   .car-track{display:flex;gap:20px;width:max-content;will-change:transform}
   .skin{flex:0 0 230px;border-radius:24px;padding:20px;background:var(--glass);border:1px solid var(--line);
@@ -320,10 +329,17 @@
   .wall .wrow.o span{color:transparent;-webkit-text-stroke:2px var(--c4)}
 
   /* skins as posters */
-  .skin{background:#100f17;border:2px solid #000;box-shadow:7px 7px 0 rgba(0,0,0,.45);position:relative}
+  .skin{flex-basis:264px;background:#100f17;border:2px solid #000;box-shadow:7px 7px 0 rgba(0,0,0,.45);position:relative;
+    transition:box-shadow .3s,border-color .3s}
+  .skin:hover{border-color:var(--g,#fff);box-shadow:7px 7px 0 rgba(0,0,0,.45),0 28px 64px -18px var(--g,#fff)}
+  .skin .face{height:218px;position:relative;overflow:hidden}
+  .skin .face::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(125deg,rgba(255,255,255,.30),rgba(255,255,255,.04) 42%,transparent 60%)}
+  .skin .face svg{position:relative;z-index:1;transition:transform .4s cubic-bezier(.34,1.5,.64,1)}
+  .skin:hover .face svg{transform:scale(1.15) rotate(-5deg)}
   .skin .ptag{position:absolute;top:-12px;left:14px;font-family:'Syne';font-size:12px;text-transform:uppercase;letter-spacing:.04em;
-    background:var(--c4);color:#000;border:2px solid #000;border-radius:99px;padding:4px 11px;transform:rotate(-4deg);z-index:2}
-  .skin .pno{position:absolute;top:12px;right:14px;font-family:'Syne';font-size:16px;color:rgba(255,255,255,.4)}
+    background:var(--g,var(--c4));color:#000;border:2px solid #000;border-radius:99px;padding:4px 11px;transform:rotate(-4deg);z-index:3}
+  .skin .pno{position:absolute;top:12px;right:14px;font-family:'Syne';font-size:16px;color:rgba(255,255,255,.4);z-index:3}
 
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -449,11 +465,11 @@
   </section>
 
   <section>
-    <div class="stats">
-      <div class="stat reveal"><div class="n" data-count="7">0</div><div class="l">Skins</div></div>
-      <div class="stat reveal"><div class="n" data-count="2">0</div><div class="l">Plataformas</div></div>
-      <div class="stat reveal"><div class="n" data-count="2">0</div><div class="l">Fuentes</div></div>
-      <div class="stat reveal"><div class="n" data-suffix="∞">∞</div><div class="l">Colores</div></div>
+    <div class="statbar reveal">
+      <div class="stat"><div class="n" data-count="7">0</div><div class="l">Skins</div><div class="sl">y subiendo</div></div>
+      <div class="stat"><div class="n" data-count="2">0</div><div class="l">Plataformas</div><div class="sl">Mac · Android</div></div>
+      <div class="stat"><div class="n" data-count="2">0</div><div class="l">Fuentes</div><div class="sl">Spotify · SoundCloud</div></div>
+      <div class="stat"><div class="n" data-suffix="∞">∞</div><div class="l">Colores</div><div class="sl">reactivos al álbum</div></div>
     </div>
   </section>
 
@@ -677,17 +693,17 @@
     notch:'<rect x="6" y="11" width="36" height="20" rx="6"/><rect x="18" y="11" width="12" height="6" rx="3"/>',
   };
   const SKINS=[
-    ["ios","iOS","Pantalla de bloqueo","linear-gradient(135deg,#ff5e62,#2b1055)","#fff"],
-    ["ipod","iPod","Rueda de clic","linear-gradient(135deg,#fafafa,#c9ccd2)","#444"],
-    ["gb","Game Boy","LCD verde","linear-gradient(135deg,#9bbc0f,#306230)","#0f380f"],
-    ["psp","PSP","Widescreen","linear-gradient(135deg,#3a3a44,#0c0c10)","#fff"],
-    ["mp4","MP4","Reproductor","linear-gradient(135deg,#1c2330,#0a0c10)","#5ad1a0"],
-    ["vinyl","Vinilo","Disco girando","linear-gradient(135deg,#2a1c0b,#e9b872)","#fff"],
-    ["notch","Notch","Rodea la cámara","linear-gradient(135deg,#00e5ff,#8b2bff)","#fff"],
+    ["ios","iOS","Pantalla de bloqueo","linear-gradient(135deg,#ff5e62,#2b1055)","#fff","#ff5e62"],
+    ["ipod","iPod","Rueda de clic","linear-gradient(135deg,#fafafa,#c9ccd2)","#444","#d6dae0"],
+    ["gb","Game Boy","LCD verde","linear-gradient(135deg,#9bbc0f,#306230)","#0f380f","#9bbc0f"],
+    ["psp","PSP","Widescreen","linear-gradient(135deg,#3a3a44,#0c0c10)","#fff","#7a7cff"],
+    ["mp4","MP4","Reproductor","linear-gradient(135deg,#1c2330,#0a0c10)","#5ad1a0","#5ad1a0"],
+    ["vinyl","Vinilo","Disco girando","linear-gradient(135deg,#2a1c0b,#e9b872)","#fff","#e9b872"],
+    ["notch","Notch","Rodea la cámara","linear-gradient(135deg,#00e5ff,#8b2bff)","#fff","#00e5ff"],
   ];
   const PT=["LOCK SCREEN","CLICK WHEEL","8-BIT","WIDESCREEN","VIDEO","ANALOG","DYNAMIC"];
   document.getElementById('skinStrip').innerHTML = SKINS.map((s,i)=>
-    `<div class="skin" data-rot="${i%2?1.4:-1.4}"><span class="ptag">${PT[i]}</span><span class="pno">0${i+1}</span><div class="face" style="background:${s[3]}"><svg viewBox="0 0 48 48" fill="none" stroke="${s[4]}" stroke-width="1.7" stroke-linejoin="round">${GLYPH[s[0]]}</svg></div><div class="nm">${s[1]}</div><div class="ds">${s[2]}</div></div>`).join('');
+    `<div class="skin" data-rot="${i%2?1.4:-1.4}" style="--g:${s[5]}"><span class="ptag">${PT[i]}</span><span class="pno">0${i+1}</span><div class="face" style="background:${s[3]}"><svg viewBox="0 0 48 48" fill="none" stroke="${s[4]}" stroke-width="1.7" stroke-linejoin="round">${GLYPH[s[0]]}</svg></div><div class="nm">${s[1]}</div><div class="ds">${s[2]}</div></div>`).join('');
 
   // ===== blossom-style drag carousel: physics drag + inertia + bend =====
   (function(){
