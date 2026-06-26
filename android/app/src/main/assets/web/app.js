@@ -7,9 +7,16 @@ const $ = (s) => document.querySelector(s);
 
 // ---------- clock ----------
 function tickClock(){
-  const d = new Date();
-  $('#time').textContent = d.toLocaleTimeString('es-ES', { hour:'2-digit', minute:'2-digit' });
-  $('#date').textContent = d.toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long' });
+  let time = '', date = '';
+  if (window.AndroidBridge && AndroidBridge.clock){           // phone's own time (12/24h + locale)
+    try { const parts = AndroidBridge.clock().split('|'); time = parts[0]; date = parts[1]; } catch(e){}
+  }
+  if (!time){ const d = new Date();                            // browser fallback (device locale)
+    time = d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    date = d.toLocaleDateString([], { weekday:'long', day:'numeric', month:'long' });
+  }
+  $('#time').textContent = time;
+  $('#date').textContent = date;
 }
 tickClock(); setInterval(tickClock, 5000);
 

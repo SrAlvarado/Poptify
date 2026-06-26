@@ -61,5 +61,14 @@ class WebPlayer(
             val id = Spotify.lastTrackId ?: return
             scope.launch { Spotify.setLike(activity, id, liked) }
         }
+        /** Phone's own clock: time formatted with the system 12/24h setting + locale, then date. */
+        @JavascriptInterface fun clock(): String {
+            val now = java.util.Date()
+            val loc = activity.resources.configuration.locales[0]
+            val time = android.text.format.DateFormat.getTimeFormat(activity).format(now)
+            val pat = android.text.format.DateFormat.getBestDateTimePattern(loc, "EEEEdMMMM")
+            val date = java.text.SimpleDateFormat(pat, loc).format(now)
+            return "$time|$date"
+        }
     }
 }
