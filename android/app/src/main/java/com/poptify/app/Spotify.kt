@@ -124,6 +124,7 @@ object Spotify {
             val images = item.optJSONObject("album")?.optJSONArray("images")
             val image = if (images != null && images.length() > 0) images.getJSONObject(0).optString("url") else ""
             val liked = isSaved(token, id)
+            val (c1, c2) = colorsFor(image, id)
             val track = JSONObject()
                 .put("title", item.optString("name"))
                 .put("artist", artist)
@@ -132,8 +133,32 @@ object Spotify {
                 .put("posMs", v.optLong("progress_ms"))
                 .put("isPlaying", v.optBoolean("is_playing"))
                 .put("liked", liked)
+                .put("c1", c1)
+                .put("c2", c2)
             JSONObject().put("track", track).toString()
         }
+    }
+
+    // dominant colors from the album art (via Palette) — reactive background, cached per track
+    private val colorCache = java.util.concurrent.ConcurrentHashMap<String, Pair<String, String>>()
+    private fun hex(c: Int) = String.format("#%06X", 0xFFFFFF and c)
+    private fun colorsFor(url: String, id: String): Pair<String, String> {
+        val def = Pair("#8b2bff", "#00e5ff")
+        colorCache[id]?.let { return it }
+        if (url.isEmpty()) return def
+        return try {
+            http.newCall(Request.Builder().url(url).build()).execute().use { r ->
+                val bytes = r.body?.bytes() ?: return def
+                val opts = android.graphics.BitmapFactory.Options().apply { inSampleSize = 4 }
+                val bmp = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts) ?: return def
+                val p = androidx.palette.graphics.Palette.from(bmp).generate()
+                val c1 = p.getVibrantColor(p.getLightVibrantColor(0xFF8B2BFF.toInt()))
+                val c2 = p.getDarkVibrantColor(p.getMutedColor(0xFF00E5FF.toInt()))
+                val res = Pair(hex(c1), hex(c2))
+                colorCache[id] = res
+                res
+            }
+        } catch (e: Exception) { def }
     }
 
     private fun isSaved(token: String, id: String): Boolean {
