@@ -1,0 +1,44 @@
+name: Build .deb
+
+# Fast, manual-only build of just the Linux .deb (no rpm/appimage/win/mac).
+# The package is uploaded as a workflow artifact — download it from the run page.
+on:
+  workflow_dispatch:
+
+jobs:
+  deb:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf build-essential file libssl-dev libgtk-3-dev
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust build
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build only the .deb
+        run: npm run tauri build -- --bundles deb
+
+      - name: Upload .deb artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: poptify-deb
+          path: src-tauri/target/release/bundle/deb/*.deb
+          if-no-files-found: error
