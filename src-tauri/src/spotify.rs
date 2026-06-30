@@ -195,6 +195,17 @@ pub async fn currently_playing(client: &reqwest::Client, token: &str) -> Result<
     Ok(Some(v))
 }
 
+/// Returns the connected account's (id, display_name). Diagnostic for the like button.
+pub async fn me(client: &reqwest::Client, token: &str) -> Result<(String, String), String> {
+    let resp = client.get(format!("{API}/me")).bearer_auth(token).send().await.map_err(|e| e.to_string())?;
+    if resp.status().as_u16() == 429 { note_rate_limit(&resp); return Err("me 429".into()); }
+    if !resp.status().is_success() { return Err(format!("me {}", resp.status())); }
+    let v: serde_json::Value = resp.json().await.map_err(|e| e.to_string())?;
+    let id = v["id"].as_str().unwrap_or("").to_string();
+    let name = v["display_name"].as_str().unwrap_or("").to_string();
+    Ok((id, name))
+}
+
 pub async fn is_saved(client: &reqwest::Client, token: &str, id: &str) -> Result<bool, String> {
     let resp = client
         .get(format!("{API}/me/tracks/contains?ids={id}"))

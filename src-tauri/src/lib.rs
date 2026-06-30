@@ -18,6 +18,8 @@ pub struct AppState {
     np_cache: Mutex<Option<(String, bool, String)>>,
     // last successful NowPlaying, reused while Spotify is rate-limiting us (429 backoff)
     last_np: Mutex<Option<spotify::NowPlaying>>,
+    // whether we've logged the connected account this run (diagnostic, once)
+    me_logged: Mutex<bool>,
 }
 
 impl AppState {
@@ -141,6 +143,19 @@ async fn now_playing(state: State<'_, AppState>) -> Result<Option<NowPlaying>, S
     // so the UI stays put (heart, art, title) instead of flickering empty.
     if spotify::rate_limited() {
         return Ok(state.last_np.lock().unwrap().clone());
+    }
+    // log the connected account once per run, so we can tell from the debug log
+    // whether the app is authorized with the same account the user liked songs on.
+    let should_log_me = {
+        let mut logged = state.me_logged.lock().unwrap();
+        let first = !*logged;
+        *logged = true;
+        first
+    };
+    if should_log_me {
+        if let Ok((id, name)) = spotify::me(&state.client, &token).await {
+            dbg_log(&format!("[me] account id={id} name=\"{name}\""));
+        }
     }
     let v = match spotify::currently_playing(&state.client, &token).await {
         Ok(Some(v)) => v,
@@ -381,6 +396,7 @@ pub fn run() {
                 data_dir: Mutex::new(data_dir),
                 np_cache: Mutex::new(None),
                 last_np: Mutex::new(None),
+                me_logged: Mutex::new(false),
             };
             // load persisted tokens
             if let Some(t) = load_tokens(&state) {
