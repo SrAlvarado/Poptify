@@ -27,6 +27,13 @@ impl AppState {
     }
 }
 
+fn dbg_log(msg: &str) {
+    use std::io::Write;
+    if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open("/tmp/poptify-debug.log") {
+        let _ = writeln!(f, "{msg}");
+    }
+}
+
 fn save_tokens(state: &AppState, t: &Tokens) {
     if let Ok(json) = serde_json::to_string(t) {
         let _ = std::fs::create_dir_all(&*state.data_dir.lock().unwrap());
@@ -190,6 +197,8 @@ async fn now_playing(state: State<'_, AppState>) -> Result<Option<NowPlaying>, S
         }
     };
 
+    dbg_log(&format!("[np] id={id} liked={liked} title=\"{title}\""));
+
     Ok(Some(NowPlaying {
         id,
         title,
@@ -233,6 +242,7 @@ async fn set_like(track_id: String, liked: bool, state: State<'_, AppState>) -> 
     let token = ensure_token(&state).await?;
     let method = if liked { "PUT" } else { "DELETE" };
     let r = spotify::player_command(&state.client, &token, method, &format!("/me/tracks?ids={track_id}")).await;
+    dbg_log(&format!("[set_like] {method} id={track_id} -> {r:?}"));
     if r.is_ok() {
         if let Some(entry) = state.np_cache.lock().unwrap().as_mut() {
             if entry.0 == track_id { entry.1 = liked; }
