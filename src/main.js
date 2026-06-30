@@ -904,8 +904,9 @@ setInterval(() => {
   updateProgressDOM();
 }, 1000);
 
-// poll Spotify less often, then refresh the view
-setInterval(async () => { await pollSpotify(); applyActive(false); }, 3000);
+// poll Spotify less often, then refresh the view. 5s + the 1s local progress tick
+// keeps the bar smooth without hammering the API (avoids 429 Too Many Requests).
+setInterval(async () => { await pollSpotify(); applyActive(false); }, 5000);
 
 // ---------- boot ----------
 async function boot() {

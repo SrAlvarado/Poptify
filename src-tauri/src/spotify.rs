@@ -33,7 +33,16 @@ struct TokenResponse {
     refresh_token: Option<String>,
 }
 
-#[derive(Serialize)]
+// global rate-limit backoff: when Spotify returns 429 we pause calls until this unix time
+pub static RATE_UNTIL: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+pub fn rate_limited() -> bool { now_secs() < RATE_UNTIL.load(std::sync::atomic::Ordering::Relaxed) }
+fn note_rate_limit(resp: &reqwest::Response) {
+    let retry = resp.headers().get("retry-after").and_then(|v| v.to_str().ok()).and_then(|s| s.trim().parse::<u64>().ok()).unwrap_or(8);
+    RATE_UNTIL.store(now_secs() + retry.max(5), std::sync::atomic::Ordering::Relaxed);
+    eprintln!("[poptify] rate-limited; backing off {}s", retry.max(5));
+}
+
+#[derive(Clone, Serialize)]
 pub struct NowPlaying {
     pub id: String,
     pub title: String,
@@ -178,6 +187,7 @@ pub async fn currently_playing(client: &reqwest::Client, token: &str) -> Result<
         .send()
         .await
         .map_err(|e| e.to_string())?;
+    if resp.status().as_u16() == 429 { note_rate_limit(&resp); return Err("currently-playing 429".into()); }
     if resp.status().as_u16() == 204 || !resp.status().is_success() {
         return Ok(None);
     }
@@ -192,6 +202,7 @@ pub async fn is_saved(client: &reqwest::Client, token: &str, id: &str) -> Result
         .send()
         .await
         .map_err(|e| e.to_string())?;
+    if resp.status().as_u16() == 429 { note_rate_limit(&resp); return Err("contains 429".into()); }
     if !resp.status().is_success() {
         let s = resp.status();
         let body = resp.text().await.unwrap_or_default();

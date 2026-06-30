@@ -16,6 +16,8 @@ pub struct AppState {
     // cache the per-track liked flag + album-art data URL so we don't hammer the
     // Spotify API (contains / image) on every poll (caused 429 Too Many Requests)
     np_cache: Mutex<Option<(String, bool, String)>>,
+    // last successful NowPlaying, reused while Spotify is rate-limiting us (429 backoff)
+    last_np: Mutex<Option<spotify::NowPlaying>>,
 }
 
 impl AppState {
@@ -135,8 +137,16 @@ fn logout(state: State<'_, AppState>) {
 #[tauri::command]
 async fn now_playing(state: State<'_, AppState>) -> Result<Option<NowPlaying>, String> {
     let token = ensure_token(&state).await?;
-    let Some(v) = spotify::currently_playing(&state.client, &token).await? else {
-        return Ok(None);
+    // if Spotify is rate-limiting us, don't call at all — reuse the last known state
+    // so the UI stays put (heart, art, title) instead of flickering empty.
+    if spotify::rate_limited() {
+        return Ok(state.last_np.lock().unwrap().clone());
+    }
+    let v = match spotify::currently_playing(&state.client, &token).await {
+        Ok(Some(v)) => v,
+        Ok(None) => return Ok(None),
+        // a 429 (or transient error) hit mid-call: keep showing the last state
+        Err(_) => return Ok(state.last_np.lock().unwrap().clone()),
     };
     let item = &v["item"];
     if item.is_null() {
@@ -199,7 +209,7 @@ async fn now_playing(state: State<'_, AppState>) -> Result<Option<NowPlaying>, S
 
     dbg_log(&format!("[np] id={id} liked={liked} title=\"{title}\""));
 
-    Ok(Some(NowPlaying {
+    let np = NowPlaying {
         id,
         title,
         artist,
@@ -209,7 +219,9 @@ async fn now_playing(state: State<'_, AppState>) -> Result<Option<NowPlaying>, S
         progress_ms,
         is_playing,
         liked,
-    }))
+    };
+    *state.last_np.lock().unwrap() = Some(np.clone());
+    Ok(Some(np))
 }
 
 #[tauri::command]
@@ -246,6 +258,10 @@ async fn set_like(track_id: String, liked: bool, state: State<'_, AppState>) -> 
     if r.is_ok() {
         if let Some(entry) = state.np_cache.lock().unwrap().as_mut() {
             if entry.0 == track_id { entry.1 = liked; }
+        }
+        // keep the last-known state in sync so a 429 backoff doesn't revert the heart
+        if let Some(np) = state.last_np.lock().unwrap().as_mut() {
+            if np.id == track_id { np.liked = liked; }
         }
     }
     r
@@ -364,6 +380,7 @@ pub fn run() {
                 client_id: Mutex::new(client_id),
                 data_dir: Mutex::new(data_dir),
                 np_cache: Mutex::new(None),
+                last_np: Mutex::new(None),
             };
             // load persisted tokens
             if let Some(t) = load_tokens(&state) {
