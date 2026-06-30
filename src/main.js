@@ -873,6 +873,9 @@ async function onScUpdate(kind) {
 // ---------- Spotify polling ----------
 async function pollSpotify() {
   if (!state.authed) { sp.track = null; sp.playing = false; return; }
+  // when SoundCloud is the explicit source, never touch the Spotify API — avoids
+  // pointless polling (and avoids resetting a Spotify 429 rate-limit window).
+  if (state.source === 'soundcloud') return;
   try {
     const np = await invoke('now_playing');
     if (!np) { sp.track = null; sp.playing = false; sp.liked = false; }
