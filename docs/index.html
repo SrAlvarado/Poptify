@@ -123,6 +123,7 @@
   .btn .lbl small{display:block;font-size:11px;font-weight:600;opacity:.7;letter-spacing:.04em}
   .btn.mac{background:linear-gradient(120deg,var(--c1),var(--c2));box-shadow:0 16px 50px -12px var(--c1)}
   .btn.android{background:linear-gradient(120deg,var(--c3),var(--c4));color:#06140c;box-shadow:0 16px 50px -12px var(--c3)}
+  .btn.win{background:linear-gradient(120deg,#00b3ff,#3a6bff);box-shadow:0 16px 50px -12px #00b3ff}
   .btn:hover{transform:translateY(-4px) scale(1.03)}
   .btn::after{content:"";position:absolute;top:0;left:-120%;width:60%;height:100%;
     background:linear-gradient(120deg,transparent,rgba(255,255,255,.5),transparent);transform:skewX(-20deg);transition:left .6s}
@@ -272,6 +273,7 @@
   .dl .go:hover svg{transform:translateY(3px)}
   .dl.macc .go{background:linear-gradient(120deg,var(--c1),var(--c2))}
   .dl.andd .go{background:linear-gradient(120deg,var(--c3),var(--c4));color:#06140c}
+  .dl.winn .go{background:linear-gradient(120deg,#00b3ff,#3a6bff)}
   .dl .tag{position:absolute;top:16px;right:16px;z-index:4;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
     padding:5px 11px;border-radius:99px;background:rgba(255,255,255,.1);color:var(--dim)}
   .dl.you{border-color:transparent;box-shadow:0 0 0 1.5px var(--c3),0 30px 80px -28px var(--c3)}
@@ -505,11 +507,15 @@
     <div>
       <h1 class="title">POPTIFY</h1>
       <div class="tagline" data-en="Your music, in a cloud of color.">Tu música, en una nube de color.</div>
-      <p class="sub" data-en="The floating popup that shows what's playing on Spotify with an iOS lock-screen look, a <b>background reactive to the album color</b> and retro skins. Drag it anywhere. For Mac and Android.">El popup flotante que muestra lo que suena en Spotify con estética de pantalla de bloqueo de iOS, <b>fondo reactivo al color del álbum</b> y skins retro. Móvelo por toda la pantalla. Para Mac y Android.</p>
+      <p class="sub" data-en="The floating popup that shows what's playing on Spotify with an iOS lock-screen look, a <b>background reactive to the album color</b> and retro skins. Drag it anywhere. For Windows, Mac and Android.">El popup flotante que muestra lo que suena en Spotify con estética de pantalla de bloqueo de iOS, <b>fondo reactivo al color del álbum</b> y skins retro. Móvelo por toda la pantalla. Para Windows, Mac y Android.</p>
       <div class="hero-cta">
         <a class="btn mac" data-dl href="#" id="dlMacHero">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.7c0-2.2 1.8-3.3 1.9-3.4-1-1.5-2.6-1.7-3.2-1.7-1.4-.1-2.7.8-3.3.8-.7 0-1.7-.8-2.8-.8-1.4 0-2.8.8-3.5 2.1-1.5 2.6-.4 6.5 1.1 8.6.7 1 1.5 2.2 2.6 2.1 1-.1 1.4-.7 2.7-.7s1.6.7 2.7.6c1.1 0 1.8-1 2.5-2 .8-1.2 1.1-2.3 1.1-2.3 0 0-2.1-.8-2.1-3.2zM14.3 5.9c.6-.7 1-1.7.9-2.7-.9 0-1.9.6-2.5 1.3-.5.6-1 1.6-.9 2.6 1 .1 2-.5 2.5-1.2z"/></svg>
           <span class="lbl">Descargar<small>para macOS · .dmg</small></span>
+        </a>
+        <a class="btn win" data-dl href="#" id="dlWinHero">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5L10.5 4.4v7.1H3V5.5zm0 13l7.5 1.1v-7H3v5.9zM11.5 4.2L21 3v8.5h-9.5V4.2zm0 8.3H21V21l-9.5-1.3v-7.2z"/></svg>
+          <span class="lbl">Descargar<small>para Windows · .exe</small></span>
         </a>
         <a class="btn android" data-dl href="#" id="dlAndroidHero">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 9.5l1.4-2.4c.1-.2 0-.4-.1-.5-.2-.1-.4 0-.5.1l-1.4 2.5C15.4 8.1 13.8 7.7 12 7.7s-3.4.4-4.5 1l-1.4-2.5c-.1-.2-.3-.2-.5-.1-.2.1-.2.3-.1.5L6.9 9C4.6 10.3 3 12.6 3 15.3h18c0-2.7-1.6-5-3.4-5.8zM8 13.4c-.4 0-.7-.3-.7-.7s.3-.7.7-.7.7.3.7.7-.3.7-.7.7zm8 0c-.4 0-.7-.3-.7-.7s.3-.7.7-.7.7.3.7.7-.3.7-.7.7z"/></svg>
@@ -581,7 +587,7 @@
       <h2 data-en="How it <em>works</em>">Cómo <em>funciona</em></h2>
     </div>
     <div class="steps">
-      <div class="step reveal"><div class="num">01</div><h3 data-en="Download &amp; install">Descarga e instala</h3><p data-en="Grab the Mac or Android app. Tiny and installs in seconds.">Coge la app para Mac o Android. Pesa poco y se instala en segundos.</p></div>
+      <div class="step reveal"><div class="num">01</div><h3 data-en="Download &amp; install">Descarga e instala</h3><p data-en="Grab the Windows, Mac or Android app. Tiny and installs in seconds.">Coge la app para Windows, Mac o Android. Pesa poco y se instala en segundos.</p></div>
       <div class="step reveal"><div class="num">02</div><h3 data-en="Connect Spotify">Conecta Spotify</h3><p data-en="One click, authorize your account and Poptify knows what you're hearing.">Un clic, autorizas tu cuenta y Poptify ya sabe qué estás escuchando.</p></div>
       <div class="step reveal"><div class="num">03</div><h3 data-en="Pick a skin &amp; enjoy">Elige skin y disfruta</h3><p data-en="Switch display, move it around and let the color flow.">Cambia de display, muévelo por la pantalla y deja que el color fluya.</p></div>
     </div>
@@ -641,6 +647,19 @@
         <div class="fmt">.dmg · Apple Silicon · macOS 11+</div>
         <a class="go" data-dl href="#"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M5 21h14"/></svg><span data-en="Download">Descargar</span></a>
       </div>
+      <div class="dl winn" id="dlWinCard">
+        <span class="tag">Windows</span>
+        <div class="glow"></div>
+        <div class="dev mac-dev">
+          <div class="dev-screen">
+            <div class="mp"><div class="mp-art" style="background:linear-gradient(135deg,#00b3ff,#7b5cff 55%,#0a1a3a)"></div><div class="mp-l1"></div><div class="mp-l2"></div><div class="mp-bar"></div></div>
+          </div>
+          <div class="base"></div>
+        </div>
+        <h3 data-en="For Windows">Para Windows</h3>
+        <div class="fmt">.exe / .msi · Windows 10/11</div>
+        <a class="go" data-dl href="#"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M5 21h14"/></svg><span data-en="Download">Descargar</span></a>
+      </div>
       <div class="dl andd" id="dlAndCard">
         <span class="tag">Android</span>
         <div class="glow"></div>
@@ -696,6 +715,20 @@
           <li data-en="Open Poptify normally — done.">Abre Poptify normalmente — listo.</li>
         </ol>
         <p class="help-note" data-en="You only need to do this once. It happens because the app isn't notarized by Apple yet.">Solo hay que hacerlo una vez. Ocurre porque la app aún no está notarizada por Apple.</p>
+      </div>
+    </div>
+
+    <div class="dl-help" id="dlHelpWin">
+      <button class="help-toggle">
+        <span data-en="⚠︎ Does Windows warn when you open the installer?">⚠︎ ¿Windows avisa al abrir el instalador?</span>
+        <span class="chev">▾</span>
+      </button>
+      <div class="help-body">
+        <ol>
+          <li data-en="When SmartScreen shows <b>“Windows protected your PC”</b>, click <b>More info</b>.">Cuando SmartScreen muestre <b>«Windows protegió su PC»</b>, pulsa <b>Más información</b>.</li>
+          <li data-en="Then click <b>Run anyway</b> and the installer opens.">Después pulsa <b>Ejecutar de todas formas</b> y se abre el instalador.</li>
+        </ol>
+        <p class="help-note" data-en="You only need to do this once. It happens because the installer isn't signed with a paid certificate yet.">Solo hay que hacerlo una vez. Ocurre porque el instalador aún no está firmado con un certificado de pago.</p>
       </div>
     </div>
   </section>
@@ -970,7 +1003,7 @@
     ["¿Necesito Spotify Premium?","Para ver la canción y marcar favoritos, no. Para controlar la reproducción (play, siguiente, seek) sí — es una limitación de la API de Spotify.","Do I need Spotify Premium?","To see the song and save favorites, no. To control playback (play, next, seek), yes — it's a Spotify API limitation."],
     ["¿Funciona con SoundCloud?","Sí, como fuente alternativa: pegas una URL y Poptify la reproduce. Spotify se refleja automáticamente.","Does it work with SoundCloud?","Yes, as an alternative source: paste a URL and Poptify plays it. Spotify is mirrored automatically."],
     ["¿Qué pasa con mis datos?","Poptify habla directamente con Spotify desde tu dispositivo. No hay servidores propios ni se guarda tu actividad.","What about my data?","Poptify talks straight to Spotify from your device. No servers of our own, no activity stored."],
-    ["¿En qué sistemas funciona?","macOS (Apple Silicon) y Android 8+. En Mac es una ventana flotante; en Android muestra la info sobre el móvil.","Which systems are supported?","macOS (Apple Silicon) and Android 8+. On Mac it's a floating window; on Android it shows the info on your phone."],
+    ["¿En qué sistemas funciona?","Windows 10/11, macOS (Apple Silicon) y Android 8+. En escritorio es una ventana flotante; en Android muestra la info sobre el móvil.","Which systems are supported?","Windows 10/11, macOS (Apple Silicon) and Android 8+. On desktop it's a floating window; on Android it shows the info on your phone."],
   ];
   const QACC=['#ff2d9b','#00e5ff','#c6ff3a','#ff7a00','#8b2bff'];
   document.getElementById('faqList').innerHTML = FAQ.map((q,n)=>
@@ -1052,6 +1085,7 @@
       {g:'Navegar',t:'Cómo funciona',i:IC.nav,run:()=>go('como')},
       {g:'Navegar',t:'Skins',i:IC.nav,run:()=>go('skins')},
       {g:'Navegar',t:'Preguntas frecuentes',i:IC.q,run:()=>go('faq')},
+      {g:'Descargar',t:'Descargar para Windows',k:'.exe',i:IC.dl,run:()=>ext(RELEASES)},
       {g:'Descargar',t:'Descargar para Mac',k:'.dmg',i:IC.dl,run:()=>ext(RELEASES)},
       {g:'Descargar',t:'Descargar para Android',k:'.apk',i:IC.dl,run:()=>ext(RELEASES)},
       ...ALBUMS.map((al,k)=>({g:'Teñir la página',t:al.t+' — '+al.a,sw:al.p[0],run:()=>{ idx=k; paint(k); bump(); close(); }})),
