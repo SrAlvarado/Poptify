@@ -5,6 +5,8 @@ import { invoke } from '@tauri-apps/api/core';
 import { getCurrentWindow, currentMonitor, primaryMonitor } from '@tauri-apps/api/window';
 import { LogicalSize, LogicalPosition } from '@tauri-apps/api/dpi';
 import { createSoundCloud } from './soundcloud.js';
+import { createYouTube } from './youtube.js';
+import { renderCRT } from './crt.js';
 import * as Hydra from './hydra.js';
 
 const appWindow = getCurrentWindow();
@@ -20,6 +22,7 @@ const SKINS = [
   { id:'psp', name:'PSP', emoji:'🕹️' },
   { id:'mp4', name:'MP4 / PMP', emoji:'📺' },
   { id:'vinyl', name:'Vinilo', emoji:'💿' },
+  { id:'crt', name:'CRT (tubo)', emoji:'📺' },
   ...(IS_MAC ? [{ id:'notch', name:'Notch (cámara)', emoji:'📷' }] : []),
 ];
 const BGS = [
@@ -35,9 +38,10 @@ const state = {
   bg: localStorage.getItem('bg') || 'dark',
   mode: localStorage.getItem('mode') || 'expanded',
   settingsOpen: false,
-  // source: 'auto' picks whichever is playing; or force 'spotify' / 'soundcloud'
+  // source: 'auto' picks whichever is playing; or force 'spotify' / 'soundcloud' / 'youtube'
   source: localStorage.getItem('source') || 'auto',
   scUrl: localStorage.getItem('scUrl') || '',
+  ytUrl: localStorage.getItem('ytUrl') || '',
   activeSource: 'spotify',
   // Hydra background
   hydraSketch: localStorage.getItem('hydraSketch') || 'andromeda',
@@ -62,7 +66,9 @@ let lyCurIdx = -1;
 const sp = { track: null, playing: false, liked: false }; // Spotify (mirrors external player)
 let likeOverride = null; // { id, liked, t } — keeps a just-clicked like sticky while Spotify's API catches up
 const sc = createSoundCloud({ onUpdate: onScUpdate });     // SoundCloud (Poptify is the player)
+const yt = createYouTube({ onUpdate: onYtUpdate });        // YouTube (video shown in the art slot)
 const scArtCache = {};
+const ytArtCache = {};
 
 // ---------- SVG icons ----------
 const I = {
@@ -365,6 +371,39 @@ function renderNotch(al, col) {
   <div class="notch-progress"><div class="bar" data-act="seek"><div class="fill" style="width:${pct}%"></div></div></div>`;
 }
 
+function renderCrtSkin(al) {
+  const pct = al.cur/al.dur*100;
+  const isVideo = activeSrc() === 'youtube';
+  return `
+  <div class="crt-tv">
+    <div class="crt-bezel">
+      <div class="crt-brand">POPTIFY ⏻</div>
+      <div class="crt-screen ${isVideo?'has-video':''}">
+        <canvas data-art width="640" height="480"></canvas>
+        <div class="crt-overlay"></div>
+        <div class="crt-glass"></div>
+        <div class="crt-osd">
+          <div class="title">${al.title}</div>
+          <div class="artist">${al.artist}</div>
+        </div>
+      </div>
+      <div class="crt-knobs">
+        <div class="crt-dial"></div>
+        <div class="crt-dial"></div>
+        <div class="crt-grille"><span></span><span></span><span></span><span></span><span></span></div>
+      </div>
+    </div>
+    <div class="crt-bar"><div class="bar" data-act="seek"><div class="fill" style="width:${pct}%"></div></div>
+      <div class="times"><span>${fmt(al.cur)}</span><span>-${fmt(al.dur-al.cur)}</span></div></div>
+    <div class="crt-ctrls">
+      <button class="icon-btn" data-act="prev">${I.prev}</button>
+      <button class="icon-btn play" data-act="play">${I.play()}</button>
+      <button class="icon-btn" data-act="next">${I.next}</button>
+      <button class="icon-btn like ${state.liked?'liked':''}" data-act="like" title="Favorito">${I.heart(state.liked)}</button>
+    </div>
+  </div>`;
+}
+
 // ---------- auth / empty screens ----------
 function renderConnect() {
   const needId = !state.hasClientId;
@@ -408,6 +447,18 @@ function renderSoundCloud() {
     <div class="auth-sub">Pega una URL de SoundCloud (track, playlist o tus likes) y Poptify la reproduce.</div>
     <input id="scUrlInput" class="auth-input" placeholder="https://soundcloud.com/artista/cancion" value="${state.scUrl || ''}" />
     <button class="auth-btn spotify" style="background:#ff5500;color:#fff" data-act="sc-load">Reproducir</button>
+    <button class="auth-link" data-act="use-spotify">← Usar Spotify</button>
+  </div>`;
+}
+
+function renderYouTube() {
+  return `
+  <div class="auth">
+    <div class="auth-logo">▶️</div>
+    <div class="auth-title">YouTube</div>
+    <div class="auth-sub">Pega el enlace de un vídeo de YouTube y Poptify lo reproduce con el vídeo en el hueco de la portada.</div>
+    <input id="ytUrlInput" class="auth-input" placeholder="https://www.youtube.com/watch?v=…" value="${state.ytUrl || ''}" />
+    <button class="auth-btn spotify" style="background:#ff0033;color:#fff" data-act="yt-load">Reproducir</button>
     <button class="auth-link" data-act="use-spotify">← Usar Spotify</button>
   </div>`;
 }
@@ -493,14 +544,18 @@ function renderSettings() {
   const skinOpts = SKINS.map(s=>`<div class="opt ${state.skin===s.id?'active':''}" data-set-skin="${s.id}"><span class="emoji">${s.emoji}</span>${s.name}</div>`).join('');
   const bgOpts = BGS.map(b=>`<div class="opt ${state.bg===b.id?'active':''}" data-set-bg="${b.id}">${b.name}</div>`).join('');
   const modeOpts = ['expanded','mini'].map(m=>`<div class="opt ${state.mode===m?'active':''}" data-set-mode="${m}">${m==='expanded'?'Expandido':'Mini'}</div>`).join('');
-  const srcOpts = [['auto','Auto'],['spotify','Spotify'],['soundcloud','SoundCloud']].map(([id,n])=>`<div class="opt ${state.source===id?'active':''}" data-set-source="${id}">${n}</div>`).join('');
+  const srcOpts = [['auto','Auto'],['spotify','Spotify'],['soundcloud','SoundCloud'],['youtube','YouTube']].map(([id,n])=>`<div class="opt ${state.source===id?'active':''}" data-set-source="${id}">${n}</div>`).join('');
   settingsEl.innerHTML = `
     <h3>Ajustes <button class="icon-btn close" data-act="settings">${I.close}</button></h3>
     <div class="sec"><span class="lbl">Fuente</span>
-      <div class="opts" style="grid-template-columns:repeat(3,1fr)">${srcOpts}</div>
+      <div class="opts" style="grid-template-columns:repeat(2,1fr)">${srcOpts}</div>
       <div style="margin-top:8px;display:flex;gap:6px">
         <input id="scUrlInputS" class="auth-input" style="margin-top:0;flex:1" placeholder="URL de SoundCloud" value="${state.scUrl||''}" />
         <button class="opt" data-act="sc-load-settings" style="width:auto;padding:0 14px">▶</button>
+      </div>
+      <div style="margin-top:6px;display:flex;gap:6px">
+        <input id="ytUrlInputS" class="auth-input" style="margin-top:0;flex:1" placeholder="URL de YouTube" value="${state.ytUrl||''}" />
+        <button class="opt" data-act="yt-load-settings" style="width:auto;padding:0 14px">▶</button>
       </div>
     </div>
     <div class="sec"><span class="lbl">Display</span><div class="opts" style="grid-template-columns:repeat(2,1fr)">${skinOpts}</div></div>
@@ -527,6 +582,8 @@ function renderSettings() {
   if (devSel) devSel.addEventListener('change', async ()=>{ state.hydraDevice=devSel.value; localStorage.setItem('hydraDevice',state.hydraDevice); try{ await Hydra.startAudio(state.hydraDevice||undefined); }catch(e){ console.error(e); } });
   const scLoadS = settingsEl.querySelector('[data-act="sc-load-settings"]');
   if (scLoadS) scLoadS.addEventListener('click', ()=>{ const u=(settingsEl.querySelector('#scUrlInputS').value||'').trim(); if(!u) return; state.scUrl=u; localStorage.setItem('scUrl',u); if(state.source==='spotify'){ state.source='auto'; localStorage.setItem('source','auto'); } sc.load(u); applyActive(true); });
+  const ytLoadS = settingsEl.querySelector('[data-act="yt-load-settings"]');
+  if (ytLoadS) ytLoadS.addEventListener('click', async ()=>{ const u=(settingsEl.querySelector('#ytUrlInputS').value||'').trim(); if(!u) return; state.ytUrl=u; localStorage.setItem('ytUrl',u); if(state.source!=='youtube'){ state.source='youtube'; localStorage.setItem('source','youtube'); } try{ await yt.load(u); }catch(e){ console.error(e); } applyActive(true); });
   settingsEl.querySelector('[data-act="settings"]').addEventListener('click',()=>{ state.settingsOpen=false; syncSettings(); });
   const lyBtn = settingsEl.querySelector('[data-act="open-lyrics"]');
   if (lyBtn) lyBtn.addEventListener('click', ()=>{ state.settingsOpen=false; state.lyricsOpen=true; render(true); loadLyrics(); });
@@ -556,6 +613,7 @@ function showScreen(html) {
   popup.innerHTML = html;
   manageHydra();
   manageNotchOverlay();
+  manageYouTube();
   bindControls();
   syncSettings();
 }
@@ -604,6 +662,25 @@ function manageHydra() {
 }
 Hydra.onStatus(() => { if (state.bg === 'hydra') manageHydra(); });
 
+// float the YouTube video stage over the current skin's art slot (no re-parenting,
+// which would reload the iframe). Hidden whenever YouTube isn't the active source.
+function manageYouTube() {
+  const stage = yt.el();
+  const active = activeSrc() === 'youtube' && yt.state().loaded && state.track && !state.lyricsOpen;
+  const art = active ? popup.querySelector('canvas[data-art]') : null;
+  if (!art) { stage.style.display = 'none'; stage.style.left = '-9999px'; return; }
+  const r = art.getBoundingClientRect();
+  if (r.width < 2) { stage.style.display = 'none'; return; }
+  stage.style.display = 'block';
+  stage.style.left = Math.round(r.left) + 'px';
+  stage.style.top = Math.round(r.top) + 'px';
+  stage.style.width = Math.round(r.width) + 'px';
+  stage.style.height = Math.round(r.height) + 'px';
+  // match the slot's rounding; CRT gets the curved-glass treatment instead
+  stage.classList.toggle('crt-video', state.skin === 'crt');
+  stage.style.borderRadius = state.skin === 'crt' ? '6% / 8%' : getComputedStyle(art).borderRadius || '0';
+}
+
 async function startHydraAudio() {
   try {
     await Hydra.startAudio(state.hydraDevice || undefined);
@@ -626,6 +703,7 @@ function render(swap) {
   // setup screens depending on the active source
   if (src === 'spotify' && !state.authed) { showScreen(renderConnect()); return; }
   if (src === 'soundcloud' && !sc.state().loaded) { showScreen(renderSoundCloud()); return; }
+  if (src === 'youtube' && !yt.state().loaded) { showScreen(renderYouTube()); return; }
   if (!state.track) { showScreen(renderEmpty()); return; }
   if (state.lyricsOpen) { showScreen(renderLyrics()); lyCurIdx = -1; updateLyricsHighlight(); return; }
 
@@ -633,13 +711,18 @@ function render(swap) {
   const col = colors();
   const isMini = state.skin==='ios' && state.mode==='mini';
   const inlineSettings = isMini || state.skin==='notch';
-  const renderers = { ios:renderIOS, ipod:renderIpod, gb:renderGB, psp:renderPSP, mp4:renderMP4, vinyl:renderVinyl, notch:renderNotch };
+  const renderers = { ios:renderIOS, ipod:renderIpod, gb:renderGB, psp:renderPSP, mp4:renderMP4, vinyl:renderVinyl, crt:renderCrtSkin, notch:renderNotch };
   popup.className = 'popup skin-' + state.skin + (isMini ? ' mini' : '');
   const gear = inlineSettings ? '' : `<button class="icon-btn gear" data-act="settings" title="Ajustes">${I.gear}</button>`;
   popup.innerHTML = gear + (isMini ? renderIOSMini(al, col) : renderers[state.skin](al, col));
-  popup.querySelectorAll('canvas[data-art]').forEach(cv => drawImageCover(cv.getContext('2d'), cv.width, cv.height, coverImg));
+  // CRT skin runs the cover through a WebGL fisheye shader; other skins draw it flat
+  popup.querySelectorAll('canvas[data-art]').forEach(cv => {
+    if (state.skin === 'crt') { if (!renderCRT(cv, coverImg)) drawImageCover(cv.getContext('2d'), cv.width, cv.height, coverImg); }
+    else drawImageCover(cv.getContext('2d'), cv.width, cv.height, coverImg);
+  });
   manageHydra();
   manageNotchOverlay();
+  manageYouTube();
   bindControls();
   syncSettings();
   lastSkin = state.skin;
@@ -707,6 +790,7 @@ async function layout() {
     }
   } catch (e) { console.error('layout', e); }
   resizing = false;
+  manageYouTube();
 }
 
 // ---------- actions ----------
@@ -717,16 +801,19 @@ function bindControls() {
       const src = activeSrc();
       if (act==='play') {
         if (src==='soundcloud') { sc.toggle(); }
+        else if (src==='youtube') { yt.toggle(); }
         else { state.playing = !state.playing; sp.playing = state.playing; render(); try { await invoke('set_playing', { play: state.playing }); } catch(err){ console.error(err); } }
       } else if (act==='next') {
         if (src==='soundcloud') { sc.next(); }
+        else if (src==='youtube') { yt.next(); }
         else { try { await invoke('next_track'); } catch(err){ console.error(err); } setTimeout(async()=>{ await pollSpotify(); applyActive(true); }, 350); }
       } else if (act==='prev') {
         if (src==='soundcloud') { sc.prev(); }
+        else if (src==='youtube') { yt.prev(); }
         else { try { await invoke('prev_track'); } catch(err){ console.error(err); } setTimeout(async()=>{ await pollSpotify(); applyActive(true); }, 350); }
       } else if (act==='like') {
         if (!state.track) return;
-        if (src==='soundcloud') return; // SoundCloud likes need API auth — not available via the widget
+        if (src==='soundcloud' || src==='youtube') return; // likes need Spotify auth
         state.liked = !state.liked; sp.liked = state.liked; likeJustToggled = true;
         // hold this value optimistically until Spotify's contains endpoint catches up (it lags a couple seconds)
         likeOverride = { id: state.track.id, liked: state.liked, t: performance.now() };
@@ -741,6 +828,7 @@ function bindControls() {
         const frac = Math.min(1, Math.max(0, (e.clientX - r.left)/r.width));
         state.track.curSec = Math.round(frac * state.track.durSec); render();
         if (src==='soundcloud') sc.seekSec(frac * state.track.durSec);
+        else if (src==='youtube') yt.seekSec(frac * state.track.durSec);
         else { try { await invoke('seek', { positionMs: Math.round(frac * state.track.durSec * 1000) }); } catch(err){ console.error(err); } }
       } else if (act==='login') {
         el.textContent = 'Abriendo Spotify…'; el.disabled = true;
@@ -760,9 +848,21 @@ function bindControls() {
         el.textContent = 'Cargando…'; el.disabled = true;
         try { await sc.load(u); } catch(err){ console.error(err); }
         applyActive(true);
+      } else if (act==='yt-load') {
+        const u = (popup.querySelector('#ytUrlInput')?.value || '').trim();
+        if (!u) return;
+        state.ytUrl = u; localStorage.setItem('ytUrl', u);
+        if (state.source==='spotify') { state.source='auto'; localStorage.setItem('source','auto'); }
+        el.textContent = 'Cargando…'; el.disabled = true;
+        try { await yt.load(u); } catch(err){ console.error(err); el.textContent='URL no válida'; el.disabled=false; return; }
+        applyActive(true);
       } else if (act==='use-soundcloud') {
         state.source = 'soundcloud'; localStorage.setItem('source','soundcloud');
         if (state.scUrl) { try { await sc.load(state.scUrl); } catch(e){} }
+        applyActive(true);
+      } else if (act==='use-youtube') {
+        state.source = 'youtube'; localStorage.setItem('source','youtube');
+        if (state.ytUrl) { try { await yt.load(state.ytUrl); } catch(e){} }
         applyActive(true);
       } else if (act==='use-spotify') {
         state.source = 'spotify'; localStorage.setItem('source','spotify'); applyActive(true);
@@ -784,7 +884,7 @@ scrimEl.addEventListener('click', ()=>{ state.settingsOpen=false; syncSettings()
 // ---------- Apple-style tilt ----------
 let tiltRAF = null;
 popup.addEventListener('pointermove', e => {
-  if (state.skin==='notch' || !state.track) return;
+  if (state.skin==='notch' || state.skin==='crt' || !state.track) return;
   const r = popup.getBoundingClientRect();
   const px = (e.clientX - r.left)/r.width - 0.5, py = (e.clientY - r.top)/r.height - 0.5;
   if (tiltRAF) cancelAnimationFrame(tiltRAF);
@@ -803,12 +903,14 @@ window.addEventListener('resize', ()=>{ layout(); });
 // ---------- source resolution ----------
 function resolveSource() {
   if (state.source !== 'auto') return state.source;
-  const s = sc.state();
+  const s = sc.state(), y = yt.state();
   if (s.playing) return 'soundcloud';
+  if (y.playing) return 'youtube';
   if (sp.playing) return 'spotify';
   if (s.loaded) return 'soundcloud';
+  if (y.loaded) return 'youtube';
   if (sp.track) return 'spotify';
-  return state.authed ? 'spotify' : (s.loaded ? 'soundcloud' : 'spotify');
+  return state.authed ? 'spotify' : (s.loaded ? 'soundcloud' : (y.loaded ? 'youtube' : 'spotify'));
 }
 function activeSrc() { return state.activeSource || resolveSource(); }
 
@@ -820,7 +922,7 @@ let lastSig = '';
 async function applyActive(forceSwap) {
   const src = resolveSource();
   state.activeSource = src;
-  const p = src === 'soundcloud' ? sc.state() : sp;
+  const p = src === 'soundcloud' ? sc.state() : src === 'youtube' ? yt.state() : sp;
   state.playing = p.playing;
   state.liked = src === 'spotify' ? sp.liked : false;
   state.track = p.track;
@@ -872,12 +974,26 @@ async function onScUpdate(kind) {
   applyActive(kind === 'track' || kind === 'loaded' || kind === 'finish');
 }
 
+// YouTube controller pushes updates here
+async function onYtUpdate(kind) {
+  const st = yt.state();
+  if (st.track && st.track.thumbUrl && !st.track.image) {
+    const u = st.track.thumbUrl;
+    if (ytArtCache[u]) st.track.image = ytArtCache[u];
+    else {
+      try { st.track.image = await invoke('fetch_image', { url: u }); ytArtCache[u] = st.track.image; }
+      catch (e) { st.track.image = ''; }
+    }
+  }
+  applyActive(kind === 'track' || kind === 'loaded' || kind === 'finish');
+}
+
 // ---------- Spotify polling ----------
 async function pollSpotify() {
   if (!state.authed) { sp.track = null; sp.playing = false; return; }
-  // when SoundCloud is the explicit source, never touch the Spotify API — avoids
-  // pointless polling (and avoids resetting a Spotify 429 rate-limit window).
-  if (state.source === 'soundcloud') return;
+  // when SoundCloud/YouTube is the explicit source, never touch the Spotify API —
+  // avoids pointless polling (and avoids resetting a Spotify 429 rate-limit window).
+  if (state.source === 'soundcloud' || state.source === 'youtube') return;
   try {
     const np = await invoke('now_playing');
     if (!np) { sp.track = null; sp.playing = false; sp.liked = false; }
@@ -921,6 +1037,7 @@ async function boot() {
   } catch (err) { console.error('boot error', err); }
   if (state.authed) await pollSpotify();
   if (state.scUrl && (state.source === 'soundcloud')) { try { await sc.load(state.scUrl); } catch (e) {} }
+  if (state.ytUrl && (state.source === 'youtube')) { try { await yt.load(state.ytUrl); } catch (e) {} }
   if (state.bg === 'hydra' && state.hydraAudio) { startHydraAudio(); }
   applyActive(true);
 }
