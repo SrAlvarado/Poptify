@@ -169,18 +169,24 @@ async fn now_playing(state: State<'_, AppState>) -> Result<Option<NowPlaying>, S
     let (liked, image) = match cached {
         Some((cid, l, img)) if !id.is_empty() && cid == id => (l, img),
         _ => {
-            let l = if id.is_empty() {
-                false
+            let liked_res = if id.is_empty() {
+                Ok(false)
             } else {
-                spotify::is_saved(&state.client, &token, &id).await.unwrap_or(false)
+                spotify::is_saved(&state.client, &token, &id).await
             };
             let img = if img_url.is_empty() {
                 String::new()
             } else {
                 spotify::fetch_image_data_url(&state.client, &img_url).await.unwrap_or_default()
             };
-            *state.np_cache.lock().unwrap() = Some((id.clone(), l, img.clone()));
-            (l, img)
+            match liked_res {
+                Ok(l) => {
+                    // only cache a successful lookup (don't pin a failed false)
+                    *state.np_cache.lock().unwrap() = Some((id.clone(), l, img.clone()));
+                    (l, img)
+                }
+                Err(_) => (false, img),
+            }
         }
     };
 
