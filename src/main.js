@@ -11,6 +11,8 @@ const appWindow = getCurrentWindow();
 const MARGIN = 22; // transparent breathing room around the popup (for shadow + 3D tilt)
 
 // ---------- catalog ----------
+// the Notch skin wraps the Mac camera notch, so it's macOS-only
+const IS_MAC = /Mac|iPhone|iPad/i.test(navigator.platform) || /Macintosh/.test(navigator.userAgent);
 const SKINS = [
   { id:'ios', name:'iOS', emoji:'📱' },
   { id:'ipod', name:'MP3 / iPod', emoji:'🎧' },
@@ -18,7 +20,7 @@ const SKINS = [
   { id:'psp', name:'PSP', emoji:'🕹️' },
   { id:'mp4', name:'MP4 / PMP', emoji:'📺' },
   { id:'vinyl', name:'Vinilo', emoji:'💿' },
-  { id:'notch', name:'Notch (cámara)', emoji:'📷' },
+  ...(IS_MAC ? [{ id:'notch', name:'Notch (cámara)', emoji:'📷' }] : []),
 ];
 const BGS = [
   { id:'dark', name:'Oscuro' },
@@ -29,7 +31,7 @@ const BGS = [
 
 // ---------- state ----------
 const state = {
-  skin: localStorage.getItem('skin') || 'ios',
+  skin: (() => { const s = localStorage.getItem('skin') || 'ios'; return (s === 'notch' && !IS_MAC) ? 'ios' : s; })(),
   bg: localStorage.getItem('bg') || 'dark',
   mode: localStorage.getItem('mode') || 'expanded',
   settingsOpen: false,
