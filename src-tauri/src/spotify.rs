@@ -192,6 +192,12 @@ pub async fn is_saved(client: &reqwest::Client, token: &str, id: &str) -> Result
         .send()
         .await
         .map_err(|e| e.to_string())?;
+    if !resp.status().is_success() {
+        let s = resp.status();
+        let body = resp.text().await.unwrap_or_default();
+        eprintln!("[poptify] is_saved {id} -> {s} {body}");
+        return Ok(false);
+    }
     let arr: Vec<bool> = resp.json().await.map_err(|e| e.to_string())?;
     Ok(arr.first().copied().unwrap_or(false))
 }

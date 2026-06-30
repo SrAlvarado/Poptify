@@ -132,7 +132,15 @@ async fn now_playing(state: State<'_, AppState>) -> Result<Option<NowPlaying>, S
     if item.is_null() {
         return Ok(None);
     }
-    let id = item["id"].as_str().unwrap_or("").to_string();
+    // Spotify "track relinking": the playing item can be a market-specific id that
+    // differs from the original track saved in the user's library. Prefer linked_from.id
+    // so the "saved" check and like/unlike target the same track the user has.
+    let id = item["linked_from"]["id"]
+        .as_str()
+        .filter(|s| !s.is_empty())
+        .or_else(|| item["id"].as_str())
+        .unwrap_or("")
+        .to_string();
     let title = item["name"].as_str().unwrap_or("").to_string();
     let artist = item["artists"]
         .as_array()
