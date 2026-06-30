@@ -13,6 +13,9 @@ pub struct AppState {
     tokens: Mutex<Option<Tokens>>,
     client_id: Mutex<String>,
     data_dir: Mutex<PathBuf>,
+    // cache the per-track liked flag + album-art data URL so we don't hammer the
+    // Spotify API (contains / image) on every poll (caused 429 Too Many Requests)
+    np_cache: Mutex<Option<(String, bool, String)>>,
 }
 
 impl AppState {
@@ -161,15 +164,24 @@ async fn now_playing(state: State<'_, AppState>) -> Result<Option<NowPlaying>, S
     let progress_ms = v["progress_ms"].as_i64().unwrap_or(0);
     let is_playing = v["is_playing"].as_bool().unwrap_or(false);
 
-    let liked = if id.is_empty() {
-        false
-    } else {
-        spotify::is_saved(&state.client, &token, &id).await.unwrap_or(false)
-    };
-    let image = if img_url.is_empty() {
-        String::new()
-    } else {
-        spotify::fetch_image_data_url(&state.client, &img_url).await.unwrap_or_default()
+    // reuse cached liked/image while the same track is playing (avoids 429)
+    let cached = state.np_cache.lock().unwrap().clone();
+    let (liked, image) = match cached {
+        Some((cid, l, img)) if !id.is_empty() && cid == id => (l, img),
+        _ => {
+            let l = if id.is_empty() {
+                false
+            } else {
+                spotify::is_saved(&state.client, &token, &id).await.unwrap_or(false)
+            };
+            let img = if img_url.is_empty() {
+                String::new()
+            } else {
+                spotify::fetch_image_data_url(&state.client, &img_url).await.unwrap_or_default()
+            };
+            *state.np_cache.lock().unwrap() = Some((id.clone(), l, img.clone()));
+            (l, img)
+        }
     };
 
     Ok(Some(NowPlaying {
@@ -214,7 +226,13 @@ async fn seek(position_ms: i64, state: State<'_, AppState>) -> Result<(), String
 async fn set_like(track_id: String, liked: bool, state: State<'_, AppState>) -> Result<(), String> {
     let token = ensure_token(&state).await?;
     let method = if liked { "PUT" } else { "DELETE" };
-    spotify::player_command(&state.client, &token, method, &format!("/me/tracks?ids={track_id}")).await
+    let r = spotify::player_command(&state.client, &token, method, &format!("/me/tracks?ids={track_id}")).await;
+    if r.is_ok() {
+        if let Some(entry) = state.np_cache.lock().unwrap().as_mut() {
+            if entry.0 == track_id { entry.1 = liked; }
+        }
+    }
+    r
 }
 
 /// Fetch any image URL and return it as a data: URL (sidesteps canvas CORS taint).
@@ -329,6 +347,7 @@ pub fn run() {
                 tokens: Mutex::new(None),
                 client_id: Mutex::new(client_id),
                 data_dir: Mutex::new(data_dir),
+                np_cache: Mutex::new(None),
             };
             // load persisted tokens
             if let Some(t) = load_tokens(&state) {
