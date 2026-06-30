@@ -20,9 +20,18 @@ jobs:
             args: ''
           - platform: macos-latest
             args: '--target universal-apple-darwin'
+          - platform: ubuntu-22.04
+            args: ''
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
+
+      # Linux needs the WebView/GTK toolchain to bundle .deb / .rpm / .AppImage
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf build-essential file libssl-dev libgtk-3-dev
 
       - name: Set up Node
         uses: actions/setup-node@v4
