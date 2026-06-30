@@ -67,7 +67,7 @@ pub fn challenge(verifier: &str) -> String {
 
 pub fn build_auth_url(client_id: &str, challenge: &str, redirect_uri: &str) -> String {
     format!(
-        "{AUTH_URL}?response_type=code&client_id={}&scope={}&redirect_uri={}&code_challenge_method=S256&code_challenge={}",
+        "{AUTH_URL}?response_type=code&client_id={}&scope={}&redirect_uri={}&code_challenge_method=S256&code_challenge={}&show_dialog=true",
         urlencoding::encode(client_id),
         urlencoding::encode(SCOPES),
         urlencoding::encode(redirect_uri),
