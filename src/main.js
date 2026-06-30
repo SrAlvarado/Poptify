@@ -58,6 +58,7 @@ let lyCurIdx = -1;
 
 // per-source snapshots
 const sp = { track: null, playing: false, liked: false }; // Spotify (mirrors external player)
+let likeOverride = null; // { id, liked, t } — keeps a just-clicked like sticky while Spotify's API catches up
 const sc = createSoundCloud({ onUpdate: onScUpdate });     // SoundCloud (Poptify is the player)
 const scArtCache = {};
 
@@ -724,8 +725,12 @@ function bindControls() {
       } else if (act==='like') {
         if (!state.track) return;
         if (src==='soundcloud') return; // SoundCloud likes need API auth — not available via the widget
-        state.liked = !state.liked; sp.liked = state.liked; likeJustToggled = true; render();
+        state.liked = !state.liked; sp.liked = state.liked; likeJustToggled = true;
+        // hold this value optimistically until Spotify's contains endpoint catches up (it lags a couple seconds)
+        likeOverride = { id: state.track.id, liked: state.liked, t: performance.now() };
+        render();
         try { await invoke('set_like', { trackId: state.track.id, liked: state.liked }); } catch(err){ console.error(err); }
+        setTimeout(async ()=>{ await pollSpotify(); applyActive(false); }, 1200);
       } else if (act==='settings') {
         state.settingsOpen = !state.settingsOpen; syncSettings();
       } else if (act==='seek') {
@@ -874,6 +879,13 @@ async function pollSpotify() {
     else {
       sp.playing = np.is_playing;
       sp.liked = np.liked;
+      // honor a recent manual like/unlike until the server agrees (or 8s pass)
+      if (likeOverride && likeOverride.id === np.id) {
+        if (np.liked === likeOverride.liked || performance.now() - likeOverride.t > 8000) likeOverride = null;
+        else sp.liked = likeOverride.liked;
+      } else if (likeOverride && likeOverride.id !== np.id) {
+        likeOverride = null;
+      }
       sp.track = {
         id: np.id, title: np.title, artist: np.artist,
         durSec: Math.round(np.duration_ms / 1000), curSec: Math.round(np.progress_ms / 1000),
