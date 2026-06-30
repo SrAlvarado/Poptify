@@ -233,7 +233,8 @@
 
   /* download */
   .download{text-align:center}
-  .dl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;margin:46px auto 0;max-width:880px;perspective:1300px}
+  .dl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:46px auto 0;max-width:1100px;perspective:1300px}
+  @media(max-width:780px){.dl-grid{grid-template-columns:1fr;max-width:420px}}
   .dl{position:relative;border-radius:28px;padding:34px 30px 30px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));
     border:1px solid var(--line);overflow:hidden;transform-style:preserve-3d;transition:box-shadow .35s,border-color .35s;
     display:flex;flex-direction:column;align-items:center;text-align:center}
