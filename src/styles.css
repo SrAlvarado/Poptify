@@ -305,45 +305,65 @@
   .skin-notch .notch-progress { position:absolute; z-index:3; bottom:0; left:18px; right:18px; }
   .skin-notch .notch-progress .bar { height:3px; background:rgba(255,255,255,0.18); }
 
-  /* ---------- CRT (tube TV) skin ---------- */
-  .skin-crt { width: 440px; }
-  .skin-crt .crt-tv { width:100%; }
-  .skin-crt .crt-bezel { position:relative; border-radius:26px; padding:22px 22px 16px;
-    background:linear-gradient(160deg,#2a2722,#15130f 60%,#0c0b09);
-    box-shadow: 0 40px 90px -22px rgba(0,0,0,0.8), inset 0 2px 0 rgba(255,255,255,0.06), inset 0 0 0 1px rgba(0,0,0,0.5); }
-  .skin-crt .crt-brand { position:absolute; right:24px; bottom:14px; font-size:9px; letter-spacing:.18em; color:#7c756a; font-weight:800; }
+  /* ---------- CRT (tube TV) skin — beige plastic monitor ---------- */
+  .skin-crt { width: 460px; }
+  .skin-crt .crt-tv { width:100%; display:flex; flex-direction:column; align-items:center; }
+  /* warm beige plastic body */
+  .skin-crt .crt-body { position:relative; width:100%; padding:30px 32px 16px;
+    border-radius:34px 34px 22px 22px / 28px 28px 26px 26px;
+    background:linear-gradient(158deg,#e6dfce 0%,#d6cdb8 44%,#c3b9a2 100%);
+    box-shadow: inset 0 3px 4px rgba(255,255,255,0.6), inset 0 -10px 20px rgba(0,0,0,0.16),
+      inset 0 0 0 1px rgba(120,108,86,0.35), 0 44px 80px -26px rgba(0,0,0,0.62); }
+  /* recessed darker lip around the tube */
+  .skin-crt .crt-bezel { position:relative; border-radius:9% / 12%; padding:14px;
+    background:linear-gradient(160deg,#c7bda6,#b3a98f);
+    box-shadow: inset 0 3px 8px rgba(0,0,0,0.45), inset 0 -2px 3px rgba(255,255,255,0.4); }
   .skin-crt .crt-screen { position:relative; aspect-ratio:4/3; border-radius:7% / 9%; overflow:hidden;
-    background:#000; box-shadow: inset 0 0 30px rgba(0,0,0,0.9), inset 0 0 0 3px #07060a, 0 0 0 6px #1b1814, 0 0 24px rgba(70,130,255,0.08); }
+    background:#34372f;
+    box-shadow: inset 0 0 0 3px #15160f, inset 0 0 26px rgba(0,0,0,0.9), 0 0 0 2px rgba(0,0,0,0.25); }
   .skin-crt .crt-screen canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
-  /* animated scanlines + flicker — over both the shader canvas and the YT video */
   .skin-crt .crt-overlay { position:absolute; inset:0; pointer-events:none; z-index:2;
-    background:repeating-linear-gradient(180deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.22) 3px, rgba(0,0,0,0) 4px);
+    background:repeating-linear-gradient(180deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.20) 3px, rgba(0,0,0,0) 4px);
     animation:crtFlicker 5.5s steps(60) infinite; mix-blend-mode:multiply; }
   .skin-crt .crt-glass { position:absolute; inset:0; pointer-events:none; z-index:3;
-    background:radial-gradient(130% 100% at 30% 0%, rgba(255,255,255,0.16), transparent 45%), radial-gradient(120% 120% at 50% 50%, transparent 55%, rgba(0,0,0,0.55) 100%); }
-  @keyframes crtFlicker { 0%,100%{opacity:.85} 48%{opacity:.92} 50%{opacity:.7} 52%{opacity:.9} }
+    background:radial-gradient(135% 100% at 28% -5%, rgba(255,255,255,0.18), transparent 42%),
+      radial-gradient(120% 120% at 50% 50%, transparent 56%, rgba(0,0,0,0.5) 100%); }
+  @keyframes crtFlicker { 0%,100%{opacity:.85} 48%{opacity:.92} 50%{opacity:.72} 52%{opacity:.9} }
   .skin-crt .crt-osd { position:absolute; left:0; right:0; bottom:0; z-index:4; padding:18px 14px 10px;
-    background:linear-gradient(0deg, rgba(0,0,0,0.55), transparent); color:#eafff2; text-shadow:0 1px 6px rgba(0,0,0,0.8); }
-  .skin-crt .crt-osd .title { font-size:16px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .skin-crt .crt-osd .artist { font-size:12px; color:rgba(255,255,255,0.8); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .skin-crt .crt-knobs { display:flex; align-items:center; gap:10px; margin-top:14px; padding-left:4px; }
-  .skin-crt .crt-dial { width:20px; height:20px; border-radius:50%; background:radial-gradient(circle at 40% 35%,#5a5246,#211e19); box-shadow: inset 0 1px 1px rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.5); }
-  .skin-crt .crt-grille { display:flex; gap:4px; margin-left:auto; }
-  .skin-crt .crt-grille span { width:4px; height:22px; border-radius:2px; background:linear-gradient(180deg,#3a352d,#16140f); }
-  .skin-crt .crt-bar { margin-top:14px; }
+    background:linear-gradient(0deg, rgba(0,0,0,0.5), transparent); color:#eafff2; text-shadow:0 1px 6px rgba(0,0,0,0.8); }
+  .skin-crt .crt-osd .title { font-size:15px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .skin-crt .crt-osd .artist { font-size:12px; color:rgba(255,255,255,0.82); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  /* bottom control panel of the TV (brand + little buttons + power) */
+  .skin-crt .crt-panel { display:flex; align-items:center; gap:10px; margin-top:14px; padding:0 4px; }
+  .skin-crt .crt-brand { font-size:11px; font-weight:800; letter-spacing:.04em; font-style:italic; color:#6f6552; text-shadow:0 1px 0 rgba(255,255,255,0.45); }
+  .skin-crt .crt-buttons { display:flex; align-items:center; gap:9px; margin-left:auto; }
+  .skin-crt .crt-b { width:14px; height:14px; border-radius:50%; border:none; cursor:pointer;
+    background:radial-gradient(circle at 38% 32%, #d8cfba, #a89e85);
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.6), inset 0 -1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.25); }
+  .skin-crt .crt-b:active { transform:translateY(1px); box-shadow: inset 0 1px 3px rgba(0,0,0,0.4); }
+  .skin-crt .crt-led { width:6px; height:6px; border-radius:50%; margin-left:4px; background:#5a3030; box-shadow: inset 0 0 1px #000; }
+  .skin-crt .crt-led.on { background:#46e07a; box-shadow:0 0 6px #46e07a; }
+  .skin-crt .crt-power { width:22px; height:22px; border-radius:50%; border:none; cursor:pointer; font-size:11px; color:#4a4336;
+    display:grid; place-items:center; background:radial-gradient(circle at 38% 32%, #e0d7c2, #b0a68c);
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.6), inset 0 -1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.25); }
+  .skin-crt .crt-power:active { transform:translateY(1px); }
+  /* stand: neck + base under the body */
+  .skin-crt .crt-stand { display:flex; flex-direction:column; align-items:center; margin-top:-2px; }
+  .skin-crt .crt-neck { width:120px; height:14px; background:linear-gradient(180deg,#c6bca5,#b0a78d);
+    border-radius:0 0 8px 8px; box-shadow: inset 0 -3px 6px rgba(0,0,0,0.2); }
+  .skin-crt .crt-base { width:200px; height:14px; border-radius:10px; background:linear-gradient(180deg,#d2c9b4,#b8ae95);
+    box-shadow: inset 0 2px 2px rgba(255,255,255,0.4), 0 12px 24px -10px rgba(0,0,0,0.5); }
+  /* progress bar below the unit */
+  .skin-crt .crt-bar { width:100%; margin-top:16px; }
   .skin-crt .crt-bar .bar { height:5px; border-radius:99px; background:rgba(255,255,255,0.16); overflow:hidden; cursor:pointer; }
   .skin-crt .crt-bar .fill { height:100%; background:linear-gradient(90deg,#00e5ff,#7b5cff); border-radius:99px; }
-  .skin-crt .crt-bar .times { display:flex; justify-content:space-between; margin-top:6px; font-size:11px; color:rgba(255,255,255,0.55); font-variant-numeric:tabular-nums; }
-  .skin-crt .crt-ctrls { display:flex; align-items:center; justify-content:center; gap:22px; margin-top:12px; }
-  .skin-crt .crt-ctrls .icon-btn { width:38px; height:38px; color:#e8e8ee; }
-  .skin-crt .crt-ctrls .play { width:48px; height:48px; border-radius:50%; background:#fff; color:#111; }
-  .skin-crt .crt-ctrls .like.liked { color:#1ed760; }
+  .skin-crt .crt-bar .times { display:flex; justify-content:space-between; margin-top:6px; font-size:11px; color:rgba(255,255,255,0.5); font-variant-numeric:tabular-nums; }
 
   /* the floating YouTube video stage */
   #yt-stage iframe, #yt-player, #yt-stage > div { width:100% !important; height:100% !important; border:0; display:block; }
   #yt-stage.crt-video { box-shadow: inset 0 0 30px rgba(0,0,0,0.85); }
   #yt-stage.crt-video::after { content:""; position:absolute; inset:0; pointer-events:none;
-    background:repeating-linear-gradient(180deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.22) 3px, rgba(0,0,0,0) 4px),
-      radial-gradient(120% 120% at 50% 50%, transparent 55%, rgba(0,0,0,0.5) 100%); }
+    background:repeating-linear-gradient(180deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.20) 3px, rgba(0,0,0,0) 4px),
+      radial-gradient(120% 120% at 50% 50%, transparent 56%, rgba(0,0,0,0.5) 100%); }
 
   .hint { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); color: var(--text-dim); font-size: 12px; z-index: 5; text-align:center; }

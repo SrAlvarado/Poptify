@@ -376,31 +376,33 @@ function renderCrtSkin(al) {
   const isVideo = activeSrc() === 'youtube';
   return `
   <div class="crt-tv">
-    <div class="crt-bezel">
-      <div class="crt-brand">POPTIFY ⏻</div>
-      <div class="crt-screen ${isVideo?'has-video':''}">
-        <canvas data-art width="640" height="480"></canvas>
-        <div class="crt-overlay"></div>
-        <div class="crt-glass"></div>
-        <div class="crt-osd">
-          <div class="title">${al.title}</div>
-          <div class="artist">${al.artist}</div>
+    <div class="crt-body">
+      <div class="crt-bezel">
+        <div class="crt-screen ${isVideo?'has-video':''}">
+          <canvas data-art width="640" height="480"></canvas>
+          <div class="crt-overlay"></div>
+          <div class="crt-glass"></div>
+          <div class="crt-osd">
+            <div class="title">${al.title}</div>
+            <div class="artist">${al.artist}</div>
+          </div>
         </div>
       </div>
-      <div class="crt-knobs">
-        <div class="crt-dial"></div>
-        <div class="crt-dial"></div>
-        <div class="crt-grille"><span></span><span></span><span></span><span></span><span></span></div>
+      <div class="crt-panel">
+        <div class="crt-brand">PoptifyVision</div>
+        <div class="crt-buttons">
+          <button class="crt-b" data-act="prev" title="Anterior"></button>
+          <button class="crt-b" data-act="next" title="Siguiente"></button>
+          <button class="crt-b" data-act="like" title="Favorito"></button>
+          <button class="crt-b" data-act="settings" title="Ajustes"></button>
+          <span class="crt-led ${state.playing?'on':''}"></span>
+          <button class="crt-power play" data-act="play" title="Play/Pausa">⏻</button>
+        </div>
       </div>
     </div>
+    <div class="crt-stand"><div class="crt-neck"></div><div class="crt-base"></div></div>
     <div class="crt-bar"><div class="bar" data-act="seek"><div class="fill" style="width:${pct}%"></div></div>
       <div class="times"><span>${fmt(al.cur)}</span><span>-${fmt(al.dur-al.cur)}</span></div></div>
-    <div class="crt-ctrls">
-      <button class="icon-btn" data-act="prev">${I.prev}</button>
-      <button class="icon-btn play" data-act="play">${I.play()}</button>
-      <button class="icon-btn" data-act="next">${I.next}</button>
-      <button class="icon-btn like ${state.liked?'liked':''}" data-act="like" title="Favorito">${I.heart(state.liked)}</button>
-    </div>
   </div>`;
 }
 
@@ -651,8 +653,8 @@ function manageHydra() {
       else hydraBadge('Hydra: cargando…', '#ffd479');
       return;
     }
-    // bg=hydra but this skin has no full background
-    hydraBadge('Hydra solo en skins con fondo (iOS / PSP / MP4)', '#ffd479');
+    // bg=hydra but this skin has no full background → just skip it silently
+    hydraBadge(null);
     return;
   }
   hydraBadge(null);
@@ -662,23 +664,38 @@ function manageHydra() {
 }
 Hydra.onStatus(() => { if (state.bg === 'hydra') manageHydra(); });
 
-// float the YouTube video stage over the current skin's art slot (no re-parenting,
-// which would reload the iframe). Hidden whenever YouTube isn't the active source.
-function manageYouTube() {
+// Glue the YouTube video stage onto the current skin's art slot every frame
+// (no re-parenting — that would reload the iframe). A rAF loop keeps it matched
+// through resizes, settings open/close and tilt, for every layout. Hidden
+// whenever YouTube isn't the active source.
+let ytSyncRAF = null;
+function syncYtStage() {
   const stage = yt.el();
   const active = activeSrc() === 'youtube' && yt.state().loaded && state.track && !state.lyricsOpen;
   const art = active ? popup.querySelector('canvas[data-art]') : null;
-  if (!art) { stage.style.display = 'none'; stage.style.left = '-9999px'; return; }
+  if (!art) {
+    stage.style.display = 'none'; stage.style.left = '-9999px';
+    ytSyncRAF = null; return;   // stop the loop until manageYouTube() restarts it
+  }
   const r = art.getBoundingClientRect();
-  if (r.width < 2) { stage.style.display = 'none'; return; }
-  stage.style.display = 'block';
-  stage.style.left = Math.round(r.left) + 'px';
-  stage.style.top = Math.round(r.top) + 'px';
-  stage.style.width = Math.round(r.width) + 'px';
-  stage.style.height = Math.round(r.height) + 'px';
-  // match the slot's rounding; CRT gets the curved-glass treatment instead
-  stage.classList.toggle('crt-video', state.skin === 'crt');
-  stage.style.borderRadius = state.skin === 'crt' ? '6% / 8%' : getComputedStyle(art).borderRadius || '0';
+  if (r.width >= 2) {
+    stage.style.display = 'block';
+    stage.style.left = r.left + 'px';
+    stage.style.top = r.top + 'px';
+    stage.style.width = r.width + 'px';
+    stage.style.height = r.height + 'px';
+    stage.classList.toggle('crt-video', state.skin === 'crt');
+    // round the video to match the art slot's container (the canvas itself is square)
+    const cont = art.parentElement;
+    const br = cont ? getComputedStyle(cont).borderRadius : '0px';
+    stage.style.borderRadius = state.skin === 'crt' ? '7% / 9%' : (br && br !== '0px' ? br : '0');
+  }
+  ytSyncRAF = requestAnimationFrame(syncYtStage);
+}
+function manageYouTube() {
+  if (ytSyncRAF) cancelAnimationFrame(ytSyncRAF);
+  ytSyncRAF = null;
+  syncYtStage();
 }
 
 async function startHydraAudio() {
@@ -710,7 +727,7 @@ function render(swap) {
   const al = trackForSkin();
   const col = colors();
   const isMini = state.skin==='ios' && state.mode==='mini';
-  const inlineSettings = isMini || state.skin==='notch';
+  const inlineSettings = isMini || state.skin==='notch' || state.skin==='crt';
   const renderers = { ios:renderIOS, ipod:renderIpod, gb:renderGB, psp:renderPSP, mp4:renderMP4, vinyl:renderVinyl, crt:renderCrtSkin, notch:renderNotch };
   popup.className = 'popup skin-' + state.skin + (isMini ? ' mini' : '');
   const gear = inlineSettings ? '' : `<button class="icon-btn gear" data-act="settings" title="Ajustes">${I.gear}</button>`;
