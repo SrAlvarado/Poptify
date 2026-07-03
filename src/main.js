@@ -576,16 +576,16 @@ function renderSettings() {
   settingsEl.querySelectorAll('[data-set-skin]').forEach(el=>el.addEventListener('click',()=>{ state.skin=el.dataset.setSkin; localStorage.setItem('skin',state.skin); render(true); }));
   settingsEl.querySelectorAll('[data-set-bg]').forEach(el=>el.addEventListener('click',()=>{ state.bg=el.dataset.setBg; localStorage.setItem('bg',state.bg); render(true); }));
   settingsEl.querySelectorAll('[data-set-mode]').forEach(el=>el.addEventListener('click',()=>{ state.mode=el.dataset.setMode; localStorage.setItem('mode',state.mode); render(true); }));
-  settingsEl.querySelectorAll('[data-set-source]').forEach(el=>el.addEventListener('click',()=>{ state.source=el.dataset.setSource; localStorage.setItem('source',state.source); applyActive(true); }));
+  settingsEl.querySelectorAll('[data-set-source]').forEach(el=>el.addEventListener('click',()=>{ state.source=el.dataset.setSource; localStorage.setItem('source',state.source); if(state.source!=='auto') stopOtherSources(state.source); applyActive(true); }));
   settingsEl.querySelectorAll('[data-set-sketch]').forEach(el=>el.addEventListener('click',()=>{ state.hydraSketch=el.dataset.setSketch; localStorage.setItem('hydraSketch',state.hydraSketch); lastHydraKey=''; render(true); }));
   const audioBtn = settingsEl.querySelector('[data-act="hydra-audio"]');
   if (audioBtn) audioBtn.addEventListener('click', async ()=>{ if(state.hydraAudio){ Hydra.stopAudio(); state.hydraAudio=false; localStorage.setItem('hydraAudio','0'); syncSettings(); } else { await startHydraAudio(); } });
   const devSel = settingsEl.querySelector('#hydraDeviceSel');
   if (devSel) devSel.addEventListener('change', async ()=>{ state.hydraDevice=devSel.value; localStorage.setItem('hydraDevice',state.hydraDevice); try{ await Hydra.startAudio(state.hydraDevice||undefined); }catch(e){ console.error(e); } });
   const scLoadS = settingsEl.querySelector('[data-act="sc-load-settings"]');
-  if (scLoadS) scLoadS.addEventListener('click', ()=>{ const u=(settingsEl.querySelector('#scUrlInputS').value||'').trim(); if(!u) return; state.scUrl=u; localStorage.setItem('scUrl',u); if(state.source==='spotify'){ state.source='auto'; localStorage.setItem('source','auto'); } sc.load(u); applyActive(true); });
+  if (scLoadS) scLoadS.addEventListener('click', ()=>{ const u=(settingsEl.querySelector('#scUrlInputS').value||'').trim(); if(!u) return; state.scUrl=u; localStorage.setItem('scUrl',u); if(state.source==='spotify'){ state.source='auto'; localStorage.setItem('source','auto'); } stopOtherSources('soundcloud'); sc.load(u); applyActive(true); });
   const ytLoadS = settingsEl.querySelector('[data-act="yt-load-settings"]');
-  if (ytLoadS) ytLoadS.addEventListener('click', async ()=>{ const u=(settingsEl.querySelector('#ytUrlInputS').value||'').trim(); if(!u) return; state.ytUrl=u; localStorage.setItem('ytUrl',u); if(state.source!=='youtube'){ state.source='youtube'; localStorage.setItem('source','youtube'); } try{ await yt.load(u); }catch(e){ console.error(e); } applyActive(true); });
+  if (ytLoadS) ytLoadS.addEventListener('click', async ()=>{ const u=(settingsEl.querySelector('#ytUrlInputS').value||'').trim(); if(!u) return; state.ytUrl=u; localStorage.setItem('ytUrl',u); if(state.source!=='youtube'){ state.source='youtube'; localStorage.setItem('source','youtube'); } stopOtherSources('youtube'); try{ await yt.load(u); }catch(e){ console.error(e); } applyActive(true); });
   settingsEl.querySelector('[data-act="settings"]').addEventListener('click',()=>{ state.settingsOpen=false; syncSettings(); });
   const lyBtn = settingsEl.querySelector('[data-act="open-lyrics"]');
   if (lyBtn) lyBtn.addEventListener('click', ()=>{ state.settingsOpen=false; state.lyricsOpen=true; render(true); loadLyrics(); });
@@ -862,6 +862,7 @@ function bindControls() {
         if (!u) return;
         state.scUrl = u; localStorage.setItem('scUrl', u);
         if (state.source==='spotify') { state.source='auto'; localStorage.setItem('source','auto'); }
+        stopOtherSources('soundcloud');
         el.textContent = 'Cargando…'; el.disabled = true;
         try { await sc.load(u); } catch(err){ console.error(err); }
         applyActive(true);
@@ -870,19 +871,22 @@ function bindControls() {
         if (!u) return;
         state.ytUrl = u; localStorage.setItem('ytUrl', u);
         if (state.source==='spotify') { state.source='auto'; localStorage.setItem('source','auto'); }
+        stopOtherSources('youtube');
         el.textContent = 'Cargando…'; el.disabled = true;
         try { await yt.load(u); } catch(err){ console.error(err); el.textContent='URL no válida'; el.disabled=false; return; }
         applyActive(true);
       } else if (act==='use-soundcloud') {
         state.source = 'soundcloud'; localStorage.setItem('source','soundcloud');
+        stopOtherSources('soundcloud');
         if (state.scUrl) { try { await sc.load(state.scUrl); } catch(e){} }
         applyActive(true);
       } else if (act==='use-youtube') {
         state.source = 'youtube'; localStorage.setItem('source','youtube');
+        stopOtherSources('youtube');
         if (state.ytUrl) { try { await yt.load(state.ytUrl); } catch(e){} }
         applyActive(true);
       } else if (act==='use-spotify') {
-        state.source = 'spotify'; localStorage.setItem('source','spotify'); applyActive(true);
+        state.source = 'spotify'; localStorage.setItem('source','spotify'); stopOtherSources('spotify'); applyActive(true);
       } else if (act==='logout') {
         await invoke('logout'); state.authed=false; sp.track=null; applyActive(true);
       } else if (act==='lyrics') {
@@ -977,8 +981,20 @@ function updateProgressDOM() {
   updateLyricsHighlight();
 }
 
+// only one player should make sound at a time — pause every source except `active`.
+// (SoundCloud + YouTube are independent iframes that otherwise keep playing.)
+function stopOtherSources(active) {
+  if (active !== 'soundcloud') sc.pause();
+  if (active !== 'youtube') yt.pause();
+  if (active !== 'spotify' && state.authed && sp.playing) {
+    sp.playing = false;
+    invoke('set_playing', { play: false }).catch(() => {});
+  }
+}
+
 // SoundCloud controller pushes updates here
 async function onScUpdate(kind) {
+  if (kind === 'play') stopOtherSources('soundcloud');
   const st = sc.state();
   if (st.track && st.track.artworkUrl && !st.track.image) {
     const u = st.track.artworkUrl;
@@ -993,6 +1009,7 @@ async function onScUpdate(kind) {
 
 // YouTube controller pushes updates here
 async function onYtUpdate(kind) {
+  if (kind === 'play') stopOtherSources('youtube');
   const st = yt.state();
   if (st.track && st.track.thumbUrl && !st.track.image) {
     const u = st.track.thumbUrl;
