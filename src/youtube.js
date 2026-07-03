@@ -54,6 +54,7 @@ export function createYouTube({ onUpdate }) {
     track: null,    // { id, title, artist, durSec, curSec, image, thumbUrl }
     playing: false,
     loaded: false,
+    error: null,    // human-readable message when a video can't play
   };
 
   // fixed "stage" that floats over the art slot; main.js sizes/places it
@@ -112,6 +113,18 @@ export function createYouTube({ onUpdate }) {
           else if (e.data === Y.ENDED) { snap.playing = false; onUpdate('finish'); }
           else if (e.data === Y.CUED) { refreshMeta(); onUpdate('loaded'); }
         },
+        onError: (e) => {
+          // 2 = bad id · 5 = HTML5 error · 100 = not found/private · 101/150 = embedding disabled
+          const code = e && e.data;
+          snap.playing = false; snap.loaded = false;
+          snap.error = code === 101 || code === 150
+            ? 'Este vídeo no permite reproducirse fuera de YouTube. Prueba con otro enlace.'
+            : code === 100 ? 'Vídeo no encontrado o privado.'
+            : code === 2 ? 'Enlace de YouTube no válido.'
+            : 'No se pudo reproducir el vídeo (error ' + code + ').';
+          console.error('[youtube] error', code, snap.error);
+          onUpdate('error');
+        },
       },
     });
   }
@@ -121,6 +134,7 @@ export function createYouTube({ onUpdate }) {
     async load(url) {
       const id = parseVideoId(url);
       if (!id) throw new Error('URL de YouTube no válida');
+      snap.error = null;
       await loadApi();
       if (!player) create(id);
       else if (ready) { player.loadVideoById(id); snap.playing = true; refreshMeta(); onUpdate('loaded'); }

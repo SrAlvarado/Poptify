@@ -454,11 +454,13 @@ function renderSoundCloud() {
 }
 
 function renderYouTube() {
+  const err = yt.state().error;
   return `
   <div class="auth">
     <div class="auth-logo">▶️</div>
     <div class="auth-title">YouTube</div>
     <div class="auth-sub">Pega el enlace de un vídeo de YouTube y Poptify lo reproduce con el vídeo en el hueco de la portada.</div>
+    ${err ? `<div class="auth-sub" style="color:#ff8585">${escapeHtml(err)}</div>` : ''}
     <input id="ytUrlInput" class="auth-input" placeholder="https://www.youtube.com/watch?v=…" value="${state.ytUrl || ''}" />
     <button class="auth-btn spotify" style="background:#ff0033;color:#fff" data-act="yt-load">Reproducir</button>
     <button class="auth-link" data-act="use-spotify">← Usar Spotify</button>
@@ -1019,7 +1021,7 @@ async function onYtUpdate(kind) {
       catch (e) { st.track.image = ''; }
     }
   }
-  applyActive(kind === 'track' || kind === 'loaded' || kind === 'finish');
+  applyActive(kind === 'track' || kind === 'loaded' || kind === 'finish' || kind === 'error');
 }
 
 // ---------- Spotify polling ----------
