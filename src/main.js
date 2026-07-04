@@ -772,10 +772,12 @@ async function layout() {
     settingsEl.style.left = (MARGIN + pw + gap) + 'px';
     settingsEl.style.top = Math.round((winH - panelH) / 2) + 'px';
   } else {
+    // notch wraps the camera flush to the very top → no top margin/gap
+    const topM = state.skin === 'notch' ? 0 : MARGIN;
     winW = pw + MARGIN * 2;
-    winH = ph + MARGIN * 2;
+    winH = ph + topM + MARGIN;
     popup.style.left = MARGIN + 'px';
-    popup.style.top = MARGIN + 'px';
+    popup.style.top = topM + 'px';
   }
 
   if (winW === lastWinW && winH === lastWinH) return;
