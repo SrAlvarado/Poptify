@@ -280,8 +280,10 @@
   /* ============ SKIN: NOTCH (wraps the Mac camera) ============ */
   .skin-notch { background:#000; border-radius: 0 0 26px 26px; box-shadow: 0 0 0 1px rgba(255,255,255,0.07), 0 22px 50px -12px rgba(0,0,0,0.75); color:#fff; overflow:hidden; }
   .skin-notch .n-glow { position:absolute; inset:0; z-index:0; opacity:.55; filter: blur(14px); transition: background .8s ease; }
-  .skin-notch .notch-body { position:relative; z-index:2; display:flex; align-items:center; gap:16px; padding:9px 18px 11px; }
-  .skin-notch .notch-left { display:flex; align-items:center; gap:11px; min-width:0; }
+  /* grid keeps a fixed, centred dead-zone the width of the Mac camera notch so
+     no control ever sits under the physical camera; equal 1fr sides center it */
+  .skin-notch .notch-body { position:relative; z-index:2; display:grid; grid-template-columns:1fr 170px 1fr; align-items:center; gap:14px; padding:9px 18px 11px; }
+  .skin-notch .notch-left { justify-self:start; display:flex; align-items:center; gap:11px; min-width:0; }
   .skin-notch .n-art { width:34px; height:34px; border-radius:9px; overflow:hidden; flex-shrink:0; box-shadow:0 4px 12px -3px rgba(0,0,0,.7); }
   .skin-notch .n-art canvas { width:100%; height:100%; display:block; }
   .skin-notch .n-info { min-width:0; max-width:150px; }
@@ -294,10 +296,10 @@
   .skin-notch .eq.paused span { animation-play-state:paused; height:4px; }
   @keyframes eqbar { 0%,100%{height:4px} 50%{height:16px} }
   /* the camera in the middle */
-  .skin-notch .notch-cam { width:46px; display:flex; justify-content:center; align-items:center; flex-shrink:0; }
+  .skin-notch .notch-cam { width:100%; display:flex; justify-content:center; align-items:center; }
   .skin-notch .notch-cam .lens { width:12px; height:12px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #38465a, #04070b 70%); box-shadow: inset 0 0 2px #000, 0 0 0 2px #0c0c0c, 0 0 4px rgba(90,150,255,0.45); position:relative; }
   .skin-notch .notch-cam .lens::after { content:""; position:absolute; top:2px; left:2.5px; width:3px; height:3px; border-radius:50%; background:rgba(255,255,255,0.55); }
-  .skin-notch .notch-right { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+  .skin-notch .notch-right { justify-self:end; display:flex; align-items:center; gap:6px; }
   .skin-notch .notch-right .icon-btn { width:30px; height:30px; color:#fff; }
   .skin-notch .notch-right .play { width:32px; height:32px; background:#fff; color:#111; }
   .skin-notch .notch-right .like.liked { color:#1ed760; }
