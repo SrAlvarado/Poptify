@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
+    "butterchurn": "^2.6.7",
+    "butterchurn-presets": "^2.4.7",
     "hydra-synth": "^1.4.0"
   },
   "devDependencies": {

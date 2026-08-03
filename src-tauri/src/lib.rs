@@ -1,3 +1,4 @@
+mod audio_tap;
 mod spotify;
 
 use spotify::{NowPlaying, Tokens};
@@ -419,7 +420,9 @@ pub fn run() {
             set_like,
             fetch_image,
             fetch_lyrics,
-            set_notch_overlay
+            set_notch_overlay,
+            audio_tap::start_audio_tap,
+            audio_tap::stop_audio_tap
         ])
         .run(tauri::generate_context!())
         .expect("error al arrancar Poptify");

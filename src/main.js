@@ -8,6 +8,7 @@ import { createSoundCloud } from './soundcloud.js';
 import { createYouTube } from './youtube.js';
 import { renderCRT } from './crt.js';
 import * as Hydra from './hydra.js';
+import * as Milkdrop from './milkdrop.js';
 
 const appWindow = getCurrentWindow();
 const MARGIN = 22; // transparent breathing room around the popup (for shadow + 3D tilt)
@@ -30,6 +31,7 @@ const BGS = [
   { id:'blur', name:'Difuminado' },
   { id:'vivid', name:'Vivo' },
   { id:'hydra', name:'Hydra' },
+  { id:'milkdrop', name:'Milkdrop' },
 ];
 
 // ---------- state ----------
@@ -127,6 +129,7 @@ function bgCSS(col) {
   const d=`rgb(${col.dom.join(',')})`, a=`rgb(${col.avg.join(',')})`;
   const dark=`rgb(${col.dom.map(v=>Math.round(v*0.32)).join(',')})`;
   if (state.bg==='hydra') return '#08080c'; // hydra canvas is drawn on top of this
+  if (state.bg==='milkdrop') return '#050505'; // butterchurn canvas is drawn on top of this
   if (state.bg==='vivid') {
     const v=col.dom.map(v=>Math.min(255,Math.round(v*1.25+30))), v2=col.avg.map(v=>Math.min(255,Math.round(v*1.2+20)));
     return `radial-gradient(120% 90% at 25% 0%, rgb(${v.join(',')}), transparent 65%), linear-gradient(160deg, rgb(${v.join(',')}), rgb(${v2.join(',')}))`;
@@ -142,7 +145,7 @@ function renderIOS(al, col) {
   return `
   <div class="bg" style="background:${bgCSS(col)}"></div>
   <div class="bg-blur" style="background-image:url(${col.dataURL});opacity:${blur?1:0}"></div>
-  <div class="noise" style="background:rgba(0,0,0,${state.bg==='hydra'?0.12:state.bg==='vivid'?0.12:state.bg==='blur'?0.25:0.30})"></div>
+  <div class="noise" style="background:rgba(0,0,0,${(state.bg==='hydra'||state.bg==='milkdrop')?0.12:state.bg==='vivid'?0.12:state.bg==='blur'?0.25:0.30})"></div>
   <div class="inner">
     <div class="grip"></div>
     <div class="topbar"><span class="live"></span> Reproduciendo ahora</div>
@@ -176,7 +179,7 @@ function renderIOSMini(al, col) {
   return `
   <div class="bg" style="background:${bgCSS(col)}"></div>
   <div class="bg-blur" style="background-image:url(${col.dataURL});opacity:${blur?1:0}"></div>
-  <div class="noise" style="background:rgba(0,0,0,${state.bg==='hydra'?0.12:state.bg==='vivid'?0.12:state.bg==='blur'?0.25:0.30})"></div>
+  <div class="noise" style="background:rgba(0,0,0,${(state.bg==='hydra'||state.bg==='milkdrop')?0.12:state.bg==='vivid'?0.12:state.bg==='blur'?0.25:0.30})"></div>
   <div class="inner">
     <div class="mini-bar">
       <div class="mini-art"><canvas data-art width="120" height="120"></canvas></div>
@@ -567,10 +570,17 @@ function renderSettings() {
     ${state.bg==='hydra' ? `
     <div class="sec"><span class="lbl">Hydra · sketch</span>
       <div class="opts" style="grid-template-columns:repeat(2,1fr)">${Hydra.SKETCHES.map(s=>`<div class="opt ${state.hydraSketch===s.id?'active':''}" data-set-sketch="${s.id}">${s.name}</div>`).join('')}</div>
-    </div>
-    <div class="sec"><span class="lbl">Hydra · audio reactivo (BlackHole)</span>
+    </div>` : ''}
+    ${state.bg==='milkdrop' ? `
+    <div class="sec"><span class="lbl">Milkdrop · preset</span>
+      ${Milkdrop.presetNames().length ? `
+      <select id="milkdropPresetSel" class="auth-input" style="margin-top:0;width:100%">${Milkdrop.presetNames().map(n=>`<option value="${n.replace(/"/g,'&quot;')}" ${Milkdrop.getPreset()===n?'selected':''}>${n}</option>`).join('')}</select>
+      <button class="opt" style="width:100%;margin-top:8px" data-act="milkdrop-random">🎲 Preset aleatorio</button>` : `<span class="lbl" style="opacity:.7">cargando presets…</span>`}
+    </div>` : ''}
+    ${(state.bg==='hydra'||state.bg==='milkdrop') ? `
+    <div class="sec"><span class="lbl">Audio reactivo (audio del sistema)</span>
       <button class="opt" style="width:100%" data-act="hydra-audio">${state.hydraAudio?'● Audio activo — desactivar':'Activar audio reactivo'}</button>
-      ${state.hydraAudio ? `<select id="hydraDeviceSel" class="auth-input" style="margin-top:8px;width:100%">${(state.hydraInputs.length?state.hydraInputs:[{id:'',label:'(dispositivo por defecto)'}]).map(d=>`<option value="${d.id}" ${state.hydraDevice===d.id?'selected':''}>${d.label}</option>`).join('')}</select>` : ''}
+      ${state.hydraAudio && !Hydra.isNative() ? `<select id="hydraDeviceSel" class="auth-input" style="margin-top:8px;width:100%">${(state.hydraInputs.length?state.hydraInputs:[{id:'',label:'(dispositivo por defecto)'}]).map(d=>`<option value="${d.id}" ${state.hydraDevice===d.id?'selected':''}>${d.label}</option>`).join('')}</select>` : ''}
     </div>` : ''}
     <div class="sec"><span class="lbl">Modo (iOS)</span><div class="opts">${modeOpts}</div></div>
     ${state.track ? `<div class="sec"><button class="opt" style="width:100%" data-act="open-lyrics">Ver letra</button></div>` : ``}
@@ -581,9 +591,13 @@ function renderSettings() {
   settingsEl.querySelectorAll('[data-set-source]').forEach(el=>el.addEventListener('click',()=>{ state.source=el.dataset.setSource; localStorage.setItem('source',state.source); if(state.source!=='auto') stopOtherSources(state.source); applyActive(true); }));
   settingsEl.querySelectorAll('[data-set-sketch]').forEach(el=>el.addEventListener('click',()=>{ state.hydraSketch=el.dataset.setSketch; localStorage.setItem('hydraSketch',state.hydraSketch); lastHydraKey=''; render(true); }));
   const audioBtn = settingsEl.querySelector('[data-act="hydra-audio"]');
-  if (audioBtn) audioBtn.addEventListener('click', async ()=>{ if(state.hydraAudio){ Hydra.stopAudio(); state.hydraAudio=false; localStorage.setItem('hydraAudio','0'); syncSettings(); } else { await startHydraAudio(); } });
+  if (audioBtn) audioBtn.addEventListener('click', async ()=>{ if(state.hydraAudio){ Hydra.stopAudio(); state.hydraAudio=false; localStorage.setItem('hydraAudio','0'); manageHydra(); syncSettings(); } else { await startHydraAudio(); } });
   const devSel = settingsEl.querySelector('#hydraDeviceSel');
-  if (devSel) devSel.addEventListener('change', async ()=>{ state.hydraDevice=devSel.value; localStorage.setItem('hydraDevice',state.hydraDevice); try{ await Hydra.startAudio(state.hydraDevice||undefined); }catch(e){ console.error(e); } });
+  if (devSel) devSel.addEventListener('change', async ()=>{ state.hydraDevice=devSel.value; localStorage.setItem('hydraDevice',state.hydraDevice); try{ await Hydra.startAudio(state.hydraDevice||undefined, { forceInput: true }); }catch(e){ console.error(e); } });
+  const mdSel = settingsEl.querySelector('#milkdropPresetSel');
+  if (mdSel) mdSel.addEventListener('change', ()=>{ Milkdrop.setPreset(mdSel.value); });
+  const mdRnd = settingsEl.querySelector('[data-act="milkdrop-random"]');
+  if (mdRnd) mdRnd.addEventListener('click', ()=>{ Milkdrop.randomPreset(); });
   const scLoadS = settingsEl.querySelector('[data-act="sc-load-settings"]');
   if (scLoadS) scLoadS.addEventListener('click', ()=>{ const u=(settingsEl.querySelector('#scUrlInputS').value||'').trim(); if(!u) return; state.scUrl=u; localStorage.setItem('scUrl',u); if(state.source==='spotify'){ state.source='auto'; localStorage.setItem('source','auto'); } stopOtherSources('soundcloud'); sc.load(u); applyActive(true); });
   const ytLoadS = settingsEl.querySelector('[data-act="yt-load-settings"]');
@@ -640,7 +654,12 @@ function hydraBadge(text, color) {
   if (!b) { b = document.createElement('div'); b.className = 'hydra-badge'; popup.appendChild(b); }
   b.textContent = text; b.style.cssText = HBADGE + 'color:' + color + ';';
 }
+function detachBgCanvas(id) {
+  const cv = document.getElementById(id);
+  if (cv && cv.parentElement) cv.parentElement.removeChild(cv);
+}
 function manageHydra() {
+  if (state.bg !== 'milkdrop') { Milkdrop.stop(); detachBgCanvas('milkdrop-canvas'); }
   if (state.bg === 'hydra' && state.track) {
     const bgEl = popup.querySelector('.bg');
     if (bgEl) {
@@ -659,12 +678,28 @@ function manageHydra() {
     hydraBadge(null);
     return;
   }
+  if (state.bg === 'milkdrop' && state.track) {
+    const bgEl = popup.querySelector('.bg');
+    if (bgEl) {
+      const cv = Milkdrop.getCanvas();
+      if (cv.parentElement !== bgEl) bgEl.appendChild(cv);
+      Milkdrop.resume();
+      const err = Milkdrop.getError();
+      if (err) hydraBadge('Milkdrop: ' + err, '#ff8585');
+      else if (!Milkdrop.isReady()) hydraBadge('Milkdrop: cargando…', '#ffd479');
+      else if (!Hydra.audioActive()) hydraBadge('Activa el audio reactivo en Ajustes para que Milkdrop baile', '#ffd479');
+      else hydraBadge(null);
+    } else hydraBadge(null);
+    lastHydraKey = '';
+    detachBgCanvas('hydra-canvas');
+    return;
+  }
   hydraBadge(null);
   lastHydraKey = '';
-  const cv = document.getElementById('hydra-canvas');
-  if (cv && cv.parentElement) cv.parentElement.removeChild(cv);
+  detachBgCanvas('hydra-canvas');
 }
 Hydra.onStatus(() => { if (state.bg === 'hydra') manageHydra(); });
+Milkdrop.onStatus(() => { if (state.bg === 'milkdrop') { manageHydra(); renderSettings(); } });
 
 // Glue the YouTube video stage onto the current skin's art slot every frame
 // (no re-parenting — that would reload the iframe). A rAF loop keeps it matched
@@ -702,18 +737,22 @@ function manageYouTube() {
 
 async function startHydraAudio() {
   try {
+    // native system-audio tap first; falls back to getUserMedia inside startAudio
     await Hydra.startAudio(state.hydraDevice || undefined);
-    state.hydraInputs = await Hydra.listInputs();
-    if (!state.hydraDevice) {
-      const bh = state.hydraInputs.find(d => /blackhole|loopback|soundflower/i.test(d.label));
-      if (bh) { state.hydraDevice = bh.id; localStorage.setItem('hydraDevice', bh.id); await Hydra.startAudio(bh.id); }
+    if (!Hydra.isNative()) {
+      state.hydraInputs = await Hydra.listInputs();
+      if (!state.hydraDevice) {
+        const bh = state.hydraInputs.find(d => /blackhole|loopback|soundflower/i.test(d.label));
+        if (bh) { state.hydraDevice = bh.id; localStorage.setItem('hydraDevice', bh.id); await Hydra.startAudio(bh.id, { forceInput: true }); }
+      }
     }
     state.hydraAudio = true; localStorage.setItem('hydraAudio', '1');
   } catch (e) {
     console.error('hydra audio', e);
     state.hydraAudio = false; localStorage.setItem('hydraAudio', '0');
-    alert('No se pudo acceder al audio. Revisa el permiso de micrófono y que el dispositivo (BlackHole) exista.');
+    alert('No se pudo acceder al audio. En macOS acepta el permiso de grabación de pantalla/audio del sistema; si no, revisa el permiso de micrófono y que exista un dispositivo loopback (BlackHole).');
   }
+  manageHydra();
   syncSettings();
 }
 
@@ -1076,7 +1115,7 @@ async function boot() {
   if (state.authed) await pollSpotify();
   if (state.scUrl && (state.source === 'soundcloud')) { try { await sc.load(state.scUrl); } catch (e) {} }
   if (state.ytUrl && (state.source === 'youtube')) { try { await yt.load(state.ytUrl); } catch (e) {} }
-  if (state.bg === 'hydra' && state.hydraAudio) { startHydraAudio(); }
+  if ((state.bg === 'hydra' || state.bg === 'milkdrop') && state.hydraAudio) { startHydraAudio(); }
   applyActive(true);
 }
 boot();

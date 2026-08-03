@@ -130,8 +130,32 @@ export function applySketch(id, colors) {
 export function setColors(colors) { applySketch(currentSketch, colors); }
 export function setProgress(p) { dyn.progress = Math.max(0, Math.min(1, p || 0)); }
 
-// ---------- audio capture (BlackHole / any input device) ----------
+// ---------- audio capture ----------
+// Preferred path: native system-audio tap (ScreenCaptureKit, macOS) — a passive
+// copy of the OS mixer, so playback quality is untouched (no BlackHole, no
+// Bluetooth HFP downgrade). Fallback: getUserMedia on a loopback input device.
+import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
+
 let audioCtx = null, analyser = null, srcNode = null, stream = null, rafA = null, freq = null;
+let native = false, unlistenFn = null;
+// latest time-domain waveform (u8, 1024/channel) for Butterchurn
+let waveL = null, waveR = null;
+export function getWave() { return waveL ? { l: waveL, r: waveR } : null; }
+export function isNative() { return native; }
+
+async function startNative() {
+  await invoke('start_audio_tap');
+  unlistenFn = await listen('audio-frame', (ev) => {
+    const f = ev.payload;
+    dyn.audio.level = f.level; dyn.audio.bass = f.bass;
+    dyn.audio.mid = f.mid; dyn.audio.treble = f.treble;
+    waveL = Uint8Array.from(f.wave_l);
+    waveR = Uint8Array.from(f.wave_r);
+  });
+  native = true;
+  dyn.audioOn = true;
+}
 
 export async function listInputs() {
   try {
@@ -140,8 +164,13 @@ export async function listInputs() {
   } catch (e) { return []; }
 }
 
-export async function startAudio(deviceId) {
+export async function startAudio(deviceId, opts = {}) {
   stopAudio();
+  // native tap first, unless the user explicitly picked an input device
+  if (!opts.forceInput) {
+    try { await startNative(); return; }
+    catch (e) { console.warn('[poptify] tap nativo no disponible, uso getUserMedia', e); }
+  }
   // disable voice processing — it tanks output quality (and forces Bluetooth
   // headphones into low-quality hands-free mode)
   const base = { echoCancellation: false, noiseSuppression: false, autoGainControl: false };
@@ -156,10 +185,13 @@ export async function startAudio(deviceId) {
   analyser.smoothingTimeConstant = 0.82;
   srcNode.connect(analyser);
   freq = new Uint8Array(analyser.frequencyBinCount);
+  const time = new Uint8Array(analyser.fftSize);
   const n = freq.length;
   const b1 = Math.floor(n * 0.08), b2 = Math.floor(n * 0.4);
   const loop = () => {
     analyser.getByteFrequencyData(freq);
+    analyser.getByteTimeDomainData(time);
+    waveL = time; waveR = time; // mono fallback: same wave on both channels
     let bass = 0, mid = 0, tre = 0, all = 0;
     for (let i = 0; i < n; i++) { all += freq[i]; if (i < b1) bass += freq[i]; else if (i < b2) mid += freq[i]; else tre += freq[i]; }
     dyn.audio.level = (all / n) / 255;
@@ -173,10 +205,16 @@ export async function startAudio(deviceId) {
 }
 
 export function stopAudio() {
+  if (native) {
+    if (unlistenFn) { try { unlistenFn(); } catch (e) {} unlistenFn = null; }
+    invoke('stop_audio_tap').catch(() => {});
+    native = false;
+  }
   if (rafA) cancelAnimationFrame(rafA), rafA = null;
   if (stream) stream.getTracks().forEach(t => t.stop());
   if (audioCtx) audioCtx.close().catch(() => {});
   audioCtx = analyser = srcNode = stream = freq = null;
+  waveL = waveR = null;
   dyn.audioOn = false;
   dyn.audio = { level: 0, bass: 0, mid: 0, treble: 0 };
 }
