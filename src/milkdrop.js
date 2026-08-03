@@ -9,6 +9,23 @@ import * as Hydra from './hydra.js';
 let visualizer = null, canvas = null, raf = null;
 let statusCb = null, lastError = '', names = [];
 let currentPreset = '';
+// auto mode (default on): pick random presets and rotate them automatically
+let auto = localStorage.getItem('milkdropAuto') !== '0';
+let autoTimer = null;
+const AUTO_MS = 30000;
+
+export function isAuto() { return auto; }
+export function setAuto(on) {
+  auto = !!on;
+  localStorage.setItem('milkdropAuto', auto ? '1' : '0');
+  scheduleAuto();
+  if (auto) randomPreset();
+  else if (statusCb) statusCb();
+}
+function scheduleAuto() {
+  if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+  if (auto && visualizer && raf) autoTimer = setInterval(() => randomPreset(), AUTO_MS);
+}
 
 export function onStatus(fn) { statusCb = fn; }
 export function getError() { return lastError; }
@@ -39,9 +56,12 @@ async function ensure() {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     visualizer = butterchurn.createVisualizer(ctx, canvas, { width: 480, height: 480, pixelRatio: 1 });
     const saved = localStorage.getItem('milkdropPreset');
-    currentPreset = (saved && presets[saved]) ? saved : names[Math.floor(names.length / 2)];
+    currentPreset = auto
+      ? names[Math.floor(Math.random() * names.length)]
+      : (saved && presets[saved]) ? saved : names[Math.floor(names.length / 2)];
     visualizer.loadPreset(presets[currentPreset], 0);
     loop();
+    scheduleAuto();
     lastError = '';
     console.debug('[poptify] butterchurn ready,', names.length, 'presets');
     if (statusCb) statusCb();
@@ -87,7 +107,9 @@ function loop() {
 
 export function stop() {
   if (raf) cancelAnimationFrame(raf), raf = null;
+  if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
 }
 export function resume() {
   if (visualizer && !raf) loop();
+  scheduleAuto();
 }

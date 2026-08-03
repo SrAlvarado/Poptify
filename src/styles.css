@@ -62,9 +62,16 @@
   /* settings — floating panel OUTSIDE the popup */
   .settings { position: fixed; z-index: 100; width: 300px; background: rgba(22,22,28,0.66); backdrop-filter: blur(40px) saturate(180%); -webkit-backdrop-filter: blur(40px) saturate(180%); border-radius: 26px; padding: 20px; box-shadow: 0 30px 80px -15px rgba(0,0,0,0.75), inset 0 0 0 1px rgba(255,255,255,0.12); opacity: 0; transform: scale(0.88) translateY(6px); transform-origin: top left; pointer-events: none; transition: opacity .26s ease, transform .42s cubic-bezier(0.34,1.56,0.64,1); }
   .settings.open { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
-  .settings h3 { font-size: 16px; margin-bottom: 4px; display:flex; justify-content:space-between; align-items:center; }
+  /* cap the panel so it never grows past a sane window height; scroll inside */
+  .settings { max-height: 520px; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; }
+  .settings::-webkit-scrollbar { width: 4px; }
+  .settings::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 4px; }
+  .settings::-webkit-scrollbar-track { background: transparent; }
+  .settings h3 { font-size: 16px; display:flex; justify-content:space-between; align-items:center; position: sticky; top: -20px; z-index: 2; margin: -20px 0 4px; padding: 16px 0 10px; background: rgba(24,24,30,0.92); border-radius: 0 0 12px 12px; }
   .settings .close { width: 30px; height: 30px; background: var(--glass); color:#fff; }
-  .settings .sec { margin-top: 18px; }
+  .settings .sec { margin-top: 14px; }
+  .settings select.auth-input { margin-top: 8px; max-width: 100%; text-overflow: ellipsis; appearance: none; -webkit-appearance: none; background-image: linear-gradient(45deg, transparent 50%, rgba(255,255,255,0.6) 50%), linear-gradient(135deg, rgba(255,255,255,0.6) 50%, transparent 50%); background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 32px; cursor: pointer; }
+  .settings select.auth-input option { background: #1a1a20; color: #fff; }
   .settings .sec > .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-dim); margin-bottom: 8px; display:block; }
   .opts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .opt { padding: 10px 12px; border-radius: 12px; background: var(--glass); border: 1px solid rgba(255,255,255,0.08); cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text); text-align: center; transition: all .15s ease; display:flex; flex-direction:column; align-items:center; gap:6px; }

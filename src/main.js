@@ -574,8 +574,11 @@ function renderSettings() {
     ${state.bg==='milkdrop' ? `
     <div class="sec"><span class="lbl">Milkdrop · preset</span>
       ${Milkdrop.presetNames().length ? `
-      <select id="milkdropPresetSel" class="auth-input" style="margin-top:0;width:100%">${Milkdrop.presetNames().map(n=>`<option value="${n.replace(/"/g,'&quot;')}" ${Milkdrop.getPreset()===n?'selected':''}>${n}</option>`).join('')}</select>
-      <button class="opt" style="width:100%;margin-top:8px" data-act="milkdrop-random">🎲 Preset aleatorio</button>` : `<span class="lbl" style="opacity:.7">cargando presets…</span>`}
+      <div style="display:flex;gap:8px">
+        <button class="opt ${Milkdrop.isAuto()?'active':''}" data-act="milkdrop-auto" style="flex:1">${Milkdrop.isAuto()?'● Auto':'Auto'}</button>
+        <button class="opt" data-act="milkdrop-random" style="flex:1">🎲 Aleatorio</button>
+      </div>
+      <select id="milkdropPresetSel" class="auth-input" style="margin-top:8px;width:100%;max-width:100%">${Milkdrop.presetNames().map(n=>`<option value="${n.replace(/"/g,'&quot;')}" ${Milkdrop.getPreset()===n?'selected':''}>${n}</option>`).join('')}</select>` : `<span class="lbl" style="opacity:.7">cargando presets…</span>`}
     </div>` : ''}
     ${(state.bg==='hydra'||state.bg==='milkdrop') ? `
     <div class="sec"><span class="lbl">Audio reactivo (audio del sistema)</span>
@@ -595,9 +598,11 @@ function renderSettings() {
   const devSel = settingsEl.querySelector('#hydraDeviceSel');
   if (devSel) devSel.addEventListener('change', async ()=>{ state.hydraDevice=devSel.value; localStorage.setItem('hydraDevice',state.hydraDevice); try{ await Hydra.startAudio(state.hydraDevice||undefined, { forceInput: true }); }catch(e){ console.error(e); } });
   const mdSel = settingsEl.querySelector('#milkdropPresetSel');
-  if (mdSel) mdSel.addEventListener('change', ()=>{ Milkdrop.setPreset(mdSel.value); });
+  if (mdSel) mdSel.addEventListener('change', ()=>{ Milkdrop.setAuto(false); Milkdrop.setPreset(mdSel.value); syncSettings(); });
   const mdRnd = settingsEl.querySelector('[data-act="milkdrop-random"]');
   if (mdRnd) mdRnd.addEventListener('click', ()=>{ Milkdrop.randomPreset(); });
+  const mdAuto = settingsEl.querySelector('[data-act="milkdrop-auto"]');
+  if (mdAuto) mdAuto.addEventListener('click', ()=>{ Milkdrop.setAuto(!Milkdrop.isAuto()); syncSettings(); });
   const scLoadS = settingsEl.querySelector('[data-act="sc-load-settings"]');
   if (scLoadS) scLoadS.addEventListener('click', ()=>{ const u=(settingsEl.querySelector('#scUrlInputS').value||'').trim(); if(!u) return; state.scUrl=u; localStorage.setItem('scUrl',u); if(state.source==='spotify'){ state.source='auto'; localStorage.setItem('source','auto'); } stopOtherSources('soundcloud'); sc.load(u); applyActive(true); });
   const ytLoadS = settingsEl.querySelector('[data-act="yt-load-settings"]');
@@ -648,11 +653,13 @@ function manageNotchOverlay() {
 // attach/detach the Hydra background canvas into the current skin's .bg layer
 let lastHydraKey = '';
 const HBADGE = 'position:absolute;left:8px;right:8px;bottom:8px;z-index:50;padding:6px 9px;border-radius:8px;font-size:11px;text-align:center;background:rgba(0,0,0,0.6);pointer-events:none;';
-function hydraBadge(text, color) {
+function hydraBadge(text, color, onClick) {
   let b = popup.querySelector('.hydra-badge');
   if (text === null) { if (b) b.remove(); return; }
   if (!b) { b = document.createElement('div'); b.className = 'hydra-badge'; popup.appendChild(b); }
-  b.textContent = text; b.style.cssText = HBADGE + 'color:' + color + ';';
+  b.textContent = text;
+  b.style.cssText = HBADGE + 'color:' + color + ';' + (onClick ? 'pointer-events:auto;cursor:pointer;' : '');
+  b.onclick = onClick || null;
 }
 function detachBgCanvas(id) {
   const cv = document.getElementById(id);
@@ -687,7 +694,7 @@ function manageHydra() {
       const err = Milkdrop.getError();
       if (err) hydraBadge('Milkdrop: ' + err, '#ff8585');
       else if (!Milkdrop.isReady()) hydraBadge('Milkdrop: cargando…', '#ffd479');
-      else if (!Hydra.audioActive()) hydraBadge('Activa el audio reactivo en Ajustes para que Milkdrop baile', '#ffd479');
+      else if (!Hydra.audioActive()) hydraBadge('▶ Pulsa aquí para activar el audio reactivo', '#ffd479', () => startHydraAudio());
       else hydraBadge(null);
     } else hydraBadge(null);
     lastHydraKey = '';
