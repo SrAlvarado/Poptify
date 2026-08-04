@@ -282,11 +282,15 @@
   .play { transition: transform .2s cubic-bezier(0.34,1.56,0.64,1), background .25s ease; }
   /* dim backdrop while settings open */
   .scrim { position: fixed; inset: 0; z-index: 90; background: rgba(0,0,0,0); pointer-events: none; transition: background .3s ease; }
-  .scrim.show { background: rgba(0,0,0,0.28); pointer-events: auto; }
+  /* invisible: still catches the click-outside-to-close, but no dark veil */
+  .scrim.show { pointer-events: auto; }
 
   /* ============ SKIN: NOTCH (wraps the Mac camera) ============ */
   .skin-notch { background:#000; border-radius: 0 0 26px 26px; box-shadow: 0 0 0 1px rgba(255,255,255,0.07), 0 22px 50px -12px rgba(0,0,0,0.75); color:#fff; overflow:hidden; }
-  .skin-notch .n-glow { position:absolute; inset:0; z-index:0; opacity:.55; filter: blur(14px); transition: background .8s ease; }
+  /* reactive background canvas (hydra/milkdrop) + scrim so the text stays readable */
+  .skin-notch .bg { position:absolute; inset:0; z-index:0; overflow:hidden; border-radius:inherit; }
+  .skin-notch .bg::after { content:""; position:absolute; inset:0; background:rgba(0,0,0,0.35); }
+  .skin-notch .n-glow { position:absolute; inset:0; z-index:1; opacity:.55; filter: blur(14px); transition: background .8s ease; }
   /* grid keeps a fixed, centred dead-zone the width of the Mac camera notch so
      no control ever sits under the physical camera; equal 1fr sides center it */
   .skin-notch .notch-body { position:relative; z-index:2; display:grid; grid-template-columns:1fr 170px 1fr; align-items:center; gap:14px; padding:9px 18px 11px; }

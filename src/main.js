@@ -351,8 +351,12 @@ function renderVinyl(al, col) {
 function renderNotch(al, col) {
   const pct = al.cur/al.dur*100;
   const glow = `radial-gradient(60% 130% at 16% 50%, rgb(${col.dom.join(',')}), transparent 72%), radial-gradient(60% 130% at 84% 50%, rgb(${col.avg.join(',')}), transparent 72%)`;
+  // reactive backgrounds (hydra/milkdrop) mount their canvas into .bg; dim the
+  // glow so it doesn't wash them out
+  const reactive = state.bg === 'hydra' || state.bg === 'milkdrop';
   return `
-  <div class="n-glow" style="background:${glow}"></div>
+  <div class="bg"></div>
+  <div class="n-glow" style="background:${glow};${reactive ? 'opacity:.22;' : ''}"></div>
   <div class="notch-body">
     <div class="notch-left">
       <div class="n-art"><canvas data-art width="80" height="80"></canvas></div>
