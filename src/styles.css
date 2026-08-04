@@ -294,6 +294,13 @@
   /* grid keeps a fixed, centred dead-zone the width of the Mac camera notch so
      no control ever sits under the physical camera; equal 1fr sides center it */
   .skin-notch .notch-body { position:relative; z-index:2; display:grid; grid-template-columns:1fr 170px 1fr; align-items:center; gap:14px; padding:9px 18px 11px; }
+  /* collapsed: slim strip hugging the camera so it doesn't cover other apps;
+     hovering expands back to the full layout (handled in main.js) */
+  .skin-notch .notch-left, .skin-notch .notch-right { overflow:hidden; }
+  .skin-notch.n-collapsed .notch-body { grid-template-columns:26px 170px 26px; gap:0; padding:5px 10px 7px; }
+  .skin-notch.n-collapsed .notch-left, .skin-notch.n-collapsed .notch-right { height:0; opacity:0; pointer-events:none; }
+  .skin-notch.n-expand .notch-left, .skin-notch.n-expand .notch-right { animation: notchIn .25s ease; }
+  @keyframes notchIn { from { opacity:0; } to { opacity:1; } }
   .skin-notch .notch-left { justify-self:start; display:flex; align-items:center; gap:11px; min-width:0; }
   .skin-notch .n-art { width:34px; height:34px; border-radius:9px; overflow:hidden; flex-shrink:0; box-shadow:0 4px 12px -3px rgba(0,0,0,.7); }
   .skin-notch .n-art canvas { width:100%; height:100%; display:block; }

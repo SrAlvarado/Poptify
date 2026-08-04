@@ -808,11 +808,34 @@ function render(swap) {
   }
 }
 
+// The notch stays collapsed (a slim strip around the camera) so it doesn't
+// cover other apps' content; hovering it expands the full controls.
+let notchHover = false, notchLeaveT = null;
+function notchCollapsed() {
+  return state.skin === 'notch' && !!state.track && !state.lyricsOpen && !state.settingsOpen && !notchHover;
+}
+popup.addEventListener('mouseenter', () => {
+  if (state.skin !== 'notch') return;
+  clearTimeout(notchLeaveT);
+  if (!notchHover) {
+    notchHover = true;
+    popup.classList.add('n-expand');
+    setTimeout(() => popup.classList.remove('n-expand'), 300);
+    layout();
+  }
+});
+popup.addEventListener('mouseleave', () => {
+  if (state.skin !== 'notch') return;
+  clearTimeout(notchLeaveT);
+  notchLeaveT = setTimeout(() => { notchHover = false; layout(); }, 400);
+});
+
 // resize the OS window to fit the current skin (+ settings panel when open),
 // place the popup/panel inside, and pin the notch to the top of the screen.
 let lastWinW = 0, lastWinH = 0;
 let resizing = false;
 async function layout() {
+  popup.classList.toggle('n-collapsed', notchCollapsed());
   popup.style.transform = ''; // clear tilt so measurements are clean
   const pr = popup.getBoundingClientRect();
   const pw = Math.ceil(pr.width), ph = Math.ceil(pr.height);
