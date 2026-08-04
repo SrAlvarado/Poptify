@@ -296,11 +296,16 @@
   .skin-notch .notch-body { position:relative; z-index:2; display:grid; grid-template-columns:1fr 170px 1fr; align-items:center; gap:14px; padding:9px 18px 11px; }
   /* collapsed: slim strip hugging the camera so it doesn't cover other apps;
      hovering expands back to the full layout (handled in main.js) */
-  .skin-notch .notch-left, .skin-notch .notch-right { overflow:hidden; }
+  .skin-notch .notch-body { transition: grid-template-columns .38s cubic-bezier(0.22,1,0.36,1), padding .38s cubic-bezier(0.22,1,0.36,1), gap .38s ease; }
+  .skin-notch .notch-left, .skin-notch .notch-right { overflow:hidden; max-height:44px; transition: max-height .38s cubic-bezier(0.22,1,0.36,1), opacity .22s ease; }
   .skin-notch.n-collapsed .notch-body { grid-template-columns:110px 170px 110px; gap:0; padding:5px 10px 7px; }
-  .skin-notch.n-collapsed .notch-left, .skin-notch.n-collapsed .notch-right { height:0; opacity:0; pointer-events:none; }
-  .skin-notch.n-expand .notch-left, .skin-notch.n-expand .notch-right { animation: notchIn .25s ease; }
-  @keyframes notchIn { from { opacity:0; } to { opacity:1; } }
+  .skin-notch.n-collapsed .notch-left, .skin-notch.n-collapsed .notch-right { max-height:0; opacity:0; pointer-events:none; }
+  /* collapsed-only marquee with the song title (left of the camera) */
+  .skin-notch .n-mini { position:absolute; z-index:3; top:0; bottom:2px; left:12px; width:104px; display:flex; align-items:center; overflow:hidden; opacity:0; pointer-events:none; transition: opacity .25s ease .1s; -webkit-mask-image: linear-gradient(90deg, transparent, #000 10px, #000 calc(100% - 10px), transparent); mask-image: linear-gradient(90deg, transparent, #000 10px, #000 calc(100% - 10px), transparent); }
+  .skin-notch.n-collapsed .n-mini { opacity:1; }
+  .skin-notch .n-marq { display:flex; white-space:nowrap; animation: nmarq 9s linear infinite; }
+  .skin-notch .n-marq span { font-size:11px; font-weight:600; color:rgba(255,255,255,0.85); padding-right:28px; }
+  @keyframes nmarq { from { transform:translateX(0); } to { transform:translateX(-50%); } }
   .skin-notch .notch-left { justify-self:start; display:flex; align-items:center; gap:11px; min-width:0; }
   .skin-notch .n-art { width:34px; height:34px; border-radius:9px; overflow:hidden; flex-shrink:0; box-shadow:0 4px 12px -3px rgba(0,0,0,.7); }
   .skin-notch .n-art canvas { width:100%; height:100%; display:block; }

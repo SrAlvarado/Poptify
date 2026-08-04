@@ -375,6 +375,7 @@ function renderNotch(al, col) {
       <button class="icon-btn settings-inline" data-act="settings" title="Ajustes">${I.gear}</button>
     </div>
   </div>
+  <div class="n-mini"><div class="n-marq"><span>${al.title}</span><span>${al.title}</span></div></div>
   <div class="notch-progress"><div class="bar" data-act="seek"><div class="fill" style="width:${pct}%"></div></div></div>`;
 }
 
@@ -790,6 +791,13 @@ function render(swap) {
   popup.className = 'popup skin-' + state.skin + (isMini ? ' mini' : '');
   const gear = inlineSettings ? '' : `<button class="icon-btn gear" data-act="settings" title="Ajustes">${I.gear}</button>`;
   popup.innerHTML = gear + (isMini ? renderIOSMini(al, col) : renderers[state.skin](al, col));
+  if (state.skin === 'notch') {
+    // measure the EXPANDED size before layout() re-applies the collapsed class,
+    // so the hover expansion can grow the window to the right size upfront
+    popup.classList.remove('n-collapsed');
+    const nr = popup.getBoundingClientRect();
+    notchExpW = Math.ceil(nr.width); notchExpH = Math.ceil(nr.height);
+  }
   // CRT skin runs the cover through a WebGL fisheye shader; other skins draw it flat
   popup.querySelectorAll('canvas[data-art]').forEach(cv => {
     if (state.skin === 'crt') { if (!renderCRT(cv, coverImg)) drawImageCover(cv.getContext('2d'), cv.width, cv.height, coverImg); }
@@ -810,24 +818,43 @@ function render(swap) {
 
 // The notch stays collapsed (a slim strip around the camera) so it doesn't
 // cover other apps' content; hovering it expands the full controls.
+// Sequencing matters for a smooth animation: grow the OS window BEFORE the CSS
+// expansion (so it isn't clipped) and shrink it AFTER the CSS collapse.
 let notchHover = false, notchLeaveT = null;
+let notchExpW = 0, notchExpH = 0; // expanded popup size, measured at render
 function notchCollapsed() {
   return state.skin === 'notch' && !!state.track && !state.lyricsOpen && !state.settingsOpen && !notchHover;
 }
-popup.addEventListener('mouseenter', () => {
+popup.addEventListener('mouseenter', async () => {
   if (state.skin !== 'notch') return;
   clearTimeout(notchLeaveT);
-  if (!notchHover) {
-    notchHover = true;
-    popup.classList.add('n-expand');
-    setTimeout(() => popup.classList.remove('n-expand'), 300);
-    layout();
+  if (notchHover) return;
+  notchHover = true;
+  if (notchExpW) {
+    try {
+      const winW = notchExpW + MARGIN * 2, winH = notchExpH + MARGIN;
+      await appWindow.setSize(new LogicalSize(winW, winH));
+      const mon = (await currentMonitor()) || (await primaryMonitor());
+      if (mon) {
+        const sf = mon.scaleFactor || 1;
+        await appWindow.setPosition(new LogicalPosition(
+          Math.round(mon.position.x / sf + (mon.size.width / sf - winW) / 2),
+          Math.round(mon.position.y / sf)));
+      }
+      lastWinW = winW; lastWinH = winH;
+    } catch (e) { console.error('notch expand', e); }
   }
+  popup.classList.remove('n-collapsed');
+  if (!notchExpW) layout();
 });
 popup.addEventListener('mouseleave', () => {
   if (state.skin !== 'notch') return;
   clearTimeout(notchLeaveT);
-  notchLeaveT = setTimeout(() => { notchHover = false; layout(); }, 400);
+  notchLeaveT = setTimeout(() => {
+    notchHover = false;
+    popup.classList.add('n-collapsed');
+    setTimeout(() => layout(), 400); // shrink the window once the CSS anim ends
+  }, 400);
 });
 
 // resize the OS window to fit the current skin (+ settings panel when open),
