@@ -757,7 +757,13 @@ async function startHydraAudio() {
   } catch (e) {
     console.error('hydra audio', e);
     state.hydraAudio = false; localStorage.setItem('hydraAudio', '0');
-    alert('No se pudo acceder al audio. En macOS acepta el permiso de grabación de pantalla/audio del sistema; si no, revisa el permiso de micrófono y que exista un dispositivo loopback (BlackHole).');
+    const ne = Hydra.getNativeError();
+    if (/PERMISO/.test(ne)) {
+      alert('Poptify necesita el permiso de "Grabación de pantalla y audio del sistema".\n\nSe abrirá el panel de Privacidad: activa ahí la app (en modo dev, el terminal desde el que la lanzas) y vuelve a intentarlo.');
+      invoke('open_capture_settings').catch(() => {});
+    } else {
+      alert('No se pudo acceder al audio. En macOS acepta el permiso de grabación de pantalla/audio del sistema; si no, revisa el permiso de micrófono y que exista un dispositivo loopback (BlackHole).');
+    }
   }
   manageHydra();
   syncSettings();

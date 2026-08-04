@@ -370,6 +370,18 @@ fn set_notch_overlay(enable: bool, window: tauri::WebviewWindow) -> Result<(), S
     Ok(())
 }
 
+/// Open the macOS privacy pane where the user grants Screen Recording
+/// (which covers system-audio capture for the reactive backgrounds).
+#[tauri::command]
+fn open_capture_settings(app: AppHandle) -> Result<(), String> {
+    app.opener()
+        .open_url(
+            "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture",
+            None::<&str>,
+        )
+        .map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -422,7 +434,8 @@ pub fn run() {
             fetch_lyrics,
             set_notch_overlay,
             audio_tap::start_audio_tap,
-            audio_tap::stop_audio_tap
+            audio_tap::stop_audio_tap,
+            open_capture_settings
         ])
         .run(tauri::generate_context!())
         .expect("error al arrancar Poptify");

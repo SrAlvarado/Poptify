@@ -138,7 +138,8 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 
 let audioCtx = null, analyser = null, srcNode = null, stream = null, rafA = null, freq = null;
-let native = false, unlistenFn = null;
+let native = false, unlistenFn = null, nativeErr = '';
+export function getNativeError() { return nativeErr; }
 // latest time-domain waveform (u8, 1024/channel) for Butterchurn
 let waveL = null, waveR = null;
 export function getWave() { return waveL ? { l: waveL, r: waveR } : null; }
@@ -168,8 +169,11 @@ export async function startAudio(deviceId, opts = {}) {
   stopAudio();
   // native tap first, unless the user explicitly picked an input device
   if (!opts.forceInput) {
-    try { await startNative(); return; }
-    catch (e) { console.warn('[poptify] tap nativo no disponible, uso getUserMedia', e); }
+    try { await startNative(); nativeErr = ''; return; }
+    catch (e) {
+      nativeErr = String((e && e.message) || e);
+      console.warn('[poptify] tap nativo no disponible, uso getUserMedia', e);
+    }
   }
   // disable voice processing — it tanks output quality (and forces Bluetooth
   // headphones into low-quality hands-free mode)

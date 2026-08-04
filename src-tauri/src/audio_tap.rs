@@ -103,8 +103,10 @@ mod mac {
     }
 
     pub fn start(ring: Arc<Mutex<Ring>>) -> Result<Tap, String> {
-        let content = SCShareableContent::get()
-            .map_err(|e| format!("sin permiso de grabación de pantalla/audio: {e}"))?;
+        let content = SCShareableContent::get().map_err(|e| {
+            eprintln!("[poptify] audio tap: SCShareableContent::get failed: {e}");
+            format!("PERMISO:{e}")
+        })?;
         let displays = content.displays();
         let display = displays.first().ok_or("no hay pantallas disponibles")?;
         let filter = SCContentFilter::create()
@@ -121,9 +123,11 @@ mod mac {
             .with_queue_depth(3);
         let mut stream = SCStream::new(&filter, &config);
         stream.add_output_handler(Handler { ring }, SCStreamOutputType::Audio);
-        stream
-            .start_capture()
-            .map_err(|e| format!("no se pudo iniciar la captura: {e}"))?;
+        stream.start_capture().map_err(|e| {
+            eprintln!("[poptify] audio tap: start_capture failed: {e}");
+            format!("no se pudo iniciar la captura: {e}")
+        })?;
+        eprintln!("[poptify] audio tap: capture started");
         Ok(Tap { stream, running: Arc::new(AtomicBool::new(true)) })
     }
 
