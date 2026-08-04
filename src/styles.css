@@ -286,7 +286,13 @@
   .scrim.show { pointer-events: auto; }
 
   /* ============ SKIN: NOTCH (wraps the Mac camera) ============ */
-  .skin-notch { background:#000; border-radius: 0 0 26px 26px; box-shadow: 0 0 0 1px rgba(255,255,255,0.07), 0 22px 50px -12px rgba(0,0,0,0.75); color:#fff; overflow:hidden; }
+  /* explicit widths: the popup is position:fixed (shrink-to-fit), so without
+     them its width would depend on the OS window size and drift off-center */
+  .skin-notch { width: 620px; background:#000; border-radius: 0 0 26px 26px; box-shadow: 0 0 0 1px rgba(255,255,255,0.07), 0 22px 50px -12px rgba(0,0,0,0.75); color:#fff; overflow:hidden; }
+  .skin-notch.n-collapsed { width: 410px; }
+  /* keep the notch horizontally centred in the window so the width animation
+     shrinks/grows symmetrically around the camera (tilt skips this skin) */
+  .skin-notch { left: 50% !important; transform: translateX(-50%); }
   /* reactive background canvas (hydra/milkdrop) + scrim so the text stays readable */
   .skin-notch .bg { position:absolute; inset:0; z-index:0; overflow:hidden; border-radius:inherit; }
   .skin-notch .bg::after { content:""; position:absolute; inset:0; background:rgba(0,0,0,0.35); }
@@ -298,7 +304,7 @@
      hovering expands back to the full layout (handled in main.js) */
   .skin-notch .notch-body { transition: grid-template-columns .38s cubic-bezier(0.22,1,0.36,1), padding .38s cubic-bezier(0.22,1,0.36,1), gap .38s ease; }
   .skin-notch .notch-left, .skin-notch .notch-right { overflow:hidden; max-height:44px; transition: max-height .38s cubic-bezier(0.22,1,0.36,1), opacity .22s ease; }
-  .skin-notch.n-collapsed .notch-body { grid-template-columns:110px 170px 110px; gap:0; padding:5px 10px 7px; }
+  .skin-notch.n-collapsed .notch-body { grid-template-columns:1fr 170px 1fr; gap:0; padding:5px 10px 7px; }
   .skin-notch.n-collapsed .notch-left, .skin-notch.n-collapsed .notch-right { max-height:0; opacity:0; pointer-events:none; }
   /* collapsed-only marquee with the song title (left of the camera) */
   .skin-notch .n-mini { position:absolute; z-index:3; top:0; bottom:2px; left:12px; width:104px; display:flex; align-items:center; overflow:hidden; opacity:0; pointer-events:none; transition: opacity .25s ease .1s; -webkit-mask-image: linear-gradient(90deg, transparent, #000 10px, #000 calc(100% - 10px), transparent); mask-image: linear-gradient(90deg, transparent, #000 10px, #000 calc(100% - 10px), transparent); }
