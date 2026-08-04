@@ -375,7 +375,7 @@ function renderNotch(al, col) {
       <button class="icon-btn settings-inline" data-act="settings" title="Ajustes">${I.gear}</button>
     </div>
   </div>
-  <div class="n-mini"><div class="n-marq"><span>${al.title}</span><span>${al.title}</span></div></div>
+  <div class="n-mini"><div class="n-marq"><span>${al.title} · ${al.artist}</span><span>${al.title} · ${al.artist}</span></div></div>
   <div class="notch-progress"><div class="bar" data-act="seek"><div class="fill" style="width:${pct}%"></div></div></div>`;
 }
 
