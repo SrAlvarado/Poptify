@@ -798,8 +798,12 @@ function render(swap) {
     // one and the hover expansion gets clipped to a collapsed-sized window.
     popup.classList.add('n-noanim');
     popup.classList.remove('n-collapsed');
+    // width:max-content — the popup is position:fixed (shrink-to-fit), so its
+    // natural width is capped by the current (possibly collapsed) window width
+    popup.style.width = 'max-content';
     const nr = popup.getBoundingClientRect();
     notchExpW = Math.ceil(nr.width); notchExpH = Math.ceil(nr.height);
+    popup.style.width = '';
     popup.classList.toggle('n-collapsed', notchCollapsed());
     void popup.offsetWidth; // apply before re-enabling transitions
     popup.classList.remove('n-noanim');
