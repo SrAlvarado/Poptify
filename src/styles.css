@@ -303,6 +303,8 @@
   /* collapsed-only marquee with the song title (left of the camera) */
   .skin-notch .n-mini { position:absolute; z-index:3; top:0; bottom:2px; left:12px; width:104px; display:flex; align-items:center; overflow:hidden; opacity:0; pointer-events:none; transition: opacity .25s ease .1s; -webkit-mask-image: linear-gradient(90deg, transparent, #000 10px, #000 calc(100% - 10px), transparent); mask-image: linear-gradient(90deg, transparent, #000 10px, #000 calc(100% - 10px), transparent); }
   .skin-notch.n-collapsed .n-mini { opacity:1; }
+  /* measurement helper: snap layout instantly while render() sizes the popup */
+  .skin-notch.n-noanim .notch-body, .skin-notch.n-noanim .notch-left, .skin-notch.n-noanim .notch-right, .skin-notch.n-noanim .n-mini { transition: none !important; }
   .skin-notch .n-marq { display:flex; white-space:nowrap; animation: nmarq 9s linear infinite; }
   .skin-notch .n-marq span { font-size:11px; font-weight:600; color:rgba(255,255,255,0.85); padding-right:28px; }
   @keyframes nmarq { from { transform:translateX(0); } to { transform:translateX(-50%); } }

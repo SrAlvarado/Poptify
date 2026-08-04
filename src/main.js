@@ -792,11 +792,17 @@ function render(swap) {
   const gear = inlineSettings ? '' : `<button class="icon-btn gear" data-act="settings" title="Ajustes">${I.gear}</button>`;
   popup.innerHTML = gear + (isMini ? renderIOSMini(al, col) : renderers[state.skin](al, col));
   if (state.skin === 'notch') {
-    // measure the EXPANDED size before layout() re-applies the collapsed class,
-    // so the hover expansion can grow the window to the right size upfront
+    // measure the EXPANDED size so the hover expansion can grow the window to
+    // the right size upfront. Transitions must be off while measuring — with
+    // them on, the rect right after removing the class is still the collapsed
+    // one and the hover expansion gets clipped to a collapsed-sized window.
+    popup.classList.add('n-noanim');
     popup.classList.remove('n-collapsed');
     const nr = popup.getBoundingClientRect();
     notchExpW = Math.ceil(nr.width); notchExpH = Math.ceil(nr.height);
+    popup.classList.toggle('n-collapsed', notchCollapsed());
+    void popup.offsetWidth; // apply before re-enabling transitions
+    popup.classList.remove('n-noanim');
   }
   // CRT skin runs the cover through a WebGL fisheye shader; other skins draw it flat
   popup.querySelectorAll('canvas[data-art]').forEach(cv => {
