@@ -1,6 +1,6 @@
 {
   "name": "poptify",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Floating Spotify now-playing popup (iOS lock-screen style) for macOS",
   "type": "module",
   "scripts": {
@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-process": "^2.3.1",
+    "@tauri-apps/plugin-updater": "^2.10.1",
     "butterchurn": "^2.6.7",
     "butterchurn-presets": "^2.4.7",
     "hydra-synth": "^1.4.0"

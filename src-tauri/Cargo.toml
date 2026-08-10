@@ -1,6 +1,6 @@
 [package]
 name = "poptify"
-version = "0.1.0"
+version = "0.2.0"
 description = "Floating Spotify now-playing popup"
 authors = ["Markel Alvarado"]
 edition = "2021"
@@ -26,6 +26,8 @@ rand = "0.8"
 urlencoding = "2"
 dirs = "5"
 rustfft = "6.4.1"
+tauri-plugin-updater = "2.10.1"
+tauri-plugin-process = "2.3.1"
 
 [target."cfg(target_os = \"macos\")".dependencies]
 objc = "0.2"

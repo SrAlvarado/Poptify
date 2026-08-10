@@ -2,6 +2,7 @@
 if (typeof globalThis.global === 'undefined') globalThis.global = globalThis;
 
 import { invoke } from '@tauri-apps/api/core';
+import { getVersion } from '@tauri-apps/api/app';
 import { getCurrentWindow, currentMonitor, primaryMonitor } from '@tauri-apps/api/window';
 import { LogicalSize, LogicalPosition } from '@tauri-apps/api/dpi';
 import { createSoundCloud } from './soundcloud.js';
@@ -592,6 +593,9 @@ function renderSettings() {
     </div>` : ''}
     <div class="sec"><span class="lbl">Modo (iOS)</span><div class="opts">${modeOpts}</div></div>
     ${state.track ? `<div class="sec"><button class="opt" style="width:100%" data-act="open-lyrics">Ver letra</button></div>` : ``}
+    <div class="sec"><span class="lbl">Aplicación${state.version ? ' · v' + state.version : ''}</span>
+      <button class="opt" style="width:100%" data-act="check-update">Buscar actualizaciones</button>
+    </div>
     ${state.authed ? `<div class="sec"><button class="opt" style="width:100%" data-act="logout">Cerrar sesión de Spotify</button></div>` : ``}`;
   settingsEl.querySelectorAll('[data-set-skin]').forEach(el=>el.addEventListener('click',()=>{ state.skin=el.dataset.setSkin; localStorage.setItem('skin',state.skin); render(true); }));
   settingsEl.querySelectorAll('[data-set-bg]').forEach(el=>el.addEventListener('click',()=>{ state.bg=el.dataset.setBg; localStorage.setItem('bg',state.bg); render(true); }));
@@ -615,6 +619,29 @@ function renderSettings() {
   settingsEl.querySelector('[data-act="settings"]').addEventListener('click',()=>{ state.settingsOpen=false; syncSettings(); });
   const lyBtn = settingsEl.querySelector('[data-act="open-lyrics"]');
   if (lyBtn) lyBtn.addEventListener('click', ()=>{ state.settingsOpen=false; state.lyricsOpen=true; render(true); loadLyrics(); });
+  const updBtn = settingsEl.querySelector('[data-act="check-update"]');
+  if (updBtn) updBtn.addEventListener('click', async () => {
+    updBtn.textContent = 'Buscando…';
+    try {
+      // lazy imports: a plugin load failure must never blank the app at startup
+      const { check } = await import('@tauri-apps/plugin-updater');
+      const up = await check();
+      if (!up) { updBtn.textContent = '✓ Estás en la última versión'; setTimeout(() => { updBtn.textContent = 'Buscar actualizaciones'; }, 3000); return; }
+      updBtn.textContent = `Descargando v${up.version}…`;
+      let total = 0, got = 0;
+      await up.downloadAndInstall((ev) => {
+        if (ev.event === 'Started') total = ev.data.contentLength || 0;
+        else if (ev.event === 'Progress') { got += ev.data.chunkLength; if (total) updBtn.textContent = `Descargando… ${Math.round((got / total) * 100)}%`; }
+        else if (ev.event === 'Finished') updBtn.textContent = 'Instalando…';
+      });
+      updBtn.textContent = 'Reiniciando…';
+      const { relaunch } = await import('@tauri-apps/plugin-process');
+      await relaunch();
+    } catch (e) {
+      console.error('update', e);
+      updBtn.textContent = 'Error al actualizar — reintentar';
+    }
+  });
   const logout = settingsEl.querySelector('[data-act="logout"]');
   if (logout) logout.addEventListener('click', async ()=>{ await invoke('logout'); state.settingsOpen=false; state.authed=false; sp.track=null; applyActive(true); });
   settingsEl.classList.toggle('open', state.settingsOpen);
@@ -1184,6 +1211,7 @@ async function boot() {
   try {
     state.hasClientId = await invoke('has_client_id');
     state.authed = await invoke('auth_status');
+    state.version = await getVersion();
   } catch (err) { console.error('boot error', err); }
   if (state.authed) await pollSpotify();
   if (state.scUrl && (state.source === 'soundcloud')) { try { await sc.load(state.scUrl); } catch (e) {} }
