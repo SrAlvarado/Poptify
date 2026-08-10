@@ -1,6 +1,6 @@
 [package]
 name = "poptify"
-version = "0.2.1"
+version = "0.2.2"
 description = "Floating Spotify now-playing popup"
 authors = ["Markel Alvarado"]
 edition = "2021"
