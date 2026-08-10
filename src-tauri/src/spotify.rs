@@ -38,8 +38,12 @@ pub static RATE_UNTIL: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU
 pub fn rate_limited() -> bool { now_secs() < RATE_UNTIL.load(std::sync::atomic::Ordering::Relaxed) }
 fn note_rate_limit(resp: &reqwest::Response) {
     let retry = resp.headers().get("retry-after").and_then(|v| v.to_str().ok()).and_then(|s| s.trim().parse::<u64>().ok()).unwrap_or(8);
-    RATE_UNTIL.store(now_secs() + retry.max(5), std::sync::atomic::Ordering::Relaxed);
-    eprintln!("[poptify] rate-limited; backing off {}s", retry.max(5));
+    // Spotify dev-mode bans send huge Retry-After values (hours); honoring them
+    // blindly freezes the app long after the ban actually lifts. Cap at 15 min:
+    // if we're still banned at the next probe, this just re-arms another 15 min.
+    let retry = retry.clamp(5, 900);
+    RATE_UNTIL.store(now_secs() + retry, std::sync::atomic::Ordering::Relaxed);
+    eprintln!("[poptify] rate-limited; backing off {retry}s");
 }
 
 #[derive(Clone, Serialize)]
