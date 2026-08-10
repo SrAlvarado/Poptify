@@ -214,11 +214,16 @@ async fn now_playing(state: State<'_, AppState>) -> Result<Option<NowPlaying>, S
             };
             match liked_res {
                 Ok(l) => {
-                    // only cache a successful lookup (don't pin a failed false)
                     *state.np_cache.lock().unwrap() = Some((id.clone(), l, img.clone()));
                     (l, img)
                 }
-                Err(_) => (false, img),
+                Err(_) => {
+                    // cache the failure too (as not-liked): retrying every poll
+                    // hammers a possibly rate-banned endpoint and refetches the
+                    // artwork each time. The heart self-corrects on track change.
+                    *state.np_cache.lock().unwrap() = Some((id.clone(), false, img.clone()));
+                    (false, img)
+                }
             }
         }
     };

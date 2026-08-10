@@ -217,7 +217,11 @@ pub async fn is_saved(client: &reqwest::Client, token: &str, id: &str) -> Result
         .send()
         .await
         .map_err(|e| e.to_string())?;
-    if resp.status().as_u16() == 429 { note_rate_limit(&resp); return Err("contains 429".into()); }
+    // a 429 here must NOT arm the global backoff: Spotify bans this endpoint
+    // (/me/tracks/contains) independently for long stretches, and freezing all
+    // polling over it left the app showing a stale song. Worst case the heart
+    // starts unliked until the endpoint recovers.
+    if resp.status().as_u16() == 429 { return Err("contains 429".into()); }
     if !resp.status().is_success() {
         let s = resp.status();
         let body = resp.text().await.unwrap_or_default();
