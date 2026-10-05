@@ -8,7 +8,7 @@
   // pivotes en coordenadas del viewBox (0 -40 300 420)
   const PIV = {
     root: [150, 352], body: [150, 350], head: [150, 180],
-    earL: [128, 84], earR: [172, 84], armL: [132, 246], armR: [168, 246],
+    earL: [128, 84], earR: [172, 84], armL: [128, 244], armR: [172, 244],
     legL: [112, 340], legR: [188, 340],
   };
 
@@ -56,6 +56,8 @@
   // forma con pelo: data-flow = hacia dónde cae el pelo, data-fl = largo, data-fd = densidad
   const FUR = (d, flow = 'down', fl = 7, fd = 1, cls = '') =>
     `<path class="fur ${cls}" fill="url(#ch-fur)" d="${d}" data-flow="${flow}" data-fl="${fl}" data-fd="${fd}"/>`;
+  // capa de pelo que va encima de otra: sin borde sombreado ni degradado propio, para que no marque una raya
+  const OVER = (d, fl) => `<path class="fur over" fill="#f6f3f0" d="${d}" data-flow="down" data-fl="${fl}" data-fd="1.2" data-ns="1"/>`;
   const AO = (cx, cy, rx, ry, o = 0.45) => `<ellipse class="ao" filter="url(#ch-soft)" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" opacity="${o}"/>`;
 
   // los ids llevan el prefijo ch- y render() los hace únicos por ilustración
@@ -114,10 +116,11 @@
   // cabeza en 3/4 mirando a la derecha (la vista principal, como la foto de referencia)
   function HEAD_TQ(expr, pose) {
     const c = COVER[expr] ?? .34;
-    const open = expr === 'shout' || expr === 'grin';
+    const open = expr === 'shout';
+    const up = expr === 'smug' || expr === 'grin';
     const mouth = open
-      ? `<path class="mouth" d="M182 158 Q192 ${expr === 'shout' ? 182 : 172} 202 157 Q192 161 182 158 Z"/><path class="tooth" d="M187 159 h4 v7 h-4 Z M191.6 159 h4 v7 h-4 Z"/>`
-      : `<path class="lip" d="M192 149 L192 155 M192 155 Q187 159 ${expr === 'smug' ? '181 156' : '181 160'} M192 155 Q197 158 ${expr === 'smug' ? '203 152' : '202 159'}"/>`;
+      ? `<ellipse class="mouth" cx="192" cy="160" rx="4" ry="3.2"/>`
+      : `<path class="lip" d="M192 149 L192 155 M192 155 Q187 159 ${up ? '181 156' : '181 160'} M192 155 Q197 158 ${expr === 'grin' ? '204 149' : up ? '203 152' : '202 159'}"/>`;
     return part('earR', pose, mirror(EAR(true, true))) +                         // oreja de detrás: se le ve el dorso
       part('earL', pose, EAR(false)) +
       AO(152, 186, 50, 12, 0.5) +
@@ -141,10 +144,11 @@
   // cabeza de frente (para la vista frontal y las tarjetas de turnaround)
   function HEAD_FRONT(expr, pose, back) {
     const c = COVER[expr] ?? .34;
-    const open = expr === 'shout' || expr === 'grin';
+    const open = expr === 'shout';
+    const up = expr === 'smug' || expr === 'grin';
     const mouth = open
-      ? `<path class="mouth" d="M139 158 Q150 ${expr === 'shout' ? 182 : 172} 161 158 Q150 162 139 158 Z"/><path class="tooth" d="M145.5 159 h4.3 v7 h-4.3 Z M150.2 159 h4.3 v7 h-4.3 Z"/>`
-      : `<path class="lip" d="M150 152 L150 158 M150 158 Q144 162 ${expr === 'smug' ? '138 159' : '138 163'} M150 158 Q156 162 ${expr === 'smug' ? '162 154' : '162 163'}"/>`;
+      ? `<ellipse class="mouth" cx="150" cy="161" rx="4.5" ry="3.4"/>`
+      : `<path class="lip" d="M150 152 L150 158 M150 158 Q144 162 ${up ? '138 159' : '138 163'} M150 158 Q156 162 ${expr === 'grin' ? '163 151' : up ? '162 154' : '162 163'}"/>`;
     return part('earL', pose, EAR(back)) + part('earR', pose, mirror(EAR(back, true))) +
       AO(150, 184, 48, 12, 0.5) +
       FUR(E(104, 152, 22, 20), 'out:150,130', 9, 1) + FUR(E(196, 152, 22, 20), 'out:150,130', 9, 1) +
@@ -169,7 +173,7 @@
     const cx = 152, cy = 182, rx = 66, ry = 24;
     let s = half === 'front'
       ? `<path class="band" d="M${cx - rx} ${cy} A${rx} ${ry} 0 0 0 ${cx + rx} ${cy}"/>` +
-        FUR('M84 186 Q152 222 220 186 Q218 200 206 208 Q152 232 98 208 Q86 200 84 186 Z', 'down', 10, 1.3)     // pelo del cuello sobre la cinta
+        OVER('M84 186 Q152 222 220 186 Q218 200 206 208 Q152 232 98 208 Q86 200 84 186 Z', 10)     // pelo del cuello sobre la cinta
       : '';
     for (let k = 0; k < 14; k++) {
       const th = (k / 14) * Math.PI * 2 + 0.2;
@@ -188,18 +192,21 @@
   }
 
   const BODY = (back) =>
-    FUR('M150 168 C204 168 226 222 224 278 C222 328 198 352 150 352 C102 352 76 328 74 278 C72 222 96 168 150 168 Z', 'down', 9, 1) +
-    (back ? '' : `<ellipse class="belly" filter="url(#ch-soft)" cx="150" cy="286" rx="44" ry="52"/>` +
+    FUR('M150 168 C206 168 230 222 230 284 C230 332 208 356 150 356 C92 356 70 332 70 284 C70 222 94 168 150 168 Z', 'down', 10, 1) +
+    `<ellipse class="thigh" filter="url(#ch-soft)" cx="96" cy="318" rx="26" ry="34"/><ellipse class="thigh" filter="url(#ch-soft)" cx="204" cy="318" rx="26" ry="34"/>` +
+    (back ? '' : `<ellipse class="belly" filter="url(#ch-soft)" cx="150" cy="286" rx="46" ry="54"/>` +
                  FUR(E(152, 212, 58, 34), 'down', 13, 1.1));                                 // pechera
+  // segunda capa de pechera por encima del arranque de las patas: así nacen del pelo, no se pegan encima
+  const RUFF = OVER('M98 222 Q150 206 202 222 Q206 246 186 258 Q150 272 114 258 Q94 246 98 222 Z', 12);
 
-  // pata delantera: sale de debajo del pecho y cuelga larga, junto a la otra, hasta abajo
+  // pata delantera: gruesa, nace bajo la pechera y cuelga pegada a la otra hasta abajo, como en la foto
   const ARM =
-    `<path class="ao" filter="url(#ch-soft)" d="M122 262 C116 290 116 316 118 334 C122 346 140 348 146 336" opacity=".35" style="transform:translate(-3px,4px)"/>` +
-    FUR('M122 240 C114 258 116 290 116 316 C114 330 118 342 128 344 C138 346 146 340 146 328 C146 312 142 290 142 270 C144 256 146 246 144 240 Z', 'down', 6, 1.2) +
-    `<path class="toe" d="M124 341 L125 335 M130 343 L130 337 M136 342 L136 336"/>`;
-  const FOOT = AO(112, 349, 30, 5, 0.6) + FUR(E(110, 343, 30, 11), 'out:110,330', 6, 1.2);
-  const FOOT_SIT = AO(112, 350, 26, 5, 0.6) + FUR(E(108, 343, 26, 12), 'out:108,330', 6, 1.2);
-  const HAUNCH = (sit) => sit ? FUR(E(98, 320, 46, 32), 'out:130,300', 8, 1) : FUR(E(100, 316, 40, 34), 'out:130,300', 8, 1);
+    `<path class="ao" filter="url(#ch-soft)" d="M146 262 L148 344" opacity=".55" style="stroke:#3d3431;stroke-width:7;fill:none"/>` +
+    FUR('M110 236 C102 262 104 296 106 322 C106 340 116 350 130 350 C144 350 150 342 149 328 C148 304 147 272 148 238 Z', 'down', 7, 1.2) +
+    `<path class="toe" d="M118 346 Q120 341 119 336 M127 349 Q128 343 127 338 M137 348 Q138 343 137 338"/>`;
+  // pies traseros: detrás del cuerpo, solo asoma la punta
+  const FOOT = AO(116, 356, 28, 4, 0.6) + FUR(E(114, 351, 24, 8), 'out:114,340', 5, 1.2);
+  const FOOT_SIT = AO(112, 356, 28, 4, 0.6) + FUR(E(108, 351, 26, 9), 'out:108,340', 5, 1.2);
   const TAIL = FUR(E(150, 322, 20, 18), 'out:150,322', 9, 1.4);
 
   function body(pose, opt) {
@@ -207,7 +214,6 @@
     const back = view === 'back';
     const sit = !!pose.sit;
     const expr = opt.expr || pose.expr;
-    const haunch = HAUNCH(sit) + mirror(HAUNCH(sit));
     const legs = part('legL', pose, sit ? FOOT_SIT : FOOT) + part('legR', pose, mirror(sit ? FOOT_SIT : FOOT));
     const bodyPose = sit ? { parts: { body: { sy: 0.86 } } } : pose;
     const collar = opt.collar !== false;
@@ -217,11 +223,12 @@
       (view === 'tq' ? HEAD_TQ(expr, pose) : HEAD_FRONT(expr, pose, back)) + `</g>` +
       (collar ? COLLAR('front') : ''));
     const arms = part('armL', pose, ARM) + part('armR', pose, mirror(ARM));
-    return haunch +
-      (back ? legs + arms : '') +
+    return legs +
+      (back ? arms : '') +
       part('body', bodyPose, BODY(back)) +
-      (back ? (sit ? `<g transform="translate(0 10)">${TAIL}</g>` : TAIL) : legs) +
-      head + (back ? '' : arms);
+      (back ? (sit ? `<g transform="translate(0 10)">${TAIL}</g>` : TAIL)
+            : arms + part('body', bodyPose, RUFF)) +
+      head;
   }
 
   // perfil (mirando a la derecha): dibujo propio, mismo pelaje y paleta
@@ -301,7 +308,7 @@
           const [fx, fy] = fdir(p.x, p.y);
           let dx = nx * 0.45 + fx * 0.7 + (rnd() - 0.5) * 0.45, dy = ny * 0.45 + fy * 0.7 + (rnd() - 0.5) * 0.45;
           const dm = Math.hypot(dx, dy) || 1; dx /= dm; dy /= dm;
-          const shadeSide = ny > 0.3 || (flow === 'up' && rnd() < 0.3);
+          const shadeSide = !path.dataset.ns && (ny > 0.3 || (flow === 'up' && rnd() < 0.3));
           strand(shadeSide && rnd() < 0.7 ? 'ed' : 'el', p.x - nx * 4, p.y - ny * 4, dx, dy, fl * (0.25 + rnd() * 0.6) + 4);
           if (rnd() < 0.18) strand('w', p.x - nx * 2, p.y - ny * 2, dx, dy, fl * (0.9 + rnd() * 0.9), 0.9);   // mechón suelto
         }
