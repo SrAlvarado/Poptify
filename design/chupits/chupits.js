@@ -14,24 +14,24 @@
   // ---------- poses ----------
   // r = rotación (grados, horario), x/y = desplazamiento, sx/sy = escala desde el pivote
   const POSES = {
-    stand:  { label: 'De pie',   bpm: 0,   expr: 'sleepy', parts: { earR: { r: 12 } } },
-    sit:    { label: 'Sentado',  bpm: 0,   expr: 'sleepy', sit: true,
+    stand:  { label: 'De pie',   bpm: 0,   expr: 'grumpy', parts: { earR: { r: 4 }, head: { r: -4 } } },
+    sit:    { label: 'Sentado',  bpm: 0,   expr: 'grumpy', sit: true,
               parts: { head: { y: 30 }, armL: { y: 26, r: -18 }, armR: { y: 26, r: 18 }, earR: { r: 10 } } },
-    jump:   { label: 'Saltando', bpm: 100, expr: 'wide',
+    jump:   { label: 'Saltando', bpm: 100, expr: 'shout',
               parts: { armL: { r: 140, x: -20, y: -4 }, armR: { r: -140, x: 20, y: -4 }, earL: { r: -38 }, earR: { r: 38 },
                        legL: { r: 28, y: 8 }, legR: { r: -28, y: 8 } } },
     bored:  { label: 'Aburrido', bpm: 0,   expr: 'bored', sit: true, zzz: true,
               parts: { head: { y: 34, r: 11 }, armL: { y: 26, r: -12 }, armR: { y: 26, r: 22 },
                        earL: { r: -14 }, earR: { r: 78 } } },
-    rap:    { label: 'Rap',      bpm: 90,  expr: 'sleepy',
+    rap:    { label: 'Rap',      bpm: 90,  expr: 'grumpy',
               parts: { armR: { r: -96 }, armL: { r: -28 }, earR: { r: 16 }, head: { r: -3 } } },
     techno: { label: 'Techno',   bpm: 128, expr: 'closed',
               parts: { armR: { r: -140, x: 24, y: -6 }, armL: { r: 22 }, earL: { r: -4 }, earR: { r: 6 } } },
     reggaeton: { label: 'Reguetón', bpm: 95, expr: 'smug',
               parts: { armL: { r: 115, x: -18 }, armR: { r: -115, x: 18 }, earR: { r: 14 } } },
-    trap:   { label: 'Trap',     bpm: 70,  expr: 'sleepy',
+    trap:   { label: 'Trap',     bpm: 70,  expr: 'grumpy',
               parts: { armL: { r: 30 }, armR: { r: -30 }, head: { r: -5, y: 3 }, earL: { r: -18 }, earR: { r: 24 } } },
-    pop:    { label: 'Pop',      bpm: 118, expr: 'happy',
+    pop:    { label: 'Pop',      bpm: 118, expr: 'grin',
               parts: { armL: { r: 140, x: -20, y: -4 }, armR: { r: -40 }, earL: { r: -8 }, earR: { r: 8 } } },
   };
 
@@ -53,43 +53,49 @@
   const mirror = (s) => `<g transform="translate(300 0) scale(-1 1)">${s}</g>`;
 
   // ---------- piezas ----------
-  const EAR = (back) =>
-    `<path class="fur" d="M108 98 C92 60 92 10 112 -18 C122 -31 137 -25 139 -8 C143 20 141 64 135 96 Z"/>` +
+  // orejas más anchas y abiertas en V (como la foto del cigarro); la derecha lleva un mordisco
+  const EAR = (back, notch) =>
+    `<g transform="rotate(-14 124 94)">` +
+    (notch
+      ? `<path class="fur" d="M106 98 C90 64 88 34 91 18 Q101 16 102 8 Q100 2 94 2 C98 -10 104 -20 112 -24 C124 -32 140 -24 142 -6 C146 22 143 66 137 96 Z"/>`
+      : `<path class="fur" d="M106 98 C88 60 88 8 110 -22 C122 -34 140 -26 142 -6 C146 22 143 66 137 96 Z"/>`) +
     (back
       ? `<path class="shade" d="M118 80 C110 50 111 16 120 -4" fill="none" stroke-width="4"/>`
-      : `<path class="inner" d="M115 86 C104 56 104 18 116 -4 C121 -12 128 -9 129 1 C132 26 130 60 126 84 Z"/>`);
+      : `<path class="inner" d="M114 86 C102 56 102 18 116 -8 C122 -16 130 -12 131 0 C134 26 132 60 127 84 Z"/>`) +
+    `</g>`;
 
   const HEAD =
-    `<path class="fur" d="M150 74 C202 74 223 104 223 138 C223 158 216 174 204 184 L210 194 L194 191 C182 199 166 202 150 202 C134 202 118 199 106 191 L90 194 L96 184 C84 174 77 158 77 138 C77 104 98 74 150 74 Z"/>` +
-    `<path class="tuft" d="M139 82 Q145 70 150 79 Q155 68 161 82"/>`;
+    `<path class="fur" d="M150 82 C194 82 216 104 219 132 C221 148 226 164 218 178 L228 186 L212 188 L216 196 L200 194 C188 203 170 206 150 206 C130 206 112 203 100 194 L84 196 L88 188 L72 186 L82 178 C74 164 79 148 81 132 C84 104 106 82 150 82 Z"/>` +
+    `<path class="tuft" d="M138 88 L144 78 L150 87 L156 76 L162 88"/>`;
 
+  // cara de matón: cejas de pelo en V, ojos rasgados sin brillo, morro hinchado y boca fruncida
   function FACE(expr) {
-    const eye = (ex, lidTilt) => {
-      switch (expr) {
-        case 'closed': return `<path class="ln" d="M${ex - 13} 139 Q${ex} 147 ${ex + 13} 139"/>`;
-        case 'happy':  return `<path class="ln" d="M${ex - 13} 144 Q${ex} 129 ${ex + 13} 144"/>`;
-        case 'wide':   return `<circle class="eye" cx="${ex}" cy="138" r="10"/><circle class="hl" cx="${ex + 3}" cy="134" r="3.2"/>`;
-        case 'bored':  return `<path class="eye" d="M${ex - 13} 140 Q${ex} 149 ${ex + 13} 140 Z"/><path class="ln" d="M${ex - 16} 140 L${ex + 16} 140"/>`;
-        default: // sleepy / smug: párpado caído, la seña de identidad de Chupits
-          return `<path class="eye" d="M${ex - 14} 136 Q${ex} 152 ${ex + 14} 136 Z"/>` +
-                 `<circle class="hl" cx="${ex + 4}" cy="141" r="2.2"/>` +
-                 `<path class="ln" d="M${ex - 17} ${136 + lidTilt} Q${ex} 130 ${ex + 17} ${136 - lidTilt}"/>`;
-      }
+    const B = { grumpy: [118, 133], smug: [118, 133], closed: [122, 131], bored: [126, 128], shout: [114, 136], grin: [119, 133] }[expr] || [118, 133];
+    const brow = (o, n) => `<path class="brow" d="M102 ${o} Q118 ${o - 1} 138 ${n}"/>`;
+    const browR = expr === 'smug' ? `<path class="brow" d="M198 116 Q180 112 162 124"/>` : mirror(brow(B[0], B[1]));
+    const slit = { // ojo izquierdo; el derecho es su espejo
+      grumpy: `<path class="eye slit" d="M107 136 Q123 138 137 143 Q122 146 110 140 Z"/><path class="bag" d="M112 150 Q123 154 133 151"/>`,
+      closed: `<path class="ln" d="M109 140 Q122 146 135 141"/>`,
+      bored:  `<path class="eye slit" d="M110 139 Q122 144 134 140 Z"/><path class="ln" d="M107 139 L137 140"/><path class="bag" d="M112 150 Q123 154 133 151"/>`,
+      shout:  `<path class="eye slit" d="M107 134 Q123 135 137 141 Q122 148 109 140 Z"/>`,
+      grin:   `<path class="ln" d="M109 142 Q122 136 135 142"/>`,
     };
-    const smug = expr === 'smug';
+    const eyeL = slit[expr] || slit.grumpy;
+    const eyeR = expr === 'smug' ? `<path class="ln" d="M165 141 Q178 135 191 139"/>` : mirror(eyeL);
+    const pout = `<path class="ln th" d="M132 184 Q140 170 150 170 Q160 170 168 184"/><path class="fur th" d="M141 181 Q150 192 159 181 Q150 177 141 181 Z"/>`;
     const mouth = {
-      happy: `<path class="ln th" d="M150 165 L150 170"/><path class="mouth" d="M139 171 Q150 184 161 171 Z"/>`,
-      wide:  `<path class="ln th" d="M150 165 L150 170"/><ellipse class="mouth" cx="150" cy="176" rx="5" ry="6"/>`,
-      bored: `<path class="ln th" d="M150 165 L150 171 M141 174 L159 173"/>`,
-    }[expr] || (smug
-      ? `<path class="ln th" d="M150 165 L150 170 M150 170 Q144 175 138 172 M150 170 Q158 172 164 166"/>`
-      : `<path class="ln th" d="M150 165 L150 170 M150 170 Q143 176 137 171 M150 170 Q157 176 163 171"/>`);
+      shout: `<path class="mouth" d="M136 177 Q150 202 164 177 Q150 182 136 177 Z"/><path class="tooth" d="M144 179 h5 v8 h-5 Z M151 179 h5 v8 h-5 Z"/>`,
+      grin:  `<path class="mouth" d="M130 174 Q150 194 170 174 Q150 182 130 174 Z"/><path class="tooth" d="M144 177 h5 v7 h-5 Z M151 177 h5 v7 h-5 Z"/>`,
+      smug:  `<path class="ln th" d="M132 184 Q140 170 150 170 Q160 170 166 166"/><path class="fur th" d="M141 181 Q150 192 159 181 Q150 177 141 181 Z"/>`,
+    }[expr] || pout;
     return `<g class="face">` +
-      `<ellipse class="blush" cx="112" cy="160" rx="13" ry="7"/><ellipse class="blush" cx="188" cy="160" rx="13" ry="7"/>` +
-      `<g class="a-eyes" style="transform-origin:150px 140px">${expr === 'smug' ? eye(122, 6) + eye(178, -4) : eye(122, 2) + eye(178, -1)}</g>` +
-      `<path class="nose" d="M142 155 Q150 150 158 155 Q154 163 150 164 Q146 163 142 155 Z"/>` + mouth +
-      `<g class="whisk"><path d="M126 160 L86 150 M126 165 L82 166 M127 170 L88 182"/>` +
-      `<path d="M174 160 L214 150 M174 165 L218 166 M173 170 L212 182"/></g></g>`;
+      `<g class="a-eyes" style="transform-origin:150px 140px">${eyeL}${eyeR}</g>` + brow(B[0], B[1]) + browR +
+      `<g class="whisk"><path d="M128 166 L80 154 M128 171 L76 174 M130 176 L86 194"/>` +
+      `<path d="M172 166 L220 154 M172 171 L224 174 M170 176 L214 194"/></g>` +
+      `` +
+      mouth +
+      `<path class="nose" d="M143 153 Q150 149 157 153 Q153 160 150 161 Q147 160 143 153 Z"/><path class="ln th" d="M150 161 L150 170"/>` +
+      `</g>`;
   }
 
   // collar de pinchos: el único accesorio que lleva siempre (también "naked")
@@ -106,9 +112,9 @@
   }
 
   const BODY = (back) =>
-    `<path class="fur" d="M150 176 C201 176 215 230 213 272 C211 322 191 346 150 346 C109 346 89 322 87 272 C85 230 99 176 150 176 Z"/>` +
-    (back ? '' : `<ellipse class="belly" cx="150" cy="282" rx="38" ry="46"/>` +
-                 `<path class="tuft" d="M134 228 L141 238 L150 229 L159 238 L166 228"/>`);
+    `<path class="fur" d="M150 174 C206 174 219 228 216 272 C213 322 192 346 150 346 C108 346 87 322 84 272 C81 228 94 174 150 174 Z"/>` +
+    (back ? '' : `<ellipse class="belly" cx="150" cy="286" rx="34" ry="40"/>` +
+                 `<path class="tuft" d="M130 230 L138 242 L144 233 L150 245 L156 233 L162 242 L170 230"/>`);
 
   const ARM = `<path class="fur" d="M113 207 C96 213 87 240 91 262 C93 276 111 278 115 265 C119 249 121 228 121 213 Z"/>` +
               `<path class="ln th" d="M98 268 L100 262 M105 270 L106 264"/>`;
@@ -129,8 +135,10 @@
     }
     const bodyPose = pose.sit ? { parts: { body: { sy: 0.84 } } } : pose;
     const head = part('head', pose,
-      part('earL', pose, EAR(back)) + part('earR', pose, mirror(EAR(back))) +
-      HEAD + (opt.collar !== false ? COLLAR() : '') + (back ? '' : FACE(opt.expr || pose.expr)));
+      `<g transform="translate(150 200) scale(.92) translate(-150 -200)">` +
+      part('earL', pose, EAR(back)) + part('earR', pose, mirror(EAR(back, true))) +
+      HEAD + (back ? '' : FACE(opt.expr || pose.expr)) + `</g>` +
+      (opt.collar !== false ? COLLAR() : ''));
     const arms = part('armL', pose, ARM) + part('armR', pose, mirror(ARM));
     return `<g class="a-root" style="transform-origin:150px 350px">` +
       (back ? legs + haunch : haunch) +
@@ -160,10 +168,10 @@
             `<path class="spike" transform="rotate(${a} ${x} ${y})" d="M${x - 6} ${y - 4} L${x} ${y + 20} L${x + 6} ${y - 4} Z"/>`).join('')
         : '') +
       `<path class="tuft" d="M108 150 L100 156 L110 158 L102 166"/>` +
-      `<path class="eye" d="M174 128 Q186 142 198 128 Z"/><path class="ln" d="M171 128 Q186 122 200 127"/>` +
+      `<path class="ln" d="M174 132 Q187 137 200 135"/><path class="brow" d="M168 118 Q186 116 204 128"/>` +
       `<path class="nose" d="M224 136 Q232 136 231 144 Q226 146 222 142 Z"/>` +
-      `<path class="ln th" d="M226 146 Q224 154 216 154"/>` +
-      `<ellipse class="blush" cx="200" cy="154" rx="12" ry="6"/>` +
+      
+      `<ellipse class="fur th" cx="214" cy="152" rx="13" ry="10"/><path class="fur th" d="M206 164 Q214 176 222 164 Z"/>` +
       `<g class="whisk"><path d="M214 148 L252 138 M214 152 L256 154 M212 156 L250 168"/></g>` +
       `</g>`;
   }

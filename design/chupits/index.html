@@ -92,8 +92,12 @@
   .chupits .hl{fill:#fff;opacity:.9}
   .chupits .nose{fill:var(--nose);stroke:var(--line);stroke-width:2.5;stroke-linejoin:round}
   .chupits .mouth{fill:#5a1f2b;stroke:var(--line);stroke-width:3}
-  .chupits .whisk path{fill:none;stroke:var(--line);stroke-width:1.6;opacity:.45;stroke-linecap:round}
-  .chupits .blush{fill:var(--pink);opacity:.35}
+  .chupits .whisk path{fill:none;stroke:var(--line);stroke-width:1.4;opacity:.4;stroke-linecap:round}
+  .chupits .fur.th{stroke-width:3}
+  .chupits .brow{fill:none;stroke:var(--line);stroke-width:7;stroke-linecap:round}
+  .chupits .eye.slit{stroke:var(--line);stroke-width:3;stroke-linejoin:round}
+  .chupits .bag{fill:none;stroke:var(--line);stroke-width:2;opacity:.35;stroke-linecap:round}
+  .chupits .tooth{fill:#fbf8f2;stroke:var(--line);stroke-width:2;stroke-linejoin:round}
   .chupits .pad{fill:var(--pink);opacity:.75}
   .chupits .collar{fill:#141214;stroke:var(--line);stroke-width:3}
   .chupits .spike{fill:#c9ced6;stroke:var(--line);stroke-width:2.5;stroke-linejoin:round}
@@ -212,12 +216,12 @@
       <div class="box">
         <h3>Quién es Chupits (sacado de las 6 referencias)</h3>
         <ul class="traits">
-          <li><b>Conejo blanco enano</b>: cabeza enorme y redonda con mejillas de pelo, cuerpo de pera compacto. Mide ~2,2 cabezas, más 1 cabeza de orejas.</li>
-          <li><b>Ojos a media asta, siempre.</b> En 5 de 6 fotos tiene el párpado caído y cara de "me da igual". Es su seña de identidad: los ojos abiertos solo para sorpresa o salto.</li>
-          <li><b>Orejas largas y rectas</b>, por dentro rosas. Una va siempre algo ladeada: la asimetría le da el carácter.</li>
+          <li><b>Conejo blanco enano</b>: cabeza enorme y redonda con mejillas de pelo, cuerpo de pera compacto. Cabeza algo más pequeña que en un chibi, hombros anchos y papada de pelo.</li>
+          <li><b>Cara de matón</b> (la foto del cigarro): ojos rasgados casi cerrados que bajan hacia la nariz, cejas de pelo en V, morro hinchado y boca fruncida con las comisuras hacia abajo. Barbilla alta, mira por encima del hombro. Ojos sin brillo: nunca redondos ni tiernos.</li>
+          <li><b>Orejas anchas y abiertas en V</b>, rosas por dentro. La derecha tiene un mordisco: viene de la calle.</li>
           <li><b>Collar negro de pinchos</b> (3 fotos + el logo). Lo lleva siempre, también naked; los outfits van por encima.</li>
           <li><b>Nariz rosa, boca en Y con media sonrisa</b> y bigotes finos. Ojos de albino: granate muy oscuro con brillo.</li>
-          <li><b>Su mundo</b>: noir en blanco y negro, sepia, grano, acento rojo (la mira), callejón de noche, máscara de luchador, el lazo negro del logo. Pasota y callejero, pero tierno.</li>
+          <li><b>Su mundo</b>: noir en blanco y negro, sepia, grano, acento rojo (la mira), callejón de noche, máscara de luchador, el lazo negro del logo. Pasota, gruñón y callejero; nada de mono.</li>
           <li><b>Lo que no lleva</b>: el cigarro de la foto se queda en actitud, no en atrezo. Nada de pelo de colores: el color lo ponen el outfit y la luz.</li>
         </ul>
       </div>
@@ -247,7 +251,7 @@
   <div class="grid g3" id="poses"></div>
 
   <h2>Expresiones</h2>
-  <p>Cinco caras. Por defecto <b>sleepy</b>; las demás se reservan para momentos concretos.</p>
+  <p>Cinco caras, todas con mala leche. Por defecto <b>gruñón</b>; aburrido sale en la pose de pausa.</p>
   <div class="grid g5" id="exprs"></div>
 
   <h2>Outfits · definición</h2>
@@ -268,13 +272,13 @@
   const DESC = {
     stand: 'Reposo. Respira, parpadea y de vez en cuando mueve una oreja. La postura de la foto de la mira y la del luchador.',
     sit: 'Sin música unos segundos o al empezar. Patas traseras abiertas, manos sobre la barriga.',
-    jump: 'Al cambiar de canción o al dar like. Estira y aplasta el cuerpo, abre los ojos y las orejas van con retraso.',
+    jump: 'Al cambiar de canción o al dar like. Estira y aplasta el cuerpo, grita enseñando los dientes y las orejas van con retraso.',
     bored: 'Pausa larga o nada sonando. Cabeza caída, una oreja doblada, suspiro lento y zzz.',
-    rap: 'Cabecea en cada beat y corta el aire con la mano. Ojos a media asta: no se inmuta.',
+    rap: 'Cabecea en cada beat y corta el aire con la mano. Morro fruncido: no se inmuta.',
     techno: 'Bombeo corto y seco, puño arriba, ojos cerrados. El escenario parpadea a tempo.',
     reggaeton: 'Vaivén de cadera cada 2 tiempos y la cabeza marca los golpes del dembow (3-3-2). Brazos arriba.',
     trap: 'Half-time: se balancea lento hacia atrás, cae a plomo en el bombo y las orejas tiemblan a tresillos como los hi-hats.',
-    pop: 'Paso lateral con saltito, brazos alternos arriba y la única sonrisa abierta del repertorio.',
+    pop: 'Paso lateral con saltito y brazos alternos arriba. Ni con pop sonríe bien: sonrisa torcida enseñando los dientes.',
   };
   const SW = [['Pelo','#f6f3f0'],['Sombra','#dcd5d2'],['Contorno','#1b1719'],['Oreja','#f3b3be'],['Nariz','#e98ea0'],['Ojo','#2a1218'],['Collar','#141214'],['Pinchos','#c9ced6'],['Acento','#e5333f']];
   document.getElementById('swatches').innerHTML = SW.map(([n,c]) => `<div><i style="background:${c}"></i>${n}<br>${c}</div>`).join('');
@@ -312,7 +316,7 @@
     document.getElementById('poses').innerHTML = Object.entries(POSES).map(([k,p]) =>
       `<div class="card click" data-pose="${k}"><div class="st">${render({ pose:k, collar:c })}</div>` +
       `<div class="nm"><b>${p.label}</b><span>${p.bpm ? p.bpm + ' BPM' : 'idle'}</span></div><p>${DESC[k]}</p></div>`).join('');
-    document.getElementById('exprs').innerHTML = [['sleepy','Sleepy','por defecto'],['smug','Smug','reguetón, like'],['closed','En la zona','techno, chill'],['happy','Feliz','pop'],['bored','Aburrido','pausa'],].map(([e,n,u]) =>
+    document.getElementById('exprs').innerHTML = [['grumpy','Gruñón','por defecto'],['smug','Chulo','reguetón, like'],['closed','En la zona','techno, chill'],['grin','Sonrisa torcida','pop'],['shout','Grito','salto, cambio de canción']].map(([e,n,u]) =>
       `<div class="card static"><div class="st">${render({ pose:'stand', expr:e, collar:c, vb:'62 -30 176 280' })}</div><div class="nm"><b>${n}</b></div><p>${u}</p></div>`).join('') ;
   }
   document.getElementById('poses').onclick = e => { const card = e.target.closest('[data-pose]'); if (card) { state.pose = card.dataset.pose; state.bpm = null; state.view = 'front'; draw(); window.scrollTo({ top: 0, behavior: 'smooth' }); } };
