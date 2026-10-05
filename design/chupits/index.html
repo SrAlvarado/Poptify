@@ -66,6 +66,9 @@
   .of{background:var(--card);border:1px solid var(--bd);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:10px}
   .of header{align-items:center}
   .of h4{font-size:18px;font-weight:850}
+  .of .st{background:radial-gradient(circle at 50% 75%,#211d21,#121012 72%);border-radius:16px;display:grid;place-items:center;height:250px;overflow:hidden;margin-bottom:4px}
+  .of .st .chupits{height:230px;width:auto}
+  .of.click{cursor:pointer}.of.click:hover{border-color:rgba(255,255,255,.25)}
   .of .pal{display:flex;gap:4px}.of .pal i{width:16px;height:16px;border-radius:5px;border:1px solid rgba(255,255,255,.2)}
   .of .kw{font:600 11px ui-monospace,Menlo,monospace;color:var(--mut)}
   .of dl{display:grid;grid-template-columns:78px 1fr;gap:5px 10px;font-size:12.5px;line-height:1.4}
@@ -99,6 +102,7 @@
   .chupits .band{fill:none;stroke:#2a292d;stroke-width:6;stroke-linecap:round}
   .chupits .spike{stroke:#2c2f34;stroke-width:.6;stroke-linejoin:round}
   .chupits .spark{fill:#fff;opacity:.9}
+  .chupits .led{animation:tick var(--b) steps(1) infinite}
   .chupits .ao{}
   .chupits .belly{opacity:.35}
   .chupits .inner{opacity:.92}
@@ -210,9 +214,9 @@
 <div class="wrap">
   <header>
     <div>
-      <div class="mono">Poptify · rama avatar · v0 naked</div>
+      <div class="mono">Poptify · rama avatar · v1 outfits</div>
       <h1>Chupits<span>.</span></h1>
-      <p class="lead">La mascota de Poptify para el <b>modo Avatar</b>: la ventana solo muestra a Chupits, que baila según el estilo de lo que suena y se cambia de outfit con el género. Primer paso: el personaje <b>naked</b> (solo con su collar) en todas las posiciones y la definición de los outfits.</p>
+      <p class="lead">La mascota de Poptify para el <b>modo Avatar</b>: la ventana solo muestra a Chupits, que baila según el estilo de lo que suena y se cambia de outfit con el género. El personaje <b>naked</b> (solo con su collar) en todas las posiciones y sus <b>8 outfits</b>, que en modo Auto cambian solos con el baile.</p>
     </div>
   </header>
 
@@ -249,6 +253,7 @@
           <button class="chip" data-view="back">Espalda</button>
           <button class="chip on" id="collarBtn">Collar</button>
         </div>
+        <div class="row" id="outfitChips" style="margin-bottom:12px"></div>
         <div class="row"><span class="mono" style="width:70px">Tempo</span><input type="range" id="bpm" min="60" max="160" value="90"><span class="mono" id="bpmVal" style="width:56px;text-align:right"></span></div>
       </div>
     </div>
@@ -266,8 +271,8 @@
   <p>Cinco caras, todas con mala leche y todas hechas con el párpado y el morro. Por defecto <b>gruñón</b>; aburrido sale en la pose de pausa.</p>
   <div class="grid g5" id="exprs"></div>
 
-  <h2>Outfits · definición</h2>
-  <p>Cada outfit es una pila de capas colgadas de las piezas del rig (cabeza, torso, brazos, piernas, pies), así heredan pose y baile sin animarse aparte. Las orejas siempre salen por fuera. El género se decide con los géneros del artista en Spotify; si no hay, se queda naked.</p>
+  <h2>Outfits</h2>
+  <p>Cada outfit es una pila de capas colgadas de las piezas del rig (cabeza, cuello, torso, mangas, pantalón, pies, mano), así baila con él sin animarse aparte. En <b>Auto</b> el outfit sigue al baile; en la app saldrá del género del artista en Spotify y, si no hay, se queda naked. Haz clic en uno para verlo bailar en grande.</p>
   <div class="grid g4" id="outfits"></div>
 
   <h2>Cómo encaja en la app</h2>
@@ -279,6 +284,7 @@
 </div>
 
 <script src="chupits.js"></script>
+<script src="outfits.js"></script>
 <script>
   const { render, POSES } = window.Chupits;
   const DESC = {
@@ -296,22 +302,25 @@
   document.getElementById('swatches').innerHTML = SW.map(([n,c]) => `<div><i style="background:${c}"></i>${n}<br>${c}</div>`).join('');
 
   // ---------- hero ----------
-  const state = { pose: 'stand', view: 'tq', collar: true, bpm: null };
+  const state = { pose: 'stand', view: 'tq', collar: true, bpm: null, outfit: 'auto' };
+  const OUT = window.ChupitsOutfits;
+  const outfitOf = () => state.outfit === 'auto' ? (OUT.byPose[state.pose] || null) : state.outfit === 'naked' ? null : state.outfit;
   const stage = document.getElementById('stage');
   function draw() {
     const p = POSES[state.pose];
     const bpm = state.bpm || p.bpm || 90;
     const view = (state.view === 'side' && state.pose !== 'stand') ? 'tq' : state.view;
-    document.getElementById('stageSvg').innerHTML = render({ pose: state.pose, view, collar: state.collar, bpm });
+    document.getElementById('stageSvg').innerHTML = render({ pose: state.pose, view, collar: state.collar, bpm, outfit: view === 'side' ? null : outfitOf() });
     stage.dataset.pose = state.pose;
     stage.style.setProperty('--b', (60 / bpm).toFixed(3) + 's');
-    document.getElementById('stageTag').textContent = `Pose · ${p.label}` + ` · ${{ tq: '3/4', front: 'frente', side: 'perfil', back: 'espalda' }[view]}`;
+    document.getElementById('stageTag').textContent = `Pose · ${p.label} · ${outfitOf() ? OUT[outfitOf()].label : 'naked'}` + ` · ${{ tq: '3/4', front: 'frente', side: 'perfil', back: 'espalda' }[view]}`;
     document.getElementById('stageBpm').innerHTML = p.bpm ? `<i></i>${bpm} BPM` : '';
     document.getElementById('bpmVal').textContent = p.bpm ? bpm + ' bpm' : '—';
     document.getElementById('bpm').value = bpm;
     document.getElementById('bpm').disabled = !p.bpm;
     document.querySelectorAll('#poseChips .chip').forEach(c => c.classList.toggle('on', c.dataset.pose === state.pose));
     document.querySelectorAll('[data-view]').forEach(c => c.classList.toggle('on', c.dataset.view === view));
+    document.querySelectorAll('[data-outfit]').forEach(c => c.classList.toggle('on', c.dataset.outfit === state.outfit));
     Chupits.furrify(stage);
     if (gridCollar !== state.collar) drawGrids();
   }
@@ -320,6 +329,9 @@
   document.getElementById('poseChips').onclick = e => { const k = e.target.dataset.pose; if (k) { state.pose = k; state.bpm = null; if (state.view === 'side') state.view = 'tq'; draw(); } };
   document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => { state.view = b.dataset.view; if (b.dataset.view === 'side') state.pose = 'stand'; draw(); });
   document.getElementById('collarBtn').onclick = e => { state.collar = !state.collar; e.target.classList.toggle('on', state.collar); draw(); };
+  document.getElementById('outfitChips').innerHTML = [['auto', 'Auto'], ['naked', 'Naked']].concat(Object.keys(OUT).filter(k => OUT[k].label).map(k => [k, OUT[k].label]))
+    .map(([k, n]) => `<button class="chip" data-outfit="${k}">${n}</button>`).join('');
+  document.getElementById('outfitChips').onclick = e => { const k = e.target.dataset.outfit; if (k) { state.outfit = k; draw(); } };
   document.getElementById('bpm').oninput = e => { state.bpm = +e.target.value; draw(); };
 
   // ---------- grids ----------
@@ -338,63 +350,65 @@
 
   // ---------- outfits (definición) ----------
   const OUTFITS = [
-    { n:'Rap', core:true, kw:'hip hop · rap · boom bap · old school', pal:['#111','#f4f4f4','#d4a537','#e5333f'], s:{
+    { id:'rap', pose:'rap', n:'Rap', core:true, kw:'hip hop · rap · boom bap · old school', pal:['#111','#f4f4f4','#d4a537','#e5333f'], s:{
       Cabeza:'Gorra snapback girada de lado (visera a la derecha, ~45°). Las orejas salen por encima.',
       Cuello:'Cadena dorada gruesa por encima del collar de pinchos.',
       Torso:'Chaqueta de chándal de 3 franjas, abierta; tirantes sueltos colgando por los lados.',
       Piernas:'Pantalón baggy caído a media cadera, con la goma del calzoncillo a la vista.',
       Pies:'Zapatillas altas blancas con los cordones sueltos.',
       Prop:'Micro en la mano que corta.' } },
-    { n:'Trap', core:true, kw:'trap · trap latino · drill · rage', pal:['#0d0d0d','#7b3ff2','#c9ced6','#f4f4f4'], s:{
+    { id:'trap', pose:'trap', n:'Trap', core:true, kw:'trap · trap latino · drill · rage', pal:['#0d0d0d','#7b3ff2','#c9ced6','#f4f4f4'], s:{
       Cabeza:'Durag negro con las colas por detrás, entre las orejas.',
-      Cara:'Gafas de sol finas tipo shield y grills plateados en los dientes de conejo.',
+      Cara:'Gafas de sol finas tipo shield (sin grills: nunca se le ven los dientes).',
       Cuello:'Cadena con colgante "P" helado.',
       Torso:'Sudadera oversize con capucha bajada.',
       Piernas:'Cargo negro amontonado sobre la zapatilla.',
       Pies:'Zapatillas chunky.' } },
-    { n:'Reguetón', core:true, kw:'reggaeton · urbano latino · dembow', pal:['#ffd23f','#ff4fa0','#22d39a','#f4f4f4'], s:{
+    { id:'reggaeton', pose:'reggaeton', n:'Reguetón', core:true, kw:'reggaeton · urbano latino · dembow', pal:['#ffd23f','#ff4fa0','#22d39a','#f4f4f4'], s:{
       Cabeza:'Bucket hat de color.',
       Cara:'Gafas envolventes de colores, estilo Y2K.',
       Cuello:'Cadena fina.',
       Torso:'Camiseta de fútbol o baloncesto oversize con dorsal.',
       Piernas:'Pantalón corto de chándal.',
       Pies:'Chanclas con calcetines blancos subidos.' } },
-    { n:'Techno', core:true, kw:'techno · house · tech house · minimal', pal:['#0a0a0a','#2a2a2a','#c6ff00','#f4f4f4'], s:{
+    { id:'techno', pose:'techno', n:'Techno', core:true, kw:'techno · house · tech house · minimal', pal:['#0a0a0a','#2a2a2a','#c6ff00','#f4f4f4'], s:{
       Cabeza:'Bucket hat negro.',
       Cara:'Gafas negras tipo shield.',
       Cuello:'Cascos de DJ apoyados en el cuello.',
       Torso:'Camiseta negra oversize.',
       Piernas:'Cargo negro.',
       Pies:'Botas militares. Pulsera LED que parpadea a tempo.' } },
-    { n:'Pop', core:true, kw:'pop · dance pop · k-pop · europop', pal:['#ff5fa2','#ffd6e8','#c9ced6','#fff'], s:{
+    { id:'pop', pose:'pop', n:'Pop', core:true, kw:'pop · dance pop · k-pop · europop', pal:['#ff5fa2','#ffd6e8','#c9ced6','#fff'], s:{
       Cabeza:'El lazo negro del logo, enorme, en la oreja izquierda.',
       Cara:'Brillos en las mejillas.',
       Torso:'Bomber satinada rosa chicle.',
       Piernas:'Pantalón de campana blanco.',
       Pies:'Plataformas.',
       Prop:'Micro de diadema.' } },
-    { n:'Rock / Punk', kw:'rock · punk · metal · emo', pal:['#111','#3a3a3a','#c9ced6','#e5333f'], s:{
+    { id:'rock', pose:'stand', n:'Rock / Punk', kw:'rock · punk · metal · emo', pal:['#111','#3a3a3a','#c9ced6','#e5333f'], s:{
       Cabeza:'Imperdible atravesando una oreja.',
       Torso:'Chupa de cuero con tachuelas (pega con el collar) y camiseta rota.',
       Piernas:'Pitillos rotos.',
       Pies:'Botas de 8 agujeros.',
       Baile:'Headbang (nuevo, por definir).' } },
-    { n:'Lo-fi / Chill', kw:'lo-fi · chill · ambient · indie', pal:['#8a7b6b','#d9c9b4','#4b5a6a','#f4f4f4'], s:{
+    { id:'lofi', pose:'sit', n:'Lo-fi / Chill', kw:'lo-fi · chill · ambient · indie', pal:['#8a7b6b','#d9c9b4','#4b5a6a','#f4f4f4'], s:{
       Cabeza:'Gorro beanie y cascos grandes.',
       Torso:'Sudadera con capucha.',
       Pies:'Zapatillas de estar por casa.',
       Baile:'Sentado, cabeceo lento: reutiliza "Sentado" a tempo.' } },
-    { n:'Lucha', kw:'easter egg · aleatorio', pal:['#c9ced6','#111','#e5333f','#f4f4f4'], s:{
+    { id:'lucha', pose:'stand', n:'Lucha', kw:'easter egg · aleatorio', pal:['#c9ced6','#111','#e5333f','#f4f4f4'], s:{
       Cabeza:'Máscara de luchador plateada con estrella y rayos (la de la foto del callejón).',
       Torso:'Naked + cinturón de campeón.',
       Cuándo:'Muy de vez en cuando, o con un like en una canción de lucha libre.' } },
   ];
   document.getElementById('outfits').innerHTML = OUTFITS.map(o =>
-    `<div class="of"><header><h4>${o.n}</h4><span class="pill ${o.core ? 'core' : ''}">${o.core ? 'pedido' : 'propuesto'}</span></header>` +
+    `<div class="of click" data-o="${o.id}" data-p="${o.pose}"><div class="st">${render({ pose: o.pose, outfit: o.id })}</div><header><h4>${o.n}</h4><span class="pill ${o.core ? 'core' : ''}">${o.core ? 'pedido' : 'propuesto'}</span></header>` +
     `<div class="pal">${o.pal.map(c => `<i style="background:${c}"></i>`).join('')}</div><div class="kw">${o.kw}</div>` +
     `<dl>${Object.entries(o.s).map(([k,v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl></div>`).join('');
 
+  document.getElementById('outfits').onclick = e => { const c = e.target.closest('[data-o]'); if (c) { state.outfit = c.dataset.o; state.pose = c.dataset.p; state.view = 'tq'; state.bpm = null; draw(); window.scrollTo({ top: 0, behavior: 'smooth' }); } };
   draw();
+  Chupits.furrify(document);
 </script>
 </body>
 </html>

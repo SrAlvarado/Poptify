@@ -72,6 +72,10 @@
     `<radialGradient id="ch-dark"><stop offset="0" stop-color="#3d3431"/><stop offset="1" stop-color="#3d3431" stop-opacity="0"/></radialGradient>` +
     `<radialGradient id="ch-shade"><stop offset="0" stop-color="#9b8f89"/><stop offset="1" stop-color="#9b8f89" stop-opacity="0"/></radialGradient>` +
     `<radialGradient id="ch-lite"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>` +
+    `<linearGradient id="ch-cloth" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".38"/></linearGradient>` +
+    `<linearGradient id="ch-clothx" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".3"/><stop offset=".35" stop-color="#000" stop-opacity="0"/><stop offset=".7" stop-color="#fff" stop-opacity=".08"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient>` +
+    `<linearGradient id="ch-gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2b8"/><stop offset=".4" stop-color="#e2b23e"/><stop offset="1" stop-color="#8a5f12"/></linearGradient>` +
+    `<linearGradient id="ch-silver" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#b9c0c8"/><stop offset="1" stop-color="#5b6168"/></linearGradient>` +
     `<radialGradient id="ch-refl"><stop offset="0" stop-color="#9c99a2"/><stop offset="1" stop-color="#9c99a2" stop-opacity="0"/></radialGradient>` +
     `</defs>`;
 
@@ -121,7 +125,7 @@
       ? `<ellipse class="mouth" cx="192" cy="160" rx="4" ry="3.2"/>`
       : `<path class="lip" d="M192 149 L192 155 M192 155 Q187 159 ${up ? '181 156' : '181 160'} M192 155 Q197 158 ${expr === 'grin' ? '204 149' : up ? '203 152' : '202 159'}"/>`;
     return part('earR', pose, mirror(EAR(true, true))) +                         // oreja de detrás: se le ve el dorso
-      part('earL', pose, EAR(false)) +
+      part('earL', pose, EAR(false) + slot('ear')) + slot('headBack') +
       AO(152, 186, 50, 12, 0.5) +
       FUR('M140 64 C178 60 206 82 214 112 C220 132 218 150 208 162 C198 178 176 190 150 190 C124 190 100 180 92 160 C82 138 86 104 100 84 C110 70 124 64 140 64 Z', 'out:165,130', 9, 1.1) +
       `<g class="face">` +
@@ -148,7 +152,7 @@
     const mouth = open
       ? `<ellipse class="mouth" cx="150" cy="161" rx="4.5" ry="3.4"/>`
       : `<path class="lip" d="M150 152 L150 158 M150 158 Q144 162 ${up ? '138 159' : '138 163'} M150 158 Q156 162 ${expr === 'grin' ? '163 151' : up ? '162 154' : '162 163'}"/>`;
-    return part('earL', pose, EAR(back)) + part('earR', pose, mirror(EAR(back, true))) +
+    return part('earL', pose, EAR(back) + slot('ear')) + part('earR', pose, mirror(EAR(back, true))) + slot('headBack') +
       AO(150, 184, 48, 12, 0.5) +
       FUR(E(104, 152, 22, 20), 'out:150,130', 9, 1) + FUR(E(196, 152, 22, 20), 'out:150,130', 9, 1) +
       FUR('M150 66 C188 66 208 92 210 122 C212 146 204 166 186 176 C174 183 162 186 150 186 C138 186 126 183 114 176 C96 166 88 146 90 122 C92 92 112 66 150 66 Z',
@@ -190,8 +194,9 @@
     return s;
   }
 
-  const BODY = (back) =>
-    FUR('M150 168 C206 168 230 222 230 284 C230 332 208 356 150 356 C92 356 70 332 70 284 C70 222 94 168 150 168 Z', 'down', 10, 1) +
+  // vestido, el pelo del cuerpo es corto: si no, asoma por los lados de la ropa
+  const BODY = (back, clothed) =>
+    FUR('M150 168 C206 168 230 222 230 284 C230 332 208 356 150 356 C92 356 70 332 70 284 C70 222 94 168 150 168 Z', 'down', clothed ? 3 : 10, 1) +
     `<ellipse class="thigh" fill="url(#ch-shade)" cx="96" cy="318" rx="26" ry="34"/><ellipse class="thigh" fill="url(#ch-shade)" cx="204" cy="318" rx="26" ry="34"/>` +
     (back ? '' : `<ellipse class="belly" fill="url(#ch-lite)" cx="150" cy="286" rx="46" ry="54"/>` +
                  FUR(E(152, 212, 58, 34), 'down', 13, 1.1));                                 // pechera
@@ -208,25 +213,35 @@
   const FOOT_SIT = AO(112, 356, 28, 4, 0.6) + FUR(E(108, 351, 26, 9), 'out:108,340', 5, 1.2);
   const TAIL = FUR(E(150, 322, 20, 18), 'out:150,322', 9, 1.4);
 
+  // outfit: capas por hueco (ver outfits.js). Cada hueco se pinta dentro de la pieza del rig que lo mueve.
+  let OF = null, OV = 'tq';
+  const slot = (name, ...a) => (OF && OF[name] ? OF[name](OV, ...a) : '');
+
   function body(pose, opt) {
     const view = opt.view || 'tq';
+    OF = opt.outfit && window.ChupitsOutfits ? window.ChupitsOutfits[opt.outfit] || null : null;
+    OV = view;
     const back = view === 'back';
     const sit = !!pose.sit;
     const expr = opt.expr || pose.expr;
-    const legs = part('legL', pose, sit ? FOOT_SIT : FOOT) + part('legR', pose, mirror(sit ? FOOT_SIT : FOOT));
+    const legs = part('legL', pose, (sit ? FOOT_SIT : FOOT) + slot('shoe', 'L')) + part('legR', pose, mirror((sit ? FOOT_SIT : FOOT) + slot('shoe', 'R')));
+    const shoesFront = !!(OF && OF.shoe);
     const bodyPose = sit ? { parts: { body: { sy: 0.86 } } } : pose;
     const collar = opt.collar !== false;
     const head = part('head', pose,
       (collar ? COLLAR('back') : '') +
       `<g transform="translate(150 188) scale(.94) translate(-150 -188)">` +
-      (view === 'tq' ? HEAD_TQ(expr, pose) : HEAD_FRONT(expr, pose, back)) + `</g>` +
-      (collar ? COLLAR('front') : ''));
-    const arms = part('armL', pose, ARM) + part('armR', pose, mirror(ARM));
-    return legs +
+      (view === 'tq' ? HEAD_TQ(expr, pose) : HEAD_FRONT(expr, pose, back)) + slot('head') + `</g>` +
+      (collar ? COLLAR('front') : '') + slot('neck'));
+    const arms = part('armL', pose, ARM + slot('sleeve', 'L') + slot('propL')) + part('armR', pose, mirror(ARM + slot('sleeve', 'R') + slot('prop')));
+    const clothed = !!(OF && OF.torso && OF.pants);
+    const clothes = (OF && (OF.torso || OF.pants))
+      ? `<g transform="translate(150 0) scale(1.05 1) translate(-150 0)">${slot('pants') + slot('torso')}</g>` : '';
+    return (shoesFront && !back ? '' : legs) +
       (back ? arms : '') +
-      part('body', bodyPose, BODY(back)) +
+      part('body', bodyPose, BODY(back, clothed) + clothes) +
       (back ? (sit ? `<g transform="translate(0 10)">${TAIL}</g>` : TAIL)
-            : arms + part('body', bodyPose, RUFF)) +
+            : (shoesFront ? legs : '') + arms + (OF && OF.torso ? '' : part('body', bodyPose, RUFF))) +
       head;
   }
 
