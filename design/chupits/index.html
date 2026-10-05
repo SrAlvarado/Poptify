@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chupits · Avatar</title>
+<style>
+  :root{
+    --bg:#0b0a0b; --card:#141214; --card2:#1a171a; --tx:#f3efec; --mut:rgba(243,239,236,.56); --bd:rgba(255,255,255,.08);
+    --red:#e5333f; --green:#1ed760;
+    /* Chupits */
+    --fur:#f6f3f0; --fur-shade:#dcd5d2; --line:#1b1719; --pink:#f3b3be; --nose:#e98ea0; --eye:#2a1218;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;padding:40px 24px 90px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.06'/%3E%3C/svg%3E")}
+  .wrap{max-width:1180px;margin:0 auto}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  h1{font-size:56px;font-weight:900;letter-spacing:-.04em;line-height:.9}
+  h1 span{color:var(--red)}
+  .lead{color:var(--mut);font-size:15px;max-width:640px;margin-top:12px;line-height:1.5}
+  h2{font-size:26px;font-weight:850;letter-spacing:-.02em;margin:64px 0 6px}
+  h2 + p{color:var(--mut);font-size:14px;max-width:720px;line-height:1.5;margin-bottom:22px}
+
+  /* hero */
+  .hero{display:grid;grid-template-columns:1.25fr 1fr;gap:20px;margin-top:30px}
+  .stage{position:relative;background:radial-gradient(circle at 50% 70%,#221e22,#0f0d0f 70%);border:1px solid var(--bd);border-radius:28px;
+    display:grid;place-items:center;min-height:520px;overflow:hidden}
+  .stage .chupits{height:470px;width:auto}
+  .stage[data-pose=techno]{animation:strobe var(--b) steps(1) infinite}
+  @keyframes strobe{0%{background:#2a2a2e}12%{background:#0f0d0f}}
+  .stage .tag{position:absolute;left:20px;top:18px}
+  .stage .bpm{position:absolute;right:20px;top:16px;font:800 13px ui-monospace,Menlo,monospace;color:var(--red)}
+  .stage .bpm i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);margin-right:6px;animation:tick var(--b) steps(1) infinite}
+  @keyframes tick{0%{opacity:1}30%{opacity:.15}}
+  .ctrl{position:absolute;left:16px;right:16px;bottom:16px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+  .chip{background:rgba(255,255,255,.06);border:1px solid var(--bd);color:var(--tx);border-radius:99px;padding:7px 12px;font-size:12px;font-weight:650;cursor:pointer}
+  .chip.on{background:var(--tx);color:#000}
+  .side{display:flex;flex-direction:column;gap:12px}
+  .box{background:var(--card);border:1px solid var(--bd);border-radius:22px;padding:20px}
+  .box h3{font-size:14px;font-weight:800;margin-bottom:10px}
+  .traits{list-style:none;display:flex;flex-direction:column;gap:9px;font-size:13px;line-height:1.45;color:rgba(243,239,236,.82)}
+  .traits b{color:var(--tx)}
+  .sw{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .sw div{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--mut)}
+  .sw i{width:22px;height:22px;border-radius:7px;border:1px solid rgba(255,255,255,.18);flex:none}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  input[type=range]{accent-color:var(--red);flex:1}
+
+  /* grids */
+  .grid{display:grid;gap:14px}
+  .g3{grid-template-columns:repeat(3,1fr)} .g5{grid-template-columns:repeat(5,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+  .card{background:var(--card);border:1px solid var(--bd);border-radius:22px;padding:14px 14px 16px;cursor:default}
+  .card .st{background:radial-gradient(circle at 50% 75%,#211d21,#121012 72%);border-radius:16px;display:grid;place-items:center;height:250px;overflow:hidden}
+  .card .st .chupits{height:230px;width:auto}
+  .card.click{cursor:pointer;transition:border-color .2s}
+  .card.click:hover{border-color:rgba(255,255,255,.25)}
+  .card .nm{display:flex;justify-content:space-between;align-items:baseline;margin-top:12px}
+  .card .nm b{font-size:16px;font-weight:800}
+  .card .nm span{font:700 11px ui-monospace,Menlo,monospace;color:var(--red)}
+  .card p{color:var(--mut);font-size:12.5px;line-height:1.45;margin-top:6px}
+  .g5 .card .st{height:190px}.g5 .card .st .chupits{height:180px}
+
+  /* outfits */
+  .of{background:var(--card);border:1px solid var(--bd);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:10px}
+  .of header{align-items:center}
+  .of h4{font-size:18px;font-weight:850}
+  .of .pal{display:flex;gap:4px}.of .pal i{width:16px;height:16px;border-radius:5px;border:1px solid rgba(255,255,255,.2)}
+  .of .kw{font:600 11px ui-monospace,Menlo,monospace;color:var(--mut)}
+  .of dl{display:grid;grid-template-columns:78px 1fr;gap:5px 10px;font-size:12.5px;line-height:1.4}
+  .of dt{color:var(--mut)} .of dd{color:rgba(243,239,236,.88)}
+  .pill{font:700 10px ui-monospace,Menlo,monospace;padding:3px 8px;border-radius:99px;border:1px solid var(--bd);color:var(--mut)}
+  .pill.core{color:var(--green);border-color:rgba(30,215,96,.35)}
+  .next{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .next .box p{font-size:13px;line-height:1.5;color:rgba(243,239,236,.78)}
+  .next .box code{font-size:11.5px;background:rgba(255,255,255,.07);padding:1px 5px;border-radius:5px}
+
+  @media (max-width:900px){.hero,.next{grid-template-columns:1fr}.g3,.g4{grid-template-columns:1fr 1fr}.g5{grid-template-columns:repeat(3,1fr)}h1{font-size:42px}}
+  @media (max-width:560px){.g3,.g4,.g5{grid-template-columns:1fr 1fr}.stage{min-height:440px}.stage .chupits{height:360px}}
+
+  /* ================= rig Chupits ================= */
+  .chupits{overflow:visible}
+  .chupits .fur{fill:var(--fur);stroke:var(--line);stroke-width:5;stroke-linejoin:round}
+  .chupits .inner{fill:var(--pink)}
+  .chupits .shade{stroke:var(--fur-shade)}
+  .chupits .belly{fill:#fff;opacity:.85}
+  .chupits .tuft{fill:none;stroke:var(--line);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+  .chupits .ln{fill:none;stroke:var(--line);stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round}
+  .chupits .ln.th{stroke-width:3}
+  .chupits .eye{fill:var(--eye)}
+  .chupits .hl{fill:#fff;opacity:.9}
+  .chupits .nose{fill:var(--nose);stroke:var(--line);stroke-width:2.5;stroke-linejoin:round}
+  .chupits .mouth{fill:#5a1f2b;stroke:var(--line);stroke-width:3}
+  .chupits .whisk path{fill:none;stroke:var(--line);stroke-width:1.6;opacity:.45;stroke-linecap:round}
+  .chupits .blush{fill:var(--pink);opacity:.35}
+  .chupits .pad{fill:var(--pink);opacity:.75}
+  .chupits .collar{fill:#141214;stroke:var(--line);stroke-width:3}
+  .chupits .spike{fill:#c9ced6;stroke:var(--line);stroke-width:2.5;stroke-linejoin:round}
+  .chupits .ring{fill:none;stroke:#c9ced6;stroke-width:2.5}
+  .chupits .shadow{fill:rgba(0,0,0,.45)}
+  .chupits .zzz text{font:900 24px -apple-system,system-ui;fill:rgba(243,239,236,.75);animation:zfloat 3s ease-in-out infinite}
+  .chupits .zzz text:nth-child(2){animation-delay:.5s}.chupits .zzz text:nth-child(3){animation-delay:1s}
+  @keyframes zfloat{0%,100%{opacity:0;transform:translate(0,8px)}40%,70%{opacity:1;transform:translate(4px,-6px)}}
+
+  /* idle: respira, parpadea, oreja nerviosa */
+  @keyframes breathe{50%{transform:scale(1.012,1.025)}}
+  @keyframes idleHead{50%{transform:translateY(2px) rotate(1deg)}}
+  @keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+  @keyframes twitch{0%,78%,100%{transform:rotate(0)}82%{transform:rotate(9deg)}86%{transform:rotate(-5deg)}90%{transform:rotate(3deg)}}
+  .pose-stand .a-body,.pose-sit .a-body{animation:breathe 3.2s ease-in-out infinite}
+  .pose-stand .a-head,.pose-sit .a-head{animation:idleHead 3.2s ease-in-out infinite}
+  .pose-stand .a-eyes,.pose-sit .a-eyes{animation:blink 4.6s infinite}
+  .pose-stand .a-earL{animation:twitch 5.3s infinite}
+  .pose-sit .a-earR{animation:twitch 3.7s infinite}
+
+  /* aburrido: suspiro largo, cabeza que se va cayendo, oreja floja */
+  @keyframes sigh{50%{transform:scale(1.03,.96)}}
+  @keyframes droop{50%{transform:rotate(4deg) translateY(4px)}}
+  @keyframes flop{50%{transform:rotate(7deg)}}
+  .pose-bored .a-body{animation:sigh 5s ease-in-out infinite}
+  .pose-bored .a-head{animation:droop 5s ease-in-out infinite}
+  .pose-bored .a-earR{animation:flop 5s ease-in-out infinite}
+
+  /* saltando: squash & stretch, sombra que se encoge */
+  @keyframes hop{0%,100%{transform:translateY(0) scale(1.1,.88)}12%{transform:translateY(0) scale(.94,1.08)}50%{transform:translateY(-84px) scale(1,1)}88%{transform:translateY(0) scale(.96,1.05)}}
+  @keyframes hopShadow{50%{transform:scale(.5);opacity:.5}}
+  @keyframes flutterL{0%,100%{transform:rotate(0)}50%{transform:rotate(-14deg)}}
+  @keyframes flutterR{0%,100%{transform:rotate(0)}50%{transform:rotate(14deg)}}
+  .pose-jump .a-root{animation:hop calc(var(--b)*2) cubic-bezier(.4,0,.6,1) infinite}
+  .pose-jump .shadow{animation:hopShadow calc(var(--b)*2) cubic-bezier(.4,0,.6,1) infinite}
+  .pose-jump .a-earL{animation:flutterL calc(var(--b)*2) ease-in-out infinite}
+  .pose-jump .a-earR{animation:flutterR calc(var(--b)*2) ease-in-out infinite}
+
+  /* RAP · 90: cabeceo en cada beat + mano que "corta" */
+  @keyframes nod{0%,100%{transform:translateY(0) rotate(0)}22%{transform:translateY(7px) rotate(-3deg)}}
+  @keyframes dip{0%,100%{transform:translateY(0)}22%{transform:translateY(6px) scale(1.02,.98)}}
+  @keyframes chop{0%,100%{transform:rotate(0)}22%{transform:rotate(18deg)}}
+  @keyframes lagL{0%,100%{transform:rotate(0)}35%{transform:rotate(-7deg)}}
+  @keyframes lagR{0%,100%{transform:rotate(0)}35%{transform:rotate(7deg)}}
+  .pose-rap .a-root{animation:dip var(--b) cubic-bezier(.2,.8,.3,1) infinite}
+  .pose-rap .a-head{animation:nod var(--b) cubic-bezier(.2,.8,.3,1) infinite}
+  .pose-rap .a-armR{animation:chop var(--b) cubic-bezier(.2,.8,.3,1) infinite}
+  .pose-rap .a-armL{animation:lagR calc(var(--b)*2) ease-in-out infinite}
+  .pose-rap .a-earL{animation:lagL var(--b) ease-out infinite}
+  .pose-rap .a-earR{animation:lagR var(--b) ease-out infinite}
+
+  /* TECHNO · 128: bombeo corto y mecánico, puño arriba */
+  @keyframes pump{0%,100%{transform:translateY(0)}18%{transform:translateY(10px) scale(1.03,.96)}}
+  @keyframes fist{0%,100%{transform:rotate(0)}18%{transform:rotate(20deg)}}
+  @keyframes robo{0%,100%{transform:translateY(0)}18%{transform:translateY(6px)}}
+  .pose-techno .a-root{animation:pump var(--b) cubic-bezier(.1,.9,.2,1) infinite}
+  .pose-techno .a-armR{animation:fist var(--b) cubic-bezier(.1,.9,.2,1) infinite}
+  .pose-techno .a-armL{animation:fist calc(var(--b)*2) ease-in-out infinite reverse}
+  .pose-techno .a-head{animation:robo var(--b) cubic-bezier(.1,.9,.2,1) infinite}
+  .pose-techno .a-earL{animation:lagL calc(var(--b)/2) ease-out infinite}
+  .pose-techno .a-earR{animation:lagR calc(var(--b)/2) ease-out infinite}
+
+  /* REGUETÓN · 95: vaivén a 2 tiempos + golpes del dembow (3-3-2) */
+  @keyframes hips{0%,100%{transform:rotate(-5deg) translateX(-8px)}50%{transform:rotate(5deg) translateX(8px)}}
+  @keyframes dembow{0%,37.5%,50%,87.5%{transform:translateY(6px) rotate(2deg)}18%,44%,70%,94%{transform:translateY(0) rotate(0)}}
+  @keyframes waveL{0%,100%{transform:rotate(0)}50%{transform:rotate(-22deg)}}
+  @keyframes waveR{0%,100%{transform:rotate(0)}50%{transform:rotate(22deg)}}
+  .pose-reggaeton .a-root{animation:hips calc(var(--b)*2) ease-in-out infinite}
+  .pose-reggaeton .a-head{animation:dembow calc(var(--b)*2) linear infinite}
+  .pose-reggaeton .a-armL{animation:waveL calc(var(--b)*2) ease-in-out infinite}
+  .pose-reggaeton .a-armR{animation:waveL calc(var(--b)*2) ease-in-out infinite}
+  .pose-reggaeton .a-earR{animation:lagR var(--b) ease-in-out infinite}
+
+  /* TRAP · 140 (half-time 70): balanceo lento, caída pesada, orejas a tresillos de hi-hat */
+  @keyframes lean{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+  @keyframes heavy{0%,100%{transform:translateY(0) rotate(0)}14%{transform:translateY(9px) rotate(-4deg)}}
+  @keyframes hat{0%,100%{transform:rotate(0)}50%{transform:rotate(4deg)}}
+  .pose-trap .a-root{animation:lean calc(var(--b)*2) ease-in-out infinite}
+  .pose-trap .a-head{animation:heavy var(--b) cubic-bezier(.2,.9,.3,1) infinite}
+  .pose-trap .a-armL{animation:waveL calc(var(--b)*2) ease-in-out infinite}
+  .pose-trap .a-armR{animation:waveL calc(var(--b)*2) ease-in-out infinite}
+  .pose-trap .a-earL,.pose-trap .a-earR{animation:hat calc(var(--b)/3) linear infinite}
+
+  /* POP · 118: paso lateral con saltito, brazos alternos, sonrisa */
+  @keyframes step{0%,100%{transform:translate(-14px,0)}25%{transform:translate(0,-16px)}50%{transform:translate(14px,0)}75%{transform:translate(0,-16px)}}
+  @keyframes armSwap{0%,100%{transform:rotate(0)}50%{transform:rotate(-110deg)}}
+  @keyframes armSwapR{0%,100%{transform:rotate(0)}50%{transform:rotate(-110deg)}}
+  .pose-pop .a-root{animation:step calc(var(--b)*2) ease-in-out infinite}
+  .pose-pop .a-armL{animation:armSwap calc(var(--b)*2) ease-in-out infinite}
+  .pose-pop .a-armR{animation:armSwapR calc(var(--b)*2) ease-in-out infinite;animation-delay:calc(var(--b)*-1)}
+  .pose-pop .a-earL{animation:lagL var(--b) ease-in-out infinite}
+  .pose-pop .a-earR{animation:lagR var(--b) ease-in-out infinite}
+
+  .static .chupits *{animation:none!important}
+  @media (prefers-reduced-motion:reduce){.chupits *,.stage{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="mono">Poptify · rama avatar · v0 naked</div>
+      <h1>Chupits<span>.</span></h1>
+      <p class="lead">La mascota de Poptify para el <b>modo Avatar</b>: la ventana solo muestra a Chupits, que baila según el estilo de lo que suena y se cambia de outfit con el género. Primer paso: el personaje <b>naked</b> (solo con su collar) en todas las posiciones y la definición de los outfits.</p>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="stage" id="stage">
+      <div class="tag mono" id="stageTag">Pose · De pie</div>
+      <div class="bpm" id="stageBpm"></div>
+      <div id="stageSvg"></div>
+      <div class="ctrl" id="poseChips"></div>
+    </div>
+    <div class="side">
+      <div class="box">
+        <h3>Quién es Chupits (sacado de las 6 referencias)</h3>
+        <ul class="traits">
+          <li><b>Conejo blanco enano</b>: cabeza enorme y redonda con mejillas de pelo, cuerpo de pera compacto. Mide ~2,2 cabezas, más 1 cabeza de orejas.</li>
+          <li><b>Ojos a media asta, siempre.</b> En 5 de 6 fotos tiene el párpado caído y cara de "me da igual". Es su seña de identidad: los ojos abiertos solo para sorpresa o salto.</li>
+          <li><b>Orejas largas y rectas</b>, por dentro rosas. Una va siempre algo ladeada: la asimetría le da el carácter.</li>
+          <li><b>Collar negro de pinchos</b> (3 fotos + el logo). Lo lleva siempre, también naked; los outfits van por encima.</li>
+          <li><b>Nariz rosa, boca en Y con media sonrisa</b> y bigotes finos. Ojos de albino: granate muy oscuro con brillo.</li>
+          <li><b>Su mundo</b>: noir en blanco y negro, sepia, grano, acento rojo (la mira), callejón de noche, máscara de luchador, el lazo negro del logo. Pasota y callejero, pero tierno.</li>
+          <li><b>Lo que no lleva</b>: el cigarro de la foto se queda en actitud, no en atrezo. Nada de pelo de colores: el color lo ponen el outfit y la luz.</li>
+        </ul>
+      </div>
+      <div class="box">
+        <h3>Paleta del cuerpo</h3>
+        <div class="sw" id="swatches"></div>
+      </div>
+      <div class="box">
+        <h3>Controles</h3>
+        <div class="row" style="margin-bottom:12px">
+          <button class="chip on" data-view="front">Frente</button>
+          <button class="chip" data-view="side">Perfil</button>
+          <button class="chip" data-view="back">Espalda</button>
+          <button class="chip on" id="collarBtn">Collar</button>
+        </div>
+        <div class="row"><span class="mono" style="width:70px">Tempo</span><input type="range" id="bpm" min="60" max="160" value="90"><span class="mono" id="bpmVal" style="width:56px;text-align:right"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <h2>Turnaround · naked</h2>
+  <p>Las tres vistas base. El frente y la espalda salen del mismo rig; el perfil es un dibujo aparte con las mismas proporciones, paleta y grosor de línea (5 px a escala 1).</p>
+  <div class="grid g3" id="turn"></div>
+
+  <h2>Posiciones</h2>
+  <p>Todas comparten esqueleto: cada pose solo gira y desplaza piezas desde sus pivotes. Las de baile están atadas al tempo (<code>--b</code> = un beat): en la app el BPM saldrá del audio tap, no de un valor fijo. Haz clic en una para verla en grande.</p>
+  <div class="grid g3" id="poses"></div>
+
+  <h2>Expresiones</h2>
+  <p>Cinco caras. Por defecto <b>sleepy</b>; las demás se reservan para momentos concretos.</p>
+  <div class="grid g5" id="exprs"></div>
+
+  <h2>Outfits · definición</h2>
+  <p>Cada outfit es una pila de capas colgadas de las piezas del rig (cabeza, torso, brazos, piernas, pies), así heredan pose y baile sin animarse aparte. Las orejas siempre salen por fuera. El género se decide con los géneros del artista en Spotify; si no hay, se queda naked.</p>
+  <div class="grid g4" id="outfits"></div>
+
+  <h2>Cómo encaja en la app</h2>
+  <div class="next">
+    <div class="box"><h3>1 · Modo Avatar</h3><p>Nuevo modo junto a iOS, iPod, Notch… La ventana transparente solo pinta a Chupits, sin carátula ni controles. El rig vive en <code>src/avatar/</code> y reutiliza este mismo SVG + CSS.</p></div>
+    <div class="box"><h3>2 · Género y tempo</h3><p>Género → outfit + baile, a partir de los géneros del artista (cacheados por artista para no gastar llamadas: ojo al 429). El tempo y los golpes salen del <b>audio tap</b> (detección de onsets), así Chupits va a compás de verdad. Si hay pausa: sentado; más de 60 s: aburrido.</p></div>
+    <div class="box"><h3>3 · Ajustes en la barra de menús</h3><p>Los ajustes salen del popup y pasan a un icono en la barra de macOS (tray de Tauri), como Notion o Docker: modo, skin, outfit forzado, opacidad, abrir al iniciar y actualizaciones.</p></div>
+  </div>
+</div>
+
+<script src="chupits.js"></script>
+<script>
+  const { render, POSES } = window.Chupits;
+  const DESC = {
+    stand: 'Reposo. Respira, parpadea y de vez en cuando mueve una oreja. La postura de la foto de la mira y la del luchador.',
+    sit: 'Sin música unos segundos o al empezar. Patas traseras abiertas, manos sobre la barriga.',
+    jump: 'Al cambiar de canción o al dar like. Estira y aplasta el cuerpo, abre los ojos y las orejas van con retraso.',
+    bored: 'Pausa larga o nada sonando. Cabeza caída, una oreja doblada, suspiro lento y zzz.',
+    rap: 'Cabecea en cada beat y corta el aire con la mano. Ojos a media asta: no se inmuta.',
+    techno: 'Bombeo corto y seco, puño arriba, ojos cerrados. El escenario parpadea a tempo.',
+    reggaeton: 'Vaivén de cadera cada 2 tiempos y la cabeza marca los golpes del dembow (3-3-2). Brazos arriba.',
+    trap: 'Half-time: se balancea lento hacia atrás, cae a plomo en el bombo y las orejas tiemblan a tresillos como los hi-hats.',
+    pop: 'Paso lateral con saltito, brazos alternos arriba y la única sonrisa abierta del repertorio.',
+  };
+  const SW = [['Pelo','#f6f3f0'],['Sombra','#dcd5d2'],['Contorno','#1b1719'],['Oreja','#f3b3be'],['Nariz','#e98ea0'],['Ojo','#2a1218'],['Collar','#141214'],['Pinchos','#c9ced6'],['Acento','#e5333f']];
+  document.getElementById('swatches').innerHTML = SW.map(([n,c]) => `<div><i style="background:${c}"></i>${n}<br>${c}</div>`).join('');
+
+  // ---------- hero ----------
+  const state = { pose: 'stand', view: 'front', collar: true, bpm: null };
+  const stage = document.getElementById('stage');
+  function draw() {
+    const p = POSES[state.pose];
+    const bpm = state.bpm || p.bpm || 90;
+    const view = (state.view !== 'front' && state.pose !== 'stand' && state.view === 'side') ? 'front' : state.view;
+    document.getElementById('stageSvg').innerHTML = render({ pose: state.pose, view, collar: state.collar, bpm });
+    stage.dataset.pose = state.pose;
+    stage.style.setProperty('--b', (60 / bpm).toFixed(3) + 's');
+    document.getElementById('stageTag').textContent = `Pose · ${p.label}` + (view === 'front' ? '' : ` · ${view === 'side' ? 'perfil' : 'espalda'}`);
+    document.getElementById('stageBpm').innerHTML = p.bpm ? `<i></i>${bpm} BPM` : '';
+    document.getElementById('bpmVal').textContent = p.bpm ? bpm + ' bpm' : '—';
+    document.getElementById('bpm').value = bpm;
+    document.getElementById('bpm').disabled = !p.bpm;
+    document.querySelectorAll('#poseChips .chip').forEach(c => c.classList.toggle('on', c.dataset.pose === state.pose));
+    document.querySelectorAll('[data-view]').forEach(c => c.classList.toggle('on', c.dataset.view === view));
+    drawGrids();
+  }
+  document.getElementById('poseChips').innerHTML = Object.entries(POSES).map(([k,p]) => `<button class="chip" data-pose="${k}">${p.label}</button>`).join('');
+  document.getElementById('poseChips').onclick = e => { const k = e.target.dataset.pose; if (k) { state.pose = k; state.bpm = null; if (state.view === 'side') state.view = 'front'; draw(); } };
+  document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => { state.view = b.dataset.view; if (b.dataset.view === 'side') state.pose = 'stand'; draw(); });
+  document.getElementById('collarBtn').onclick = e => { state.collar = !state.collar; e.target.classList.toggle('on', state.collar); draw(); };
+  document.getElementById('bpm').oninput = e => { state.bpm = +e.target.value; draw(); };
+
+  // ---------- grids ----------
+  function drawGrids() {
+    const c = state.collar;
+    document.getElementById('turn').innerHTML = [['front','Frente'],['side','Perfil'],['back','Espalda']].map(([v,n]) =>
+      `<div class="card"><div class="st">${render({ pose:'stand', view:v, collar:c })}</div><div class="nm"><b>${n}</b><span>naked</span></div></div>`).join('');
+    document.getElementById('poses').innerHTML = Object.entries(POSES).map(([k,p]) =>
+      `<div class="card click" data-pose="${k}"><div class="st">${render({ pose:k, collar:c })}</div>` +
+      `<div class="nm"><b>${p.label}</b><span>${p.bpm ? p.bpm + ' BPM' : 'idle'}</span></div><p>${DESC[k]}</p></div>`).join('');
+    document.getElementById('exprs').innerHTML = [['sleepy','Sleepy','por defecto'],['smug','Smug','reguetón, like'],['closed','En la zona','techno, chill'],['happy','Feliz','pop'],['bored','Aburrido','pausa'],].map(([e,n,u]) =>
+      `<div class="card static"><div class="st">${render({ pose:'stand', expr:e, collar:c, vb:'62 -30 176 280' })}</div><div class="nm"><b>${n}</b></div><p>${u}</p></div>`).join('') ;
+  }
+  document.getElementById('poses').onclick = e => { const card = e.target.closest('[data-pose]'); if (card) { state.pose = card.dataset.pose; state.bpm = null; state.view = 'front'; draw(); window.scrollTo({ top: 0, behavior: 'smooth' }); } };
+
+  // ---------- outfits (definición) ----------
+  const OUTFITS = [
+    { n:'Rap', core:true, kw:'hip hop · rap · boom bap · old school', pal:['#111','#f4f4f4','#d4a537','#e5333f'], s:{
+      Cabeza:'Gorra snapback girada de lado (visera a la derecha, ~45°). Las orejas salen por encima.',
+      Cuello:'Cadena dorada gruesa por encima del collar de pinchos.',
+      Torso:'Chaqueta de chándal de 3 franjas, abierta; tirantes sueltos colgando por los lados.',
+      Piernas:'Pantalón baggy caído a media cadera, con la goma del calzoncillo a la vista.',
+      Pies:'Zapatillas altas blancas con los cordones sueltos.',
+      Prop:'Micro en la mano que corta.' } },
+    { n:'Trap', core:true, kw:'trap · trap latino · drill · rage', pal:['#0d0d0d','#7b3ff2','#c9ced6','#f4f4f4'], s:{
+      Cabeza:'Durag negro con las colas por detrás, entre las orejas.',
+      Cara:'Gafas de sol finas tipo shield y grills plateados en los dientes de conejo.',
+      Cuello:'Cadena con colgante "P" helado.',
+      Torso:'Sudadera oversize con capucha bajada.',
+      Piernas:'Cargo negro amontonado sobre la zapatilla.',
+      Pies:'Zapatillas chunky.' } },
+    { n:'Reguetón', core:true, kw:'reggaeton · urbano latino · dembow', pal:['#ffd23f','#ff4fa0','#22d39a','#f4f4f4'], s:{
+      Cabeza:'Bucket hat de color.',
+      Cara:'Gafas envolventes de colores, estilo Y2K.',
+      Cuello:'Cadena fina.',
+      Torso:'Camiseta de fútbol o baloncesto oversize con dorsal.',
+      Piernas:'Pantalón corto de chándal.',
+      Pies:'Chanclas con calcetines blancos subidos.' } },
+    { n:'Techno', core:true, kw:'techno · house · tech house · minimal', pal:['#0a0a0a','#2a2a2a','#c6ff00','#f4f4f4'], s:{
+      Cabeza:'Bucket hat negro.',
+      Cara:'Gafas negras tipo shield.',
+      Cuello:'Cascos de DJ apoyados en el cuello.',
+      Torso:'Camiseta negra oversize.',
+      Piernas:'Cargo negro.',
+      Pies:'Botas militares. Pulsera LED que parpadea a tempo.' } },
+    { n:'Pop', core:true, kw:'pop · dance pop · k-pop · europop', pal:['#ff5fa2','#ffd6e8','#c9ced6','#fff'], s:{
+      Cabeza:'El lazo negro del logo, enorme, en la oreja izquierda.',
+      Cara:'Brillos en las mejillas.',
+      Torso:'Bomber satinada rosa chicle.',
+      Piernas:'Pantalón de campana blanco.',
+      Pies:'Plataformas.',
+      Prop:'Micro de diadema.' } },
+    { n:'Rock / Punk', kw:'rock · punk · metal · emo', pal:['#111','#3a3a3a','#c9ced6','#e5333f'], s:{
+      Cabeza:'Imperdible atravesando una oreja.',
+      Torso:'Chupa de cuero con tachuelas (pega con el collar) y camiseta rota.',
+      Piernas:'Pitillos rotos.',
+      Pies:'Botas de 8 agujeros.',
+      Baile:'Headbang (nuevo, por definir).' } },
+    { n:'Lo-fi / Chill', kw:'lo-fi · chill · ambient · indie', pal:['#8a7b6b','#d9c9b4','#4b5a6a','#f4f4f4'], s:{
+      Cabeza:'Gorro beanie y cascos grandes.',
+      Torso:'Sudadera con capucha.',
+      Pies:'Zapatillas de estar por casa.',
+      Baile:'Sentado, cabeceo lento: reutiliza "Sentado" a tempo.' } },
+    { n:'Lucha', kw:'easter egg · aleatorio', pal:['#c9ced6','#111','#e5333f','#f4f4f4'], s:{
+      Cabeza:'Máscara de luchador plateada con estrella y rayos (la de la foto del callejón).',
+      Torso:'Naked + cinturón de campeón.',
+      Cuándo:'Muy de vez en cuando, o con un like en una canción de lucha libre.' } },
+  ];
+  document.getElementById('outfits').innerHTML = OUTFITS.map(o =>
+    `<div class="of"><header><h4>${o.n}</h4><span class="pill ${o.core ? 'core' : ''}">${o.core ? 'pedido' : 'propuesto'}</span></header>` +
+    `<div class="pal">${o.pal.map(c => `<i style="background:${c}"></i>`).join('')}</div><div class="kw">${o.kw}</div>` +
+    `<dl>${Object.entries(o.s).map(([k,v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl></div>`).join('');
+
+  draw();
+</script>
+</body>
+</html>
