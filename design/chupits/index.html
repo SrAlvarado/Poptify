@@ -88,19 +88,19 @@
   .chupits .s-il{stroke:#fff;stroke-width:.7;opacity:.5}
   .chupits .s-id{stroke:#b4a9a3;stroke-width:.7;opacity:.3}
   .chupits .s-w{stroke:#fff;stroke-width:.6;opacity:.6}
-  .chupits .socket{fill:#a99c96;opacity:.3}
-  .chupits .refl{fill:#8a8790;opacity:.45}
+  .chupits .socket{opacity:.35}
+  .chupits .refl{opacity:.5}
   .chupits .glint{fill:#fff;opacity:.92}
   .chupits .rim{fill:none;stroke:#000;stroke-width:1.4}
   .chupits .lash{fill:none;stroke:#1c1617;stroke-width:2.2;stroke-linecap:round}
   .chupits .lidfold{fill:none;stroke:#b9aea8;stroke-width:1.3;opacity:.55;stroke-linecap:round}
-  .chupits .thigh{fill:#9b8f89;opacity:.22}
-  .chupits .brow{fill:#8d817b;opacity:.28}
+  .chupits .thigh{opacity:.25}
+  .chupits .brow{opacity:.3}
   .chupits .band{fill:none;stroke:#2a292d;stroke-width:6;stroke-linecap:round}
   .chupits .spike{stroke:#2c2f34;stroke-width:.6;stroke-linejoin:round}
   .chupits .spark{fill:#fff;opacity:.9}
-  .chupits .ao{fill:#3d3431}
-  .chupits .belly{fill:#fff;opacity:.35}
+  .chupits .ao{}
+  .chupits .belly{opacity:.35}
   .chupits .inner{opacity:.92}
   .chupits .vein{fill:none;stroke:#cf7d8a;stroke-width:1;opacity:.55;stroke-linecap:round}
   .chupits .nose{stroke:#b56b77;stroke-width:.8}
@@ -110,7 +110,8 @@
   .chupits .dots circle{fill:#8c7f7a;opacity:.7}
   .chupits .whisk path{fill:none;stroke:rgba(255,255,255,.75);stroke-width:.9;stroke-linecap:round}
   .chupits .toe{fill:none;stroke:#b3a8a2;stroke-width:1.3;stroke-linecap:round}
-  .chupits .shadow{fill:rgba(0,0,0,.55)}
+  .chupits .shadow{opacity:.75}
+  .chupits .halo{opacity:.1}
   .chupits .zzz text{font:900 24px -apple-system,system-ui;fill:rgba(243,239,236,.75);animation:zfloat 3s ease-in-out infinite}
   .chupits .zzz text:nth-child(2){animation-delay:.5s}.chupits .zzz text:nth-child(3){animation-delay:1s}
   @keyframes zfloat{0%,100%{opacity:0;transform:translate(0,8px)}40%,70%{opacity:1;transform:translate(4px,-6px)}}
@@ -168,15 +169,17 @@
   .pose-techno .a-earL{animation:lagL calc(var(--b)/2) ease-out infinite}
   .pose-techno .a-earR{animation:lagR calc(var(--b)/2) ease-out infinite}
 
-  /* REGUETÓN · 95: vaivén a 2 tiempos + golpes del dembow (3-3-2) */
-  @keyframes hips{0%,100%{transform:rotate(-5deg) translateX(-8px)}50%{transform:rotate(5deg) translateX(8px)}}
-  @keyframes dembow{0%,37.5%,50%,87.5%{transform:translateY(6px) rotate(2deg)}18%,44%,70%,94%{transform:translateY(0) rotate(0)}}
-  @keyframes waveL{0%,100%{transform:rotate(0)}50%{transform:rotate(-22deg)}}
-  @keyframes waveR{0%,100%{transform:rotate(0)}50%{transform:rotate(22deg)}}
-  .pose-reggaeton .a-root{animation:hips calc(var(--b)*2) ease-in-out infinite}
-  .pose-reggaeton .a-head{animation:dembow calc(var(--b)*2) linear infinite}
-  .pose-reggaeton .a-armL{animation:waveL calc(var(--b)*2) ease-in-out infinite}
-  .pose-reggaeton .a-armR{animation:waveL calc(var(--b)*2) ease-in-out infinite}
+  /* REGUETÓN · 95: rebote de rodillas en cada golpe del dembow (3-3-2), meneo de hombros y brazos que se alternan */
+  @keyframes dembowBounce{0%,37.5%,50%,87.5%{transform:translateY(7px) scale(1.02,.97)}15%,44%,68%,94%{transform:translateY(0) scale(1)}}
+  @keyframes shimmy{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+  @keyframes punchL{0%,100%{transform:rotate(0)}25%{transform:rotate(-34deg)}50%{transform:rotate(0)}}
+  @keyframes nodSide{0%,100%{transform:rotate(-4deg)}37.5%{transform:rotate(4deg) translateY(3px)}50%{transform:rotate(2deg)}87.5%{transform:rotate(-2deg) translateY(3px)}}
+  .pose-reggaeton .a-root{animation:dembowBounce calc(var(--b)*2) cubic-bezier(.2,.8,.3,1) infinite}
+  .pose-reggaeton .a-body{animation:shimmy var(--b) ease-in-out infinite}
+  .pose-reggaeton .a-armL{animation:punchL calc(var(--b)*2) ease-in-out infinite}
+  .pose-reggaeton .a-armR{animation:punchL calc(var(--b)*2) ease-in-out infinite reverse;animation-delay:calc(var(--b)*-1)}
+  .pose-reggaeton .a-head{animation:nodSide calc(var(--b)*2) ease-in-out infinite}
+  .pose-reggaeton .a-earL{animation:lagL var(--b) ease-in-out infinite}
   .pose-reggaeton .a-earR{animation:lagR var(--b) ease-in-out infinite}
 
   /* TRAP · 140 (half-time 70): balanceo lento, caída pesada, orejas a tresillos de hi-hat */
@@ -285,7 +288,7 @@
     bored: 'Pausa larga o nada sonando. Cabeza caída, una oreja doblada, suspiro lento y zzz.',
     rap: 'Cabecea en cada beat y corta el aire con la mano. Morro fruncido: no se inmuta.',
     techno: 'Bombeo corto y seco, puño arriba, ojos cerrados. El escenario parpadea a tempo.',
-    reggaeton: 'Vaivén de cadera cada 2 tiempos y la cabeza marca los golpes del dembow (3-3-2). Brazos arriba.',
+    reggaeton: 'Rebota de rodillas en cada golpe del dembow (3-3-2), menea los hombros y los brazos, cortos y doblados delante, se alternan al golpe.',
     trap: 'Half-time: se balancea lento hacia atrás, cae a plomo en el bombo y las orejas tiemblan a tresillos como los hi-hats.',
     pop: 'Paso lateral con saltito y brazos alternos arriba. Ni con pop sonríe del todo: media sonrisa torcida, boca cerrada.',
   };
