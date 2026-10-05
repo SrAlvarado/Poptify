@@ -272,7 +272,7 @@
   <div class="grid g5" id="exprs"></div>
 
   <h2>Outfits</h2>
-  <p>Cada outfit es una pila de capas colgadas de las piezas del rig (cabeza, cuello, torso, mangas, pantalón, pies, mano), así baila con él sin animarse aparte. En <b>Auto</b> el outfit sigue al baile; en la app saldrá del género del artista en Spotify y, si no hay, se queda naked. Haz clic en uno para verlo bailar en grande.</p>
+  <p>Minimalistas: 2 o 3 piezas que dicen el género, siempre en cabeza, cuello u orejas, para que el conejo y su pelo se vean enteros. Cada pieza va colgada de su parte del rig, así baila con él sin animarse aparte. En <b>Auto</b> el outfit sigue al baile; en la app saldrá del género del artista en Spotify y, si no hay, se queda naked. Haz clic en uno para verlo bailar en grande.</p>
   <div class="grid g4" id="outfits"></div>
 
   <h2>Cómo encaja en la app</h2>
@@ -350,56 +350,22 @@
 
   // ---------- outfits (definición) ----------
   const OUTFITS = [
-    { id:'rap', pose:'rap', n:'Rap', core:true, kw:'hip hop · rap · boom bap · old school', pal:['#111','#f4f4f4','#d4a537','#e5333f'], s:{
-      Cabeza:'Gorra snapback girada de lado (visera a la derecha, ~45°). Las orejas salen por encima.',
-      Cuello:'Cadena dorada gruesa por encima del collar de pinchos.',
-      Torso:'Chaqueta de chándal de 3 franjas, abierta; tirantes sueltos colgando por los lados.',
-      Piernas:'Pantalón baggy caído a media cadera, con la goma del calzoncillo a la vista.',
-      Pies:'Zapatillas altas blancas con los cordones sueltos.',
-      Prop:'Micro en la mano que corta.' } },
-    { id:'trap', pose:'trap', n:'Trap', core:true, kw:'trap · trap latino · drill · rage', pal:['#0d0d0d','#7b3ff2','#c9ced6','#f4f4f4'], s:{
-      Cabeza:'Durag negro con las colas por detrás, entre las orejas.',
-      Cara:'Gafas de sol finas tipo shield (sin grills: nunca se le ven los dientes).',
-      Cuello:'Cadena con colgante "P" helado.',
-      Torso:'Sudadera oversize con capucha bajada.',
-      Piernas:'Cargo negro amontonado sobre la zapatilla.',
-      Pies:'Zapatillas chunky.' } },
-    { id:'reggaeton', pose:'reggaeton', n:'Reguetón', core:true, kw:'reggaeton · urbano latino · dembow', pal:['#ffd23f','#ff4fa0','#22d39a','#f4f4f4'], s:{
-      Cabeza:'Bucket hat de color.',
-      Cara:'Gafas envolventes de colores, estilo Y2K.',
-      Cuello:'Cadena fina.',
-      Torso:'Camiseta de fútbol o baloncesto oversize con dorsal.',
-      Piernas:'Pantalón corto de chándal.',
-      Pies:'Chanclas con calcetines blancos subidos.' } },
-    { id:'techno', pose:'techno', n:'Techno', core:true, kw:'techno · house · tech house · minimal', pal:['#0a0a0a','#2a2a2a','#c6ff00','#f4f4f4'], s:{
-      Cabeza:'Bucket hat negro.',
-      Cara:'Gafas negras tipo shield.',
-      Cuello:'Cascos de DJ apoyados en el cuello.',
-      Torso:'Camiseta negra oversize.',
-      Piernas:'Cargo negro.',
-      Pies:'Botas militares. Pulsera LED que parpadea a tempo.' } },
-    { id:'pop', pose:'pop', n:'Pop', core:true, kw:'pop · dance pop · k-pop · europop', pal:['#ff5fa2','#ffd6e8','#c9ced6','#fff'], s:{
-      Cabeza:'El lazo negro del logo, enorme, en la oreja izquierda.',
-      Cara:'Brillos en las mejillas.',
-      Torso:'Bomber satinada rosa chicle.',
-      Piernas:'Pantalón de campana blanco.',
-      Pies:'Plataformas.',
-      Prop:'Micro de diadema.' } },
-    { id:'rock', pose:'stand', n:'Rock / Punk', kw:'rock · punk · metal · emo', pal:['#111','#3a3a3a','#c9ced6','#e5333f'], s:{
-      Cabeza:'Imperdible atravesando una oreja.',
-      Torso:'Chupa de cuero con tachuelas (pega con el collar) y camiseta rota.',
-      Piernas:'Pitillos rotos.',
-      Pies:'Botas de 8 agujeros.',
-      Baile:'Headbang (nuevo, por definir).' } },
-    { id:'lofi', pose:'sit', n:'Lo-fi / Chill', kw:'lo-fi · chill · ambient · indie', pal:['#8a7b6b','#d9c9b4','#4b5a6a','#f4f4f4'], s:{
-      Cabeza:'Gorro beanie y cascos grandes.',
-      Torso:'Sudadera con capucha.',
-      Pies:'Zapatillas de estar por casa.',
-      Baile:'Sentado, cabeceo lento: reutiliza "Sentado" a tempo.' } },
-    { id:'lucha', pose:'stand', n:'Lucha', kw:'easter egg · aleatorio', pal:['#c9ced6','#111','#e5333f','#f4f4f4'], s:{
-      Cabeza:'Máscara de luchador plateada con estrella y rayos (la de la foto del callejón).',
-      Torso:'Naked + cinturón de campeón.',
-      Cuándo:'Muy de vez en cuando, o con un like en una canción de lucha libre.' } },
+    { id:'rap', pose:'rap', n:'Rap', core:true, kw:'hip hop · rap · boom bap · old school', pal:['#141416','#d4a537','#c9ced6'], s:{
+      Cabeza:'Gorra negra con la visera de lado y la "P" dorada.', Cuello:'Cadena gorda de oro sobre el collar.', Mano:'Micro.' } },
+    { id:'trap', pose:'trap', n:'Trap', core:true, kw:'trap · trap latino · drill · rage', pal:['#16141a','#1b1426','#c9ced6'], s:{
+      Cabeza:'Durag negro con las colas por detrás.', Cara:'Gafas finas oscuras.', Cuello:'Cadena de plata con colgante "P".' } },
+    { id:'reggaeton', pose:'reggaeton', n:'Reguetón', core:true, kw:'reggaeton · urbano latino · dembow', pal:['#ffd23f','#ff4fa0'], s:{
+      Cabeza:'Gorro de pescador amarillo con lunares rosas.', Cara:'Gafas Y2K de rosa a amarillo.' } },
+    { id:'techno', pose:'techno', n:'Techno', core:true, kw:'techno · house · tech house · minimal', pal:['#0b0b0d','#1d1d22','#c6ff00'], s:{
+      Cara:'Gafas negras.', Cuello:'Cascos de DJ apoyados en las clavículas.', Muñeca:'Pulsera LED que parpadea a tempo.' } },
+    { id:'pop', pose:'pop', n:'Pop', core:true, kw:'pop · dance pop · k-pop · europop', pal:['#121114','#ffffff','#2a2a2e'], s:{
+      Oreja:'El lazo negro del logo.', Cara:'Brillos en las mejillas y micro de diadema.' } },
+    { id:'rock', pose:'stand', n:'Rock / Punk', kw:'rock · punk · metal · emo', pal:['#141416','#d6dbe0'], s:{
+      Oreja:'Imperdible.', Muñeca:'Muñequera negra de tachuelas (pega con el collar).' } },
+    { id:'lofi', pose:'sit', n:'Lo-fi / Chill', kw:'lo-fi · chill · ambient · indie', pal:['#b58a3c','#33333a'], s:{
+      Cabeza:'Gorro de lana y cascos puestos.', Baile:'Sentado, cabeceo lento.' } },
+    { id:'lucha', pose:'stand', n:'Lucha', kw:'easter egg · aleatorio', pal:['#c9ced6','#141214','#e5333f'], s:{
+      Cabeza:'Máscara de luchador plateada con estrella y rayos (la de la foto del callejón).', Cuándo:'Muy de vez en cuando, o con un like en una canción de lucha libre.' } },
   ];
   document.getElementById('outfits').innerHTML = OUTFITS.map(o =>
     `<div class="of click" data-o="${o.id}" data-p="${o.pose}"><div class="st">${render({ pose: o.pose, outfit: o.id })}</div><header><h4>${o.n}</h4><span class="pill ${o.core ? 'core' : ''}">${o.core ? 'pedido' : 'propuesto'}</span></header>` +

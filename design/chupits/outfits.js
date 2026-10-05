@@ -1,7 +1,8 @@
 // Outfits de Chupits. Cada outfit rellena huecos del rig y cada hueco se pinta dentro de la pieza que lo mueve:
 //   head / headBack (cabeza, coords de la cabeza sin escalar) · ear (oreja de delante) · neck (cuello, sobre el collar)
-//   torso / pants (cuerpo) · sleeve(side) / prop / propL (brazos, coords del brazo izquierdo: el derecho es su espejo)
-//   shoe(side) (pies: si hay zapatos, los pies se pintan delante del cuerpo)
+//   prop / propL (patas, coords de la pata izquierda: la derecha es su espejo)
+//   El rig también acepta torso / pants / sleeve / shoe, pero los outfits no los usan: se decidió que fueran
+//   minimalistas y que no taparan el cuerpo.
 // Todas las funciones reciben la vista ('tq' | 'front' | 'back'). Los ids ch-* los hace únicos render().
 (function () {
   // tela: color plano + sombreado vertical y lateral encima, para que tenga volumen sin filtros
@@ -9,47 +10,6 @@
     `<path d="${d}" fill="${fill}"/><path d="${d}" fill="url(#ch-cloth)"/><path d="${d}" fill="url(#ch-clothx)"/>${extra}`;
   const FOLD = (d, o = 0.35) => `<path d="${d}" fill="none" stroke="#000" stroke-opacity="${o}" stroke-width="1.6" stroke-linecap="round"/>`;
   const LINE = (d, c, w = 2, o = 1) => `<path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-opacity="${o}" stroke-linecap="round" stroke-linejoin="round"/>`;
-  const front = (v) => v !== 'back';
-
-  // ---------- torso ----------
-  const T_TEE  = 'M96 194 C116 184 184 184 204 194 L222 232 C230 262 230 296 226 318 Q150 332 74 318 C70 296 70 262 78 232 Z';
-  const T_LONG = 'M96 194 C116 184 184 184 204 194 L222 232 C232 266 232 304 228 332 Q150 346 72 332 C68 304 68 266 78 232 Z';
-  const T_JKL  = 'M96 194 C110 188 124 186 136 188 C132 230 132 292 138 334 Q102 338 72 332 C68 304 68 266 78 232 Z';
-  const T_JKR  = 'M204 194 C190 188 176 186 164 188 C168 230 168 292 162 334 Q198 338 228 332 C232 304 232 266 222 232 Z';
-  const HOOD = (c) => CL('M82 216 C78 186 110 170 150 170 C190 170 222 186 218 216 Q150 196 82 216 Z', c) +
-                      FOLD('M96 206 Q150 188 204 206', .45);
-  // ---------- mangas (brazo izquierdo) ----------
-  const S_SHORT = 'M97 228 C93 250 95 272 97 292 Q126 302 157 292 C155 268 155 248 155 230 Q126 218 97 228 Z';
-  const S_LONG  = 'M97 228 C91 262 93 302 95 334 Q126 346 159 334 C157 300 155 262 155 230 Q126 218 97 228 Z';
-  const CUFF = (c) => CL('M94 324 Q126 334 160 324 L160 337 Q126 348 94 337 Z', c) + FOLD('M98 330 L158 330', .2);
-  const STRIPES = (c) => LINE('M101 236 C97 268 98 300 99 324', c, 2.4) + LINE('M107 234 C103 268 104 300 105 326', c, 2.4) + LINE('M113 233 C109 268 110 300 111 327', c, 2.4);
-  // ---------- pantalones ----------
-  const P_FULL  = 'M72 296 Q150 310 228 296 C232 322 230 346 224 362 L158 362 L150 336 L142 362 L76 362 C70 346 68 322 72 296 Z';
-  const P_LOW   = 'M72 308 Q150 322 228 308 C232 330 230 350 224 364 L158 364 L150 342 L142 364 L76 364 C70 350 68 330 72 308 Z';
-  const P_SHORT = 'M72 296 Q150 310 228 296 C230 314 228 328 224 340 L158 342 L150 326 L142 342 L76 340 C72 328 70 314 72 296 Z';
-  const P_FLARE = 'M72 296 Q150 310 228 296 C230 324 236 348 246 364 L160 364 L150 334 L140 364 L54 364 C64 348 70 324 72 296 Z';
-  const WAIST = (y = 304) => FOLD(`M72 ${y} Q150 ${y + 14} 228 ${y}`, .45);
-  const PFOLDS = FOLD('M98 326 Q110 338 102 356 M202 326 Q190 340 198 356 M118 340 Q124 350 120 360 M182 340 Q176 350 180 360', .3);
-  const CARGO = (c) => CL('M74 318 L96 316 L98 340 L76 342 Z', c) + CL('M226 318 L204 316 L202 340 L224 342 Z', c) +
-                       FOLD('M74 326 L97 324 M226 326 L203 324', .5);
-  // ---------- calzado (pie izquierdo; el derecho es su espejo) ----------
-  const SOLE = (c, h = 8) => `<path d="M85 352 L145 352 L145 ${352 + h} Q115 ${356 + h} 85 ${352 + h} Z" fill="${c}"/>` + FOLD(`M86 ${352 + h / 2} L144 ${352 + h / 2}`, .2);
-  const SNEAKER = (c, sole = '#f2f2f2') =>
-    CL('M87 352 C85 338 95 330 109 328 L130 326 C138 326 143 334 143 342 L143 354 L87 354 Z', c) + SOLE(sole) +
-    LINE('M110 332 L124 330 M110 338 L126 336', '#c9c9c9', 1.6);
-  const HIGHTOP = (c, lace = '#222') =>
-    CL('M88 352 C86 340 93 332 99 328 L101 306 L135 306 L137 326 C143 330 145 338 145 344 L145 354 L88 354 Z', c) + SOLE('#ffffff', 8) +
-    LINE('M106 312 L128 310 M106 318 L130 316 M106 324 L132 322', lace, 1.8) +
-    LINE('M120 324 C116 336 110 340 104 348 M124 324 C128 338 132 342 136 350', lace, 1.4);       // cordones sueltos
-  const BOOT = (c) =>
-    CL('M90 352 C88 340 95 330 99 326 L99 300 L137 300 L139 326 C145 332 147 340 147 346 L147 354 L90 354 Z', c) +
-    `<path d="M86 352 L150 352 L150 362 L86 362 Z" fill="#111"/>` + LINE('M88 358 h6 M98 358 h6 M108 358 h6 M118 358 h6 M128 358 h6 M138 358 h6', '#333', 2) +
-    LINE('M106 306 L130 304 M106 314 L130 312 M106 322 L132 320', '#555', 1.6);
-  const PLATFORM = (c) => SNEAKER(c, '#d9d9e0') + SOLE('#f3b3d0', 16);
-  const SLIDES = () =>
-    CL('M98 318 L134 318 L136 350 L96 350 Z', '#f4f4f4') + LINE('M98 326 L134 326 M98 331 L134 331', '#1a1a1a', 2.2) +
-    `<path d="M84 352 L146 352 L146 358 Q115 362 84 358 Z" fill="#161616"/>` +
-    CL('M90 346 Q115 334 142 346 L142 354 Q115 346 90 354 Z', '#151515') + LINE('M104 344 L126 342', '#fff', 1.4, .8);
 
   // ---------- cabeza (coords de la cabeza; 'tq' = 3/4 mirando a la derecha) ----------
   const CAP_SIDE = (c, logo) => (v) =>
@@ -139,91 +99,21 @@
   const MIC = `<g transform="rotate(16 128 340)"><rect x="123.5" y="318" width="9" height="40" rx="3.5" fill="#1a1a1c"/>` +
               `<circle cx="128" cy="314" r="10" fill="url(#ch-silver)"/>` + LINE('M120 310 L136 318 M120 318 L136 310 M118 314 L138 314', '#6d737b', .9) + `</g>`;
 
+  const Y2K = `<defs><linearGradient id="ch-y2k" x1="0" x2="1"><stop offset="0" stop-color="#ff4fa0" stop-opacity=".9"/><stop offset="1" stop-color="#ffd23f" stop-opacity=".9"/></linearGradient></defs>`;
+  const STUDS = `<path d="M100 314 Q127 322 154 314 L154 328 Q127 336 100 328 Z" fill="#141416"/>` +
+                `<g fill="url(#ch-silver)">${[108, 118, 128, 138, 148].map((x) => `<circle cx="${x}" cy="${322 + (x - 127) ** 2 / 400}" r="2.6"/>`).join('')}</g>`;
+
+  // Minimalistas a propósito: 2-3 piezas que dicen el género, el cuerpo y el pelo siempre a la vista.
   window.ChupitsOutfits = {
-    rap: {
-      label: 'Rap',
-      head: CAP_SIDE('#141416', true),
-      neck: () => CHAIN(22, 6, 4.2, 258, 'gold', '#7a5410'),
-      torso: (v) => CL(T_JKL, '#17181c') + CL(T_JKR, '#17181c') + (front(v) ? LINE('M136 190 C132 232 132 292 138 334', '#c9ced6', 1.6, .8) + LINE('M164 190 C168 232 168 292 162 334', '#c9ced6', 1.6, .8) : '') +
-                   LINE('M96 300 C92 316 96 336 104 350', '#e5333f', 4) + LINE('M204 300 C208 316 204 336 196 350', '#e5333f', 4) +          // tirantes sueltos
-                   `<rect x="99" y="346" width="10" height="7" rx="1.5" fill="url(#ch-silver)"/><rect x="191" y="346" width="10" height="7" rx="1.5" fill="url(#ch-silver)"/>`,
-      pants: () => CL('M73 294 Q150 308 227 294 L228 310 Q150 324 72 310 Z', '#f2f2f2') + LINE('M73 299 Q150 313 227 299', '#e5333f', 2) + LINE('M73 305 Q150 319 227 305', '#e5333f', 2) +   // goma del calzoncillo
-                   CL(P_LOW, '#3b5c8c') + WAIST(316) + PFOLDS + FOLD('M150 322 L150 342', .4),
-      sleeve: () => CL(S_LONG, '#17181c') + STRIPES('#f4f4f4') + CUFF('#17181c'),
-      prop: () => MIC,
-      shoe: () => HIGHTOP('#f6f6f6'),
-    },
-    trap: {
-      label: 'Trap',
-      headBack: (v) => v === 'back' ? '' : DURAG_TAILS(v),
-      head: (v) => DURAG(v) + SHADES('#1b1426')(v),
-      neck: () => CHAIN(28, 3.4, 2.4, 238, 'silver', '#59606a') + PENDANT_P,
-      torso: () => HOOD('#1c1b21') + CL(T_LONG, '#1c1b21') + LINE('M138 196 L136 244 M162 196 L164 248', '#7b3ff2', 2.4) +
-                   `<rect x="133" y="242" width="6" height="9" rx="2" fill="url(#ch-silver)"/><rect x="161" y="246" width="6" height="9" rx="2" fill="url(#ch-silver)"/>`,
-      pants: () => CL(P_FULL, '#141416') + WAIST() + CARGO('#1b1b1e') + PFOLDS + FOLD('M84 350 Q92 346 100 352 M200 352 Q208 346 216 350', .5),
-      sleeve: () => CL(S_LONG, '#1c1b21') + CUFF('#1c1b21') + FOLD('M100 280 Q112 286 124 280 M104 300 Q118 306 132 300', .3),
-      shoe: () => SNEAKER('#efeff2', '#7b3ff2') + SOLE('#7b3ff2', 13),
-    },
-    reggaeton: {
-      label: 'Reguetón',
-      head: (v) => BUCKET('#ffd23f', '#ff4fa0', '#ff4fa0')(v) + (v === 'back' ? '' : SHADES('url(#ch-y2k)')(v)),
-      neck: () => CHAIN(34, 2.6, 1.8, 236, 'gold', '#7a5410'),
-      torso: (v) => `<defs><linearGradient id="ch-y2k" x1="0" x2="1"><stop offset="0" stop-color="#ff4fa0" stop-opacity=".9"/><stop offset="1" stop-color="#ffd23f" stop-opacity=".9"/></linearGradient></defs>` +
-                    CL(T_TEE, '#ffd23f') + LINE('M110 190 Q150 206 190 190', '#22d39a', 4) +
-                    (front(v) ? `<text x="132" y="230" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="24" fill="#22d39a" stroke="#0e7a58" stroke-width="1">10</text>` : '') +
-                    LINE('M74 314 Q150 328 226 314', '#22d39a', 4),
-      pants: () => CL(P_SHORT, '#22d39a') + WAIST() + LINE('M74 304 L76 338 M226 304 L224 338', '#fff', 3) + FOLD('M150 312 L150 326', .4),
-      sleeve: () => CL(S_SHORT, '#ffd23f') + LINE('M97 284 Q126 294 157 284', '#22d39a', 4),
-      shoe: () => SLIDES(),
-    },
-    techno: {
-      label: 'Techno',
-      head: (v) => BUCKET('#141416', '#1d1d20')(v) + SHADES('#0b0b0d')(v),
-      neck: () => NECK_PHONES,
-      torso: (v) => CL(T_TEE, '#131315') + (front(v) ? `<text x="114" y="226" font-family="ui-monospace,Menlo,monospace" font-weight="800" font-size="11" fill="#c6ff00" letter-spacing="1">POPTIFY</text>` +
-                    LINE('M114 232 l6 -6 6 10 6 -14 6 18 6 -12 6 8 6 -4', '#c6ff00', 1.6) : ''),
-      pants: () => CL(P_FULL, '#18181a') + WAIST() + CARGO('#202023') + PFOLDS,
-      sleeve: () => CL(S_SHORT, '#131315') + FOLD('M100 284 Q126 292 154 284', .3),
-      propL: () => LED,
-      shoe: () => BOOT('#151515'),
-    },
-    pop: {
-      label: 'Pop',
-      ear: () => BOW('front'),
-      head: (v) => SPARKLES(v) + HEADSET(v),
-      torso: () => CL(T_LONG, '#ff5fa2') + LINE('M136 192 C134 236 134 294 140 336', '#c9ced6', 2, .9) +
-                   CL('M72 322 Q150 336 228 322 L228 334 Q150 348 72 334 Z', '#e04d8c') + FOLD('M96 210 Q104 240 98 270 M204 210 Q196 240 202 270', .2),
-      pants: () => CL(P_FLARE, '#f6f3f0') + WAIST() + FOLD('M90 330 Q80 350 70 362 M210 330 Q220 350 230 362', .2),
-      sleeve: () => CL(S_LONG, '#ff5fa2') + CUFF('#e04d8c') + LINE('M104 240 Q112 260 108 280', '#fff', 3, .25),
-      shoe: () => PLATFORM('#f2f2f6'),
-    },
-    rock: {
-      label: 'Rock / Punk',
-      ear: () => PIN('front'),
-      torso: (v) => CL(T_TEE, '#ece9e4') + (front(v) ? FOLD('M146 200 L152 214 L148 222 M160 204 L156 216', .6) : '') +
-                    CL(T_JKL, '#111113') + CL(T_JKR, '#111113') +
-                    `<g fill="url(#ch-silver)">${[[100, 210], [92, 236], [86, 262], [84, 290], [200, 210], [208, 236], [214, 262], [216, 290]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3"/>`).join('')}</g>` +
-                    LINE('M134 190 L120 222 L136 232', '#2a2a2e', 2.2) + LINE('M166 190 L180 222 L164 232', '#2a2a2e', 2.2),
-      pants: () => CL('M72 296 Q150 310 228 296 C230 322 226 346 218 362 L158 362 L150 336 L142 362 L82 362 C74 346 70 322 72 296 Z', '#1a1a1e') + WAIST() +
-                   `<path d="M92 334 Q100 330 110 334 Q102 338 92 334 Z M190 342 Q198 338 208 342 Q200 346 190 342 Z" fill="#f2efe9" opacity=".85"/>`,
-      sleeve: () => CL(S_LONG, '#111113') + CUFF('#111113') + LINE('M102 250 L108 252 M100 290 L106 292', '#c9ced6', 2) + LINE('M112 234 L150 234', '#2a2a2e', 2),
-      shoe: () => BOOT('#0f0f10'),
-    },
-    lofi: {
-      label: 'Lo-fi / Chill',
-      head: (v) => BEANIE('#b58a3c')(v) + HEADPHONES_ON(v),
-      torso: () => HOOD('#7d8590') + CL(T_LONG, '#7d8590') + CL('M112 278 Q150 270 188 278 L196 318 Q150 326 104 318 Z', '#737a85') + LINE('M138 196 L136 236 M162 196 L164 240', '#e8e3dc', 2.2),
-      pants: () => CL(P_FULL, '#4b5a6a') + WAIST() + PFOLDS,
-      sleeve: () => CL(S_LONG, '#7d8590') + CUFF('#737a85'),
-      shoe: () => CL('M86 352 C84 340 96 332 112 330 L130 330 C140 330 146 338 146 346 L146 356 L86 356 Z', '#8a7b6b') +
-                  CL('M84 346 Q115 338 148 346 L148 352 Q115 344 84 352 Z', '#f0e8dc') + SOLE('#5a4f45', 6),
-    },
-    lucha: {
-      label: 'Lucha',
-      head: MASK,
-      torso: () => CL('M72 286 Q150 300 228 286 L229 310 Q150 324 71 310 Z', 'url(#ch-gold)') + FOLD('M72 292 Q150 306 228 292 M72 304 Q150 318 228 304', .35) +
-                   `<g fill="#e5333f">${[[86, 298], [214, 298]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4"/>`).join('')}</g>`,
-    },
+    rap:       { label: 'Rap',          head: CAP_SIDE('#141416', true), neck: () => CHAIN(22, 6, 4.2, 258, 'gold', '#7a5410'), prop: () => MIC },
+    trap:      { label: 'Trap',         headBack: (v) => v === 'back' ? '' : DURAG_TAILS(v), head: (v) => DURAG(v) + SHADES('#1b1426')(v),
+                 neck: () => CHAIN(28, 3.4, 2.4, 238, 'silver', '#59606a') + PENDANT_P },
+    reggaeton: { label: 'Reguetón',     head: (v) => Y2K + BUCKET('#ffd23f', '#ff4fa0', '#ff4fa0')(v) + SHADES('url(#ch-y2k)')(v) },
+    techno:    { label: 'Techno',       head: SHADES('#0b0b0d'), neck: () => NECK_PHONES, propL: () => LED },
+    pop:       { label: 'Pop',          ear: () => BOW('front'), head: (v) => SPARKLES(v) + HEADSET(v) },
+    rock:      { label: 'Rock / Punk',  ear: () => PIN('front'), propL: () => STUDS },
+    lofi:      { label: 'Lo-fi / Chill', head: (v) => BEANIE('#b58a3c')(v) + HEADPHONES_ON(v) },
+    lucha:     { label: 'Lucha',        head: MASK },
   };
   // qué outfit va con cada baile (modo Auto)
   window.ChupitsOutfits.byPose = { rap: 'rap', trap: 'trap', reggaeton: 'reggaeton', techno: 'techno', pop: 'pop' };
