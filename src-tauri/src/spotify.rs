@@ -51,6 +51,8 @@ pub struct NowPlaying {
     pub id: String,
     pub title: String,
     pub artist: String,
+    /// id del primer artista (para pedir sus géneros: modo Avatar)
+    pub artist_id: String,
     pub album: String,
     pub image: String, // data: URL
     pub duration_ms: i64,
@@ -231,6 +233,16 @@ pub async fn is_saved(client: &reqwest::Client, token: &str, id: &str) -> Result
     }
     let arr: Vec<bool> = resp.json().await.map_err(|e| e.to_string())?;
     Ok(arr.first().copied().unwrap_or(false))
+}
+
+/// Géneros de un artista (modo Avatar: deciden el baile y el outfit de Chupits).
+/// Un 429 aquí NO arma el backoff global: es un extra cosmético y no debe congelar el polling.
+pub async fn artist_genres(client: &reqwest::Client, token: &str, id: &str) -> Result<Vec<String>, String> {
+    let resp = client.get(format!("{API}/artists/{id}")).bearer_auth(token).send().await.map_err(|e| e.to_string())?;
+    if resp.status().as_u16() == 429 { return Err("artists 429".into()); }
+    if !resp.status().is_success() { return Err(format!("artists {}", resp.status())); }
+    let v: serde_json::Value = resp.json().await.map_err(|e| e.to_string())?;
+    Ok(v["genres"].as_array().map(|a| a.iter().filter_map(|g| g.as_str().map(String::from)).collect()).unwrap_or_default())
 }
 
 pub async fn fetch_image_data_url(client: &reqwest::Client, url: &str) -> Result<String, String> {

@@ -21,6 +21,8 @@ pub struct AppState {
     last_np: Mutex<Option<spotify::NowPlaying>>,
     // whether we've logged the connected account this run (diagnostic, once)
     me_logged: Mutex<bool>,
+    // géneros por artista (modo Avatar): se piden una sola vez por artista y sesión
+    genres_cache: Mutex<std::collections::HashMap<String, Vec<String>>>,
 }
 
 impl AppState {
@@ -187,6 +189,7 @@ async fn now_playing(state: State<'_, AppState>) -> Result<Option<NowPlaying>, S
                 .join(", ")
         })
         .unwrap_or_default();
+    let artist_id = item["artists"][0]["id"].as_str().unwrap_or("").to_string();
     let album = item["album"]["name"].as_str().unwrap_or("").to_string();
     let img_url = item["album"]["images"]
         .get(0)
@@ -234,6 +237,7 @@ async fn now_playing(state: State<'_, AppState>) -> Result<Option<NowPlaying>, S
         id,
         title,
         artist,
+        artist_id,
         album,
         image,
         duration_ms,
@@ -290,6 +294,24 @@ async fn set_like(track_id: String, liked: bool, state: State<'_, AppState>) -> 
 
 /// Fetch any image URL and return it as a data: URL (sidesteps canvas CORS taint).
 /// Used for SoundCloud artwork so reactive colors still work.
+/// Géneros del artista para el modo Avatar. Cacheado por artista; con 429 o error
+/// devuelve lista vacía (Chupits baila el estilo por defecto) y no lo cachea, para reintentar.
+#[tauri::command]
+async fn artist_genres(artist_id: String, state: State<'_, AppState>) -> Result<Vec<String>, String> {
+    if artist_id.is_empty() { return Ok(vec![]); }
+    if let Some(g) = state.genres_cache.lock().unwrap().get(&artist_id) { return Ok(g.clone()); }
+    if spotify::rate_limited() { return Ok(vec![]); }
+    let token = ensure_token(&state).await?;
+    match spotify::artist_genres(&state.client, &token, &artist_id).await {
+        Ok(g) => {
+            dbg_log(&format!("[genres] {artist_id} -> {g:?}"));
+            state.genres_cache.lock().unwrap().insert(artist_id, g.clone());
+            Ok(g)
+        }
+        Err(e) => { dbg_log(&format!("[genres] {artist_id} error {e}")); Ok(vec![]) }
+    }
+}
+
 #[tauri::command]
 async fn fetch_image(url: String, state: State<'_, AppState>) -> Result<String, String> {
     spotify::fetch_image_data_url(&state.client, &url).await
@@ -417,6 +439,7 @@ pub fn run() {
                 np_cache: Mutex::new(None),
                 last_np: Mutex::new(None),
                 me_logged: Mutex::new(false),
+                genres_cache: Mutex::new(std::collections::HashMap::new()),
             };
             // load persisted tokens
             if let Some(t) = load_tokens(&state) {
@@ -438,6 +461,7 @@ pub fn run() {
             seek,
             set_like,
             fetch_image,
+            artist_genres,
             fetch_lyrics,
             set_notch_overlay,
             audio_tap::start_audio_tap,

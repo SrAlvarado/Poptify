@@ -144,6 +144,9 @@ export function getNativeError() { return nativeErr; }
 let waveL = null, waveR = null;
 export function getWave() { return waveL ? { l: waveL, r: waveR } : null; }
 export function isNative() { return native; }
+// suscriptor de cada frame de audio (lo usa el modo Avatar para sacar el tempo)
+let frameCb = null;
+export function onAudioFrame(fn) { frameCb = fn; }
 
 async function startNative() {
   await invoke('start_audio_tap');
@@ -153,6 +156,7 @@ async function startNative() {
     dyn.audio.mid = f.mid; dyn.audio.treble = f.treble;
     waveL = Uint8Array.from(f.wave_l);
     waveR = Uint8Array.from(f.wave_r);
+    if (frameCb) frameCb(dyn.audio);
   });
   native = true;
   dyn.audioOn = true;
@@ -202,6 +206,7 @@ export async function startAudio(deviceId, opts = {}) {
     dyn.audio.bass = (bass / Math.max(1, b1)) / 255;
     dyn.audio.mid = (mid / Math.max(1, b2 - b1)) / 255;
     dyn.audio.treble = (tre / Math.max(1, n - b2)) / 255;
+    if (frameCb) frameCb(dyn.audio);
     rafA = requestAnimationFrame(loop);
   };
   loop();

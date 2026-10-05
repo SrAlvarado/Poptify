@@ -10,6 +10,7 @@ import { createYouTube } from './youtube.js';
 import { renderCRT } from './crt.js';
 import * as Hydra from './hydra.js';
 import * as Milkdrop from './milkdrop.js';
+import { createAvatar } from './avatar/avatar.js';
 
 const appWindow = getCurrentWindow();
 const MARGIN = 22; // transparent breathing room around the popup (for shadow + 3D tilt)
@@ -26,6 +27,7 @@ const SKINS = [
   { id:'vinyl', name:'Vinilo', emoji:'💿' },
   { id:'crt', name:'CRT (tubo)', emoji:'📺' },
   ...(IS_MAC ? [{ id:'notch', name:'Notch (cámara)', emoji:'📷' }] : []),
+  { id:'avatar', name:'Avatar (Chupits)', emoji:'🐰' },
 ];
 const BGS = [
   { id:'dark', name:'Oscuro' },
@@ -71,6 +73,9 @@ let likeOverride = null; // { id, liked, t } — keeps a just-clicked like stick
 const sc = createSoundCloud({ onUpdate: onScUpdate });     // SoundCloud (Poptify is the player)
 const yt = createYouTube({ onUpdate: onYtUpdate });        // YouTube (video shown in the art slot)
 const scArtCache = {};
+// modo Avatar: Chupits baila según el género y el tempo de lo que suena
+const avatar = createAvatar({ invoke, onChange: () => renderSettings() });
+Hydra.onAudioFrame((l) => avatar.feedAudio(l));
 const ytArtCache = {};
 
 // ---------- SVG icons ----------
@@ -415,6 +420,24 @@ function renderCrtSkin(al) {
   </div>`;
 }
 
+function renderAvatar(al) {
+  const has = !!state.track;
+  return `
+  <div class="av">
+    <div class="av-stage">${avatar.html()}</div>
+    <div class="av-hud">
+      <div class="av-meta"><div class="title">${has ? al.title : 'Nada sonando'}</div><div class="artist">${has ? al.artist : ''}</div></div>
+      <div class="av-ctrls">
+        <button class="icon-btn" data-act="prev" title="Anterior">${I.prev}</button>
+        <button class="icon-btn play" data-act="play" title="Pausa">${I.play()}</button>
+        <button class="icon-btn" data-act="next" title="Siguiente">${I.next}</button>
+        <button class="icon-btn like ${state.liked?'liked':''}" data-act="like" title="Favorito">${I.heart(state.liked)}</button>
+        <button class="icon-btn settings-inline" data-act="settings" title="Ajustes">${I.gear}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
 // ---------- auth / empty screens ----------
 function renderConnect() {
   const needId = !state.hasClientId;
@@ -572,6 +595,14 @@ function renderSettings() {
       </div>
     </div>
     <div class="sec"><span class="lbl">Display</span><div class="opts" style="grid-template-columns:repeat(2,1fr)">${skinOpts}</div></div>
+    ${state.skin==='avatar' ? `
+    <div class="sec"><span class="lbl">Avatar · outfit</span>
+      <div class="opts" style="grid-template-columns:repeat(3,1fr)">${[['auto','Auto'],['naked','Naked'],...avatar.outfitLabels()].map(([k,n])=>`<div class="opt ${avatar.prefs.outfit===k?'active':''}" data-set-avoutfit="${k}">${n}</div>`).join('')}</div>
+    </div>
+    <div class="sec"><span class="lbl">Avatar · baile</span>
+      <div class="opts" style="grid-template-columns:repeat(3,1fr)">${[['auto','Auto'],['rap','Rap'],['trap','Trap'],['reggaeton','Reguetón'],['techno','Techno'],['pop','Pop']].map(([k,n])=>`<div class="opt ${avatar.prefs.dance===k?'active':''}" data-set-avdance="${k}">${n}</div>`).join('')}</div>
+      <button class="opt" style="width:100%;margin-top:8px" data-act="avatar-audio">${state.hydraAudio?'● Bailando al tempo real — desactivar':'Bailar al tempo real (audio del sistema)'}</button>
+    </div>` : ''}
     <div class="sec"><span class="lbl">Fondo</span><div class="opts" style="grid-template-columns:repeat(2,1fr)">${bgOpts}</div></div>
     ${state.bg==='hydra' ? `
     <div class="sec"><span class="lbl">Hydra · sketch</span>
@@ -601,6 +632,10 @@ function renderSettings() {
   settingsEl.querySelectorAll('[data-set-bg]').forEach(el=>el.addEventListener('click',()=>{ state.bg=el.dataset.setBg; localStorage.setItem('bg',state.bg); render(true); }));
   settingsEl.querySelectorAll('[data-set-mode]').forEach(el=>el.addEventListener('click',()=>{ state.mode=el.dataset.setMode; localStorage.setItem('mode',state.mode); render(true); }));
   settingsEl.querySelectorAll('[data-set-source]').forEach(el=>el.addEventListener('click',()=>{ state.source=el.dataset.setSource; localStorage.setItem('source',state.source); if(state.source!=='auto') stopOtherSources(state.source); applyActive(true); }));
+  settingsEl.querySelectorAll('[data-set-avoutfit]').forEach(el=>el.addEventListener('click',()=>avatar.set('outfit', el.dataset.setAvoutfit)));
+  settingsEl.querySelectorAll('[data-set-avdance]').forEach(el=>el.addEventListener('click',()=>avatar.set('dance', el.dataset.setAvdance)));
+  const avAudio = settingsEl.querySelector('[data-act="avatar-audio"]');
+  if (avAudio) avAudio.addEventListener('click', async ()=>{ if(state.hydraAudio){ Hydra.stopAudio(); state.hydraAudio=false; localStorage.setItem('hydraAudio','0'); syncSettings(); } else { await startHydraAudio(); } });
   settingsEl.querySelectorAll('[data-set-sketch]').forEach(el=>el.addEventListener('click',()=>{ state.hydraSketch=el.dataset.setSketch; localStorage.setItem('hydraSketch',state.hydraSketch); lastHydraKey=''; render(true); }));
   const audioBtn = settingsEl.querySelector('[data-act="hydra-audio"]');
   if (audioBtn) audioBtn.addEventListener('click', async ()=>{ if(state.hydraAudio){ Hydra.stopAudio(); state.hydraAudio=false; localStorage.setItem('hydraAudio','0'); manageHydra(); syncSettings(); } else { await startHydraAudio(); } });
@@ -807,17 +842,19 @@ function render(swap) {
   if (src === 'spotify' && !state.authed) { showScreen(renderConnect()); return; }
   if (src === 'soundcloud' && !sc.state().loaded) { showScreen(renderSoundCloud()); return; }
   if (src === 'youtube' && !yt.state().loaded) { showScreen(renderYouTube()); return; }
-  if (!state.track) { showScreen(renderEmpty()); return; }
+  // en modo Avatar no hay pantalla vacía: Chupits se queda aburrido esperando
+  if (!state.track && state.skin !== 'avatar') { showScreen(renderEmpty()); return; }
   if (state.lyricsOpen) { showScreen(renderLyrics()); lyCurIdx = -1; updateLyricsHighlight(); return; }
 
   const al = trackForSkin();
   const col = colors();
   const isMini = state.skin==='ios' && state.mode==='mini';
-  const inlineSettings = isMini || state.skin==='notch' || state.skin==='crt';
-  const renderers = { ios:renderIOS, ipod:renderIpod, gb:renderGB, psp:renderPSP, mp4:renderMP4, vinyl:renderVinyl, crt:renderCrtSkin, notch:renderNotch };
+  const inlineSettings = isMini || state.skin==='notch' || state.skin==='crt' || state.skin==='avatar';
+  const renderers = { ios:renderIOS, ipod:renderIpod, gb:renderGB, psp:renderPSP, mp4:renderMP4, vinyl:renderVinyl, crt:renderCrtSkin, notch:renderNotch, avatar:renderAvatar };
   popup.className = 'popup skin-' + state.skin + (isMini ? ' mini' : '');
   const gear = inlineSettings ? '' : `<button class="icon-btn gear" data-act="settings" title="Ajustes">${I.gear}</button>`;
   popup.innerHTML = gear + (isMini ? renderIOSMini(al, col) : renderers[state.skin](al, col));
+  if (state.skin === 'avatar') avatar.mount(popup.querySelector('.av-stage'));
   if (state.skin === 'notch') {
     // measure the EXPANDED size so the hover expansion can grow the window to
     // the right size upfront. Transitions must be off while measuring — with
@@ -1048,7 +1085,7 @@ scrimEl.addEventListener('click', ()=>{ state.settingsOpen=false; syncSettings()
 // ---------- Apple-style tilt ----------
 let tiltRAF = null;
 popup.addEventListener('pointermove', e => {
-  if (state.skin==='notch' || state.skin==='crt' || !state.track) return;
+  if (state.skin==='notch' || state.skin==='crt' || state.skin==='avatar' || !state.track) return;
   const r = popup.getBoundingClientRect();
   const px = (e.clientX - r.left)/r.width - 0.5, py = (e.clientY - r.top)/r.height - 0.5;
   if (tiltRAF) cancelAnimationFrame(tiltRAF);
@@ -1090,6 +1127,7 @@ async function applyActive(forceSwap) {
   state.playing = p.playing;
   state.liked = src === 'spotify' ? sp.liked : false;
   state.track = p.track;
+  avatar.update(state.track, state.playing, state.liked);
   const id = p.track ? p.track.id : null;
   const sig = `${src}|${id}|${state.playing}|${state.liked}|${id ? 1 : 0}`;
   const trackChanged = id !== shownTrackId;
@@ -1185,7 +1223,7 @@ async function pollSpotify() {
         likeOverride = null;
       }
       sp.track = {
-        id: np.id, title: np.title, artist: np.artist,
+        id: np.id, title: np.title, artist: np.artist, artistId: np.artist_id,
         durSec: Math.round(np.duration_ms / 1000), curSec: Math.round(np.progress_ms / 1000),
         image: np.image,
       };
@@ -1216,7 +1254,7 @@ async function boot() {
   if (state.authed) await pollSpotify();
   if (state.scUrl && (state.source === 'soundcloud')) { try { await sc.load(state.scUrl); } catch (e) {} }
   if (state.ytUrl && (state.source === 'youtube')) { try { await yt.load(state.ytUrl); } catch (e) {} }
-  if ((state.bg === 'hydra' || state.bg === 'milkdrop') && state.hydraAudio) { startHydraAudio(); }
+  if ((state.bg === 'hydra' || state.bg === 'milkdrop' || state.skin === 'avatar') && state.hydraAudio) { startHydraAudio(); }
   applyActive(true);
 }
 boot();
