@@ -1170,29 +1170,15 @@ popup.addEventListener('pointerleave', ()=>{ popup.style.transform=''; });
 popup.addEventListener('contextmenu', e => { e.preventDefault(); state.settingsOpen = !state.settingsOpen; syncSettings(); });
 
 // ---------- drag the OS window from anywhere on the popup ----------
-// En macOS el arrastre nativo (startDragging) no deja que una ventana sin marco cruce la barra de menús,
-// así que no se puede llevar a una pantalla colocada ENCIMA del portátil. Allí se arrastra a mano:
-// la ventana sigue al ratón con setPosition, que no tiene esa restricción. En el resto, el nativo.
-popup.addEventListener('mousedown', async e => {
+// En macOS el arrastre lo hace Rust (native_drag): el nativo de AppKit no deja cruzar la barra de menús
+// hacia una pantalla colocada encima, y hacerlo desde aquí parpadea al cambiar de densidad de pantalla.
+popup.addEventListener('mousedown', e => {
   if (e.button !== 0) return;
   if (e.target.closest('[data-act]') || e.target.closest('input')) return; // keep controls clickable
-  if (!IS_MAC) { appWindow.startDragging(); return; }
+  if (!IS_MAC || state.skin === 'notch') { appWindow.startDragging(); return; }
   e.preventDefault();
-  let start = null, last = null, raf = null, done = false;
-  const step = () => {
-    raf = null;
-    if (!start || !last) return;
-    lastMovedAt = performance.now();
-    appWindow.setPosition(new LogicalPosition(Math.round(start.x + last.screenX - start.mx), Math.round(start.y + last.screenY - start.my))).catch(() => {});
-  };
-  const move = ev => { last = ev; if (!raf) raf = requestAnimationFrame(step); };
-  const up = () => { done = true; window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); };
-  window.addEventListener('mousemove', move);
-  window.addEventListener('mouseup', up);
-  try {
-    const sf = await appWindow.scaleFactor(), p = await appWindow.outerPosition();
-    if (!done) start = { x: p.x / sf, y: p.y / sf, mx: e.screenX, my: e.screenY };
-  } catch (err) { up(); appWindow.startDragging(); }
+  lastMovedAt = performance.now();
+  invoke('native_drag').catch(() => appWindow.startDragging());
 });
 window.addEventListener('resize', ()=>{ layout(); });
 

@@ -6,7 +6,7 @@ mod tray;
 use spotify::{NowPlaying, Tokens};
 use std::path::PathBuf;
 use std::sync::Mutex;
-use tauri::{AppHandle, Manager, State};
+use tauri::{AppHandle, Emitter, Manager, State};
 use tauri_plugin_opener::OpenerExt;
 
 /// Shared app state: an HTTP client, the OAuth tokens, the Spotify client id,
@@ -436,6 +436,62 @@ fn set_notch_overlay(enable: bool, window: tauri::WebviewWindow) -> Result<(), S
     Ok(())
 }
 
+/// Arrastre nativo de la ventana en macOS. El de AppKit (startDragging) no deja que una ventana sin marco
+/// cruce la barra de menús, así que no llega a una pantalla colocada ENCIMA; y hacerlo desde la web falla
+/// al cambiar de densidad (las coordenadas del ratón cambian de referencia y la ventana parpadea).
+/// Aquí se sigue al ratón en coordenadas globales de Cocoa (iguales en todas las pantallas) hasta que se
+/// suelta el botón. Mientras dura, la ventana está en todos los escritorios: con "pantallas con Spaces
+/// separados", al pasarla a otra pantalla se quedaba en el escritorio de la primera y desaparecía.
+#[tauri::command]
+fn native_drag(window: tauri::WebviewWindow, app: AppHandle) -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    {
+        use objc::runtime::{Class, Object};
+        use objc::{msg_send, sel, sel_impl};
+        #[repr(C)] #[derive(Clone, Copy)] struct P { x: f64, y: f64 }
+        #[repr(C)] #[derive(Clone, Copy)] struct R { o: P, s: P }
+        let ns = window.ns_window().map_err(|e| e.to_string())? as usize;
+        let (tx, rx) = std::sync::mpsc::channel::<(P, P, u64)>();
+        let read = move |tx: std::sync::mpsc::Sender<(P, P, u64)>| unsafe {
+            let ev = Class::get("NSEvent").unwrap();
+            let m: P = msg_send![ev, mouseLocation];
+            let f: R = msg_send![ns as *mut Object, frame];
+            let b: u64 = msg_send![ev, pressedMouseButtons];
+            let _ = tx.send((m, f.o, b));
+        };
+        // estado inicial (en el hilo principal) y "todos los escritorios" mientras se arrastra
+        let tx0 = tx.clone();
+        app.run_on_main_thread(move || unsafe {
+            let behavior: u64 = 1 << 0;      // canJoinAllSpaces
+            let _: () = msg_send![ns as *mut Object, setCollectionBehavior: behavior];
+            read(tx0);
+        }).map_err(|e| e.to_string())?;
+        let (m0, o0, _) = rx.recv().map_err(|e| e.to_string())?;
+        std::thread::spawn(move || {
+            loop {
+                std::thread::sleep(std::time::Duration::from_millis(8));
+                let tx1 = tx.clone();
+                if app.run_on_main_thread(move || read(tx1)).is_err() { break; }
+                let Ok((m, _, buttons)) = rx.recv() else { break };
+                if buttons & 1 == 0 { break; }                      // se soltó el botón
+                let o = P { x: o0.x + (m.x - m0.x), y: o0.y + (m.y - m0.y) };
+                let _ = app.run_on_main_thread(move || unsafe {
+                    let _: () = msg_send![ns as *mut Object, setFrameOrigin: o];
+                });
+            }
+            // al soltar: comportamiento normal; macOS la asigna al escritorio de la pantalla donde quedó
+            let _ = app.run_on_main_thread(move || unsafe {
+                let behavior: u64 = 0;
+                let _: () = msg_send![ns as *mut Object, setCollectionBehavior: behavior];
+            });
+            let _ = app.emit("drag-end", ());
+        });
+    }
+    #[cfg(not(target_os = "macos"))]
+    { let _ = (&window, &app); }
+    Ok(())
+}
+
 /// Open the macOS privacy pane where the user grants Screen Recording
 /// (which covers system-audio capture for the reactive backgrounds).
 #[tauri::command]
@@ -515,6 +571,7 @@ pub fn run() {
             audio_tap::start_audio_tap,
             audio_tap::stop_audio_tap,
             open_capture_settings,
+            native_drag,
             tray::tray_sync
         ])
         .run(tauri::generate_context!())
