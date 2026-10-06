@@ -598,7 +598,7 @@ function renderSettings() {
       <div class="opts" style="grid-template-columns:repeat(3,1fr)">${[['auto','Auto'],['naked','Naked'],...avatar.outfitLabels()].map(([k,n])=>`<div class="opt ${avatar.prefs.outfit===k?'active':''}" data-set-avoutfit="${k}">${n}</div>`).join('')}</div>
     </div>
     <div class="sec"><span class="lbl">Avatar · baile</span>
-      <div class="opts" style="grid-template-columns:repeat(3,1fr)">${[['auto','Auto'],['rap','Rap'],['trap','Trap'],['reggaeton','Reguetón'],['techno','Techno'],['pop','Pop']].map(([k,n])=>`<div class="opt ${avatar.prefs.dance===k?'active':''}" data-set-avdance="${k}">${n}</div>`).join('')}</div>
+      <div class="opts" style="grid-template-columns:repeat(3,1fr)">${[['auto','Auto'],['rap','Rap'],['trap','Trap'],['reggaeton','Reguetón'],['techno','Techno'],['pop','Pop'],['chill','Chill']].map(([k,n])=>`<div class="opt ${avatar.prefs.dance===k?'active':''}" data-set-avdance="${k}">${n}</div>`).join('')}</div>
       <button class="opt" style="width:100%;margin-top:8px" data-act="avatar-audio">${state.hydraAudio?'● Bailando al tempo real — desactivar':'Bailar al tempo real (audio del sistema)'}</button>
     </div>` : ''}
     <div class="sec"><span class="lbl">Fondo</span><div class="opts" style="grid-template-columns:repeat(2,1fr)">${bgOpts}</div></div>
@@ -697,7 +697,7 @@ function syncTray(force) {
     sources: [['auto','Auto'],['spotify','Spotify'],['soundcloud','SoundCloud'],['youtube','YouTube']].map(([id, name]) => ({ id, name })), source: state.source,
     mode: state.mode,
     outfits: [['auto','Auto (según el género)'],['naked','Naked'],...avatar.outfitLabels()].map(([id, name]) => ({ id, name })), outfit: avatar.prefs.outfit,
-    dances: [['auto','Auto (según el género)'],['rap','Rap'],['trap','Trap'],['reggaeton','Reguetón'],['techno','Techno'],['pop','Pop']].map(([id, name]) => ({ id, name })), dance: avatar.prefs.dance,
+    dances: [['auto','Auto (según el género)'],['rap','Rap'],['trap','Trap'],['reggaeton','Reguetón'],['techno','Techno'],['pop','Pop'],['chill','Chill']].map(([id, name]) => ({ id, name })), dance: avatar.prefs.dance,
     audio: !!state.hydraAudio, authed: !!state.authed, version: state.version || '',
   };
   const key = JSON.stringify(menu);

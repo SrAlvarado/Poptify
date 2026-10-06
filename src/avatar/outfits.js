@@ -116,5 +116,5 @@
     lucha:     { label: 'Lucha',        head: MASK },
   };
   // qué outfit va con cada baile (modo Auto)
-  window.ChupitsOutfits.byPose = { rap: 'rap', trap: 'trap', reggaeton: 'reggaeton', techno: 'techno', pop: 'pop' };
+  window.ChupitsOutfits.byPose = { rap: 'rap', trap: 'trap', reggaeton: 'reggaeton', techno: 'techno', pop: 'pop', chill: 'lofi' };
 })();

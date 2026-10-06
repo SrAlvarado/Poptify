@@ -29,10 +29,10 @@ export function styleFromGenres(genres) {
   }
   return null;
 }
-// estilo → baile (rock y lo-fi no tienen baile propio todavía)
-const DANCE = { rap: 'rap', trap: 'trap', reggaeton: 'reggaeton', techno: 'techno', pop: 'pop', rock: 'techno', lofi: 'sit' };
+// estilo → baile (rock no tiene baile propio todavía: usa el del techno)
+const DANCE = { rap: 'rap', trap: 'trap', reggaeton: 'reggaeton', techno: 'techno', pop: 'pop', rock: 'techno', lofi: 'chill' };
 export const STYLES = ['rap', 'trap', 'reggaeton', 'techno', 'pop', 'rock', 'lofi'];
-export const DANCES = ['rap', 'trap', 'reggaeton', 'techno', 'pop'];
+export const DANCES = ['rap', 'trap', 'reggaeton', 'techno', 'pop', 'chill'];
 
 // ---------- tempo a partir del audio ----------
 // Detecta golpes de bajo (subida brusca sobre la media reciente) y estima el BPM con un
@@ -75,6 +75,7 @@ function foldFor(pose, bpm) {
   if (!bpm) return null;
   if (pose === 'trap') return bpm > 110 ? bpm / 2 : bpm;
   if (pose === 'reggaeton') return bpm > 130 ? bpm / 2 : bpm;
+  if (pose === 'chill') return bpm > 100 ? bpm / 2 : bpm;
   if (pose === 'sit' || pose === 'bored' || pose === 'stand') return null;
   return bpm < 80 ? bpm * 2 : bpm;
 }

@@ -164,16 +164,18 @@
 <script src="../../src/avatar/outfits.js"></script>
 <script>
   const { render, POSES } = window.Chupits;
+  // bailes basados en "Patrones de baile por género — análisis fotograma a fotograma" (Claude Docs)
   const DESC = {
-    stand: 'Reposo. Respira, parpadea y de vez en cuando mueve una oreja. La postura de la foto de la mira y la del luchador.',
-    sit: 'Sin música unos segundos o al empezar. Patas traseras abiertas, manos sobre la barriga.',
-    jump: 'Al cambiar de canción o al dar like. Estira y aplasta el cuerpo, abre los ojos y suelta un bufido y las orejas van con retraso.',
+    stand: 'Reposo. Respira, parpadea y de vez en cuando mueve una oreja.',
+    sit: 'Pausa. Patas traseras abiertas, manos sobre la barriga.',
+    jump: 'Al cambiar de canción o al dar like. Estira y aplasta el cuerpo, abre los ojos y suelta un bufido.',
     bored: 'Pausa larga o nada sonando. Cabeza caída, una oreja doblada, suspiro lento y zzz.',
-    rap: 'Cabecea en cada beat y corta el aire con la mano. Morro fruncido: no se inmuta.',
-    techno: 'Bombeo corto y seco, puño arriba, ojos cerrados. El escenario parpadea a tempo.',
-    reggaeton: 'Rebota de rodillas en cada golpe del dembow (3-3-2), menea los hombros y los brazos, cortos y doblados delante, se alternan al golpe.',
-    trap: 'Half-time: se balancea lento hacia atrás, cae a plomo en el bombo y las orejas tiemblan a tresillos como los hi-hats.',
-    pop: 'Paso lateral con saltito y brazos alternos arriba. Ni con pop sonríe del todo: media sonrisa torcida, boca cerrada.',
+    rap: 'Groove base del hip-hop: baja con el bombo (1 y 3) y en la caja (2 y 4) cabeceo seco, pop de pecho y golpe de mano. Laid-back, brazos sueltos.',
+    techno: 'Bounce + pisotón de club: un pie por bombo, cadera a la izquierda en el 1 y a la derecha en el 2, cabeceo con la cadera y torso quieto. Puño arriba.',
+    reggaeton: 'Paso lateral con golpe de cadera: rebote mínimo en cada tiempo, cadera seca a un lado en el 1 y al otro en el 3, y micro-golpes en las cajas del dembow.',
+    trap: 'Two-step a medio tiempo (Bankhead): brazos cruzados en el pecho en los acentos y abiertos entre medias, golpe fuerte en la caja, hombros a doble tiempo.',
+    pop: 'Step touch en frases de 8 con una pose de brazos por count; nod en los toques y saltito en la pose final del 8.',
+    chill: 'Lo-fi: vibing sentado. Cuello y hombros caen en el pulso un pelín por detrás y se balancea lento. Ojos cerrados.',
   };
   const SW = [['Pelo','#f5f2ef'],['Sombra','#dcd4cf'],['Contraluz','#ffffff'],['Oreja','#e9c3bd'],['Nariz','#f4c9c9'],['Ojo','#040304'],['Cinta','#222125'],['Cromo','#e6eaee'],['Acento','#e5333f']];
   document.getElementById('swatches').innerHTML = SW.map(([n,c]) => `<div><i style="background:${c}"></i>${n}<br>${c}</div>`).join('');
@@ -239,8 +241,8 @@
       Oreja:'El lazo negro del logo.', Cara:'Brillos en las mejillas y micro de diadema.' } },
     { id:'rock', pose:'stand', n:'Rock / Punk', kw:'rock · punk · metal · emo', pal:['#141416','#d6dbe0'], s:{
       Oreja:'Imperdible.', Muñeca:'Muñequera negra de tachuelas (pega con el collar).' } },
-    { id:'lofi', pose:'sit', n:'Lo-fi / Chill', kw:'lo-fi · chill · ambient · indie', pal:['#b58a3c','#33333a'], s:{
-      Cabeza:'Gorro de lana y cascos puestos.', Baile:'Sentado, cabeceo lento.' } },
+    { id:'lofi', pose:'chill', n:'Lo-fi / Chill', kw:'lo-fi · chill · ambient · indie', pal:['#b58a3c','#33333a'], s:{
+      Cabeza:'Gorro de lana y cascos puestos.', Baile:'Chill: vibing sentado.' } },
     { id:'lucha', pose:'stand', n:'Lucha', kw:'easter egg · aleatorio', pal:['#c9ced6','#141214','#e5333f'], s:{
       Cabeza:'Máscara de luchador plateada con estrella y rayos (la de la foto del callejón).', Cuándo:'Muy de vez en cuando, o con un like en una canción de lucha libre.' } },
   ];

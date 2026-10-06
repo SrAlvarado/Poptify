@@ -14,11 +14,12 @@
 
   // ---------- poses ----------
   // r = rotación (grados, horario), x/y = desplazamiento, sx/sy = escala desde el pivote
+  // armsFront: brazos delante de la cabeza (bailes que los suben por encima de los hombros)
   const POSES = {
     stand:  { label: 'De pie',   bpm: 0,   expr: 'grumpy', parts: { head: { r: 4 } } },
     sit:    { label: 'Sentado',  bpm: 0,   expr: 'grumpy', sit: true,
               parts: { head: { y: 30 }, armL: { y: 22, r: -2 }, armR: { y: 22, r: 2 } } },
-    jump:   { label: 'Saltando', bpm: 100, expr: 'shout',
+    jump:   { label: 'Saltando', bpm: 100, expr: 'shout', armsFront: true,
               parts: { armL: { r: 115, x: -16 }, armR: { r: -115, x: 16 }, earL: { r: -30 }, earR: { r: 30 },
                        legL: { r: 26, y: 8 }, legR: { r: -26, y: 8 } } },
     bored:  { label: 'Aburrido', bpm: 0,   expr: 'bored', sit: true, zzz: true,
@@ -29,11 +30,13 @@
     techno: { label: 'Techno',   bpm: 128, expr: 'closed',
               parts: { armR: { r: -150, x: 26, y: -8 }, armL: { r: 8 }, earL: { r: -6 }, earR: { r: 4 } } },
     reggaeton: { label: 'Reguetón', bpm: 95, expr: 'smug',
-              parts: { armL: { r: 38, sx: .9, sy: .66 }, armR: { r: -38, sx: .9, sy: .66 }, head: { r: 3 }, earL: { r: -10 } } },
+              parts: { armL: { r: -60, sx: .9, sy: .66 }, armR: { r: 60, sx: .9, sy: .66 }, earL: { r: -10 } } },
     trap:   { label: 'Trap',     bpm: 70,  expr: 'grumpy',
-              parts: { armL: { r: 16 }, armR: { r: -16 }, head: { r: 6, y: 3 }, earL: { r: -18 }, earR: { r: 14 } } },
-    pop:    { label: 'Pop',      bpm: 118, expr: 'grin',
-              parts: { armL: { r: 125, x: -14, sx: .9, sy: .7 }, armR: { r: -22, sx: .9, sy: .72 }, earL: { r: -8 }, earR: { r: 6 } } },
+              parts: { armL: { sx: .9, sy: .7 }, armR: { sx: .9, sy: .7 }, head: { r: 6, y: 3 }, earL: { r: -18 }, earR: { r: 14 } } },
+    pop:    { label: 'Pop',      bpm: 118, expr: 'grin', armsFront: true,
+              parts: { armL: { x: -14, sx: .9, sy: .7 }, armR: { x: 14, sx: .9, sy: .7 }, earL: { r: -8 }, earR: { r: 6 } } },
+    chill:  { label: 'Chill',    bpm: 80,  expr: 'closed', sit: true,
+              parts: { head: { y: 30 }, armL: { y: 22, r: -2 }, armR: { y: 22, r: 2 }, earR: { r: 10 } } },
   };
 
   function T(name, p) {
@@ -241,8 +244,8 @@
       (back ? arms : '') +
       part('body', bodyPose, BODY(back, clothed) + clothes) +
       (back ? (sit ? `<g transform="translate(0 10)">${TAIL}</g>` : TAIL)
-            : (shoesFront ? legs : '') + arms + (OF && OF.torso ? '' : part('body', bodyPose, RUFF))) +
-      head;
+            : (shoesFront ? legs : '') + (pose.armsFront ? '' : arms) + (OF && OF.torso ? '' : part('body', bodyPose, RUFF))) +
+      head + (pose.armsFront && !back ? arms : '');
   }
 
   // perfil (mirando a la derecha): dibujo propio, mismo pelaje y paleta
