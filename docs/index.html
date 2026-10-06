@@ -548,7 +548,7 @@
     <span class="sticker s1" data-par="-0.14" data-en="Free">Gratis</span>
     <span class="sticker s2" data-par="0.2">Mac + Android</span>
     <span class="sticker s3" data-par="0.12" data-en="★ Reactive">★ Reactivo</span>
-    <span class="sticker s4" data-par="-0.24">v0.1.0</span>
+    <span class="sticker s4" data-par="-0.24" data-ver>v0.3.2</span>
     <svg class="rbadge hero" data-par="0.26" viewBox="0 0 120 120" aria-hidden="true">
       <g class="ring">
         <defs><path id="rc" d="M60,60 m-46,0 a46,46 0 1,1 92,0 a46,46 0 1,1 -92,0"/></defs>
@@ -630,7 +630,7 @@
 
   <section id="descargar" class="download">
     <div class="reveal">
-      <div class="kicker" data-en="Free · v0.1.0">Gratis · v0.1.0</div>
+      <div class="kicker" data-en="Free · v0.3.2" data-ver-kicker>Gratis · v0.3.2</div>
       <h2 data-en="Hit <em>play</em>">Dale al <em>play</em></h2>
       <p class="lead" style="margin-inline:auto" data-en="Download it, connect Spotify and let the music paint your screen.">Descárgalo, conéctalo a Spotify y deja que la música pinte tu pantalla.</p>
     </div>
@@ -645,7 +645,7 @@
           <div class="base"></div>
         </div>
         <h3 data-en="For Mac">Para Mac</h3>
-        <div class="fmt">.dmg · Apple Silicon · macOS 11+</div>
+        <div class="fmt">.dmg · Apple Silicon e Intel · macOS 13+</div>
         <a class="go" data-dl href="#"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M5 21h14"/></svg><span data-en="Download">Descargar</span></a>
       </div>
       <div class="dl winn" id="dlWinCard">
@@ -760,6 +760,14 @@
   // ===== download links (point to GitHub releases; edit when you publish) =====
   const RELEASES = "https://github.com/SrAlvarado/Poptify/releases/latest";
   document.querySelectorAll('[data-dl]').forEach(a=>{ a.href = RELEASES; });
+
+  // versión publicada: se lee de GitHub para que la web no se quede atrás (el texto fijo es solo el respaldo)
+  fetch('https://api.github.com/repos/SrAlvarado/Poptify/releases/latest').then(r=>r.ok?r.json():null).then(rel=>{
+    if(!rel||!rel.tag_name) return;
+    const v=rel.tag_name.startsWith('v')?rel.tag_name:'v'+rel.tag_name;
+    document.querySelectorAll('[data-ver]').forEach(el=>{ el.textContent=v; });
+    document.querySelectorAll('[data-ver-kicker]').forEach(el=>{ el.textContent=el.textContent.replace(/v[\d.]+/,v); el.setAttribute('data-en','Free · '+v); });
+  }).catch(()=>{});
 
   // highlight the visitor's platform card
   (function(){
@@ -1004,7 +1012,7 @@
     ["¿Necesito Spotify Premium?","Para ver la canción y marcar favoritos, no. Para controlar la reproducción (play, siguiente, seek) sí — es una limitación de la API de Spotify.","Do I need Spotify Premium?","To see the song and save favorites, no. To control playback (play, next, seek), yes — it's a Spotify API limitation."],
     ["¿Funciona con SoundCloud?","Sí, como fuente alternativa: pegas una URL y Poptify la reproduce. Spotify se refleja automáticamente.","Does it work with SoundCloud?","Yes, as an alternative source: paste a URL and Poptify plays it. Spotify is mirrored automatically."],
     ["¿Qué pasa con mis datos?","Poptify habla directamente con Spotify desde tu dispositivo. No hay servidores propios ni se guarda tu actividad.","What about my data?","Poptify talks straight to Spotify from your device. No servers of our own, no activity stored."],
-    ["¿En qué sistemas funciona?","Windows 10/11, macOS (Apple Silicon) y Android 8+. En escritorio es una ventana flotante; en Android muestra la info sobre el móvil.","Which systems are supported?","Windows 10/11, macOS (Apple Silicon) and Android 8+. On desktop it's a floating window; on Android it shows the info on your phone."],
+    ["¿En qué sistemas funciona?","Windows 10/11, macOS 13+ (Apple Silicon e Intel), Linux y Android 8+. En escritorio es una ventana flotante; en Android muestra la info sobre el móvil.","Which systems are supported?","Windows 10/11, macOS 13+ (Apple Silicon and Intel), Linux and Android 8+. On desktop it's a floating window; on Android it shows the info on your phone."],
   ];
   const QACC=['#ff2d9b','#00e5ff','#c6ff3a','#ff7a00','#8b2bff'];
   document.getElementById('faqList').innerHTML = FAQ.map((q,n)=>
