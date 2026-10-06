@@ -61,6 +61,22 @@ fn on_click(app: &AppHandle, id: &str) {
             }
             let _ = app.emit("tray", "visibility");   // la web vuelve a sincronizar el texto de la opción
         }
+        _ if id.starts_with("mon:") => {
+            // mover la ventana al centro de otra pantalla (plan B al arrastre, siempre funciona)
+            let idx: usize = id[4..].parse().unwrap_or(0);
+            if let (Some(w), Ok(mons)) = (win, app.available_monitors()) {
+                if let Some(m) = mons.get(idx) {
+                    let (mp, ms) = (m.position(), m.size());
+                    let ws = w.outer_size().unwrap_or_default();
+                    let k = m.scale_factor() / w.scale_factor().unwrap_or(1.0);   // el tamaño cambia de escala al cambiar de pantalla
+                    let (ww, wh) = ((ws.width as f64 * k) as i32, (ws.height as f64 * k) as i32);
+                    let x = mp.x + (ms.width as i32 - ww) / 2;
+                    let y = mp.y + (ms.height as i32 - wh) / 2;
+                    let _ = w.show();
+                    let _ = w.set_position(tauri::PhysicalPosition::new(x, y));
+                }
+            }
+        }
         _ => {
             // abrir ajustes con la ventana oculta no tendría sentido: se muestra primero
             if id == "settings" { if let Some(w) = &win { let _ = w.show(); let _ = w.set_focus(); } }
@@ -94,13 +110,20 @@ fn build(app: &AppHandle, s: &TrayState) -> tauri::Result<Menu<Wry>> {
     let audio = CheckMenuItem::with_id(app, "audio", "Audio reactivo (tempo real)", true, s.audio, None::<&str>)?;
 
     let more = MenuItem::with_id(app, "settings", "Más ajustes…", true, None::<&str>)?;
+    // "Mover a pantalla": una opción por monitor conectado
+    let mons = app.available_monitors().unwrap_or_default();
+    let mon_items: Vec<MenuItem<Wry>> = mons.iter().enumerate()
+        .map(|(i, m)| MenuItem::with_id(app, format!("mon:{i}"), m.name().cloned().unwrap_or_else(|| format!("Pantalla {}", i + 1)), true, None::<&str>))
+        .collect::<tauri::Result<_>>()?;
+    let mon_refs: Vec<&dyn IsMenuItem<Wry>> = mon_items.iter().map(|i| i as &dyn IsMenuItem<Wry>).collect();
+    let move_to = Submenu::with_items(app, "Mover a pantalla", mons.len() > 1, &mon_refs)?;
     let lastfm = MenuItem::with_id(app, "lastfm", if s.lastfm { "Last.fm: conectado ✓" } else { "Conectar Last.fm…" }, true, None::<&str>)?;
     let lyrics = MenuItem::with_id(app, "lyrics", "Ver letra", true, None::<&str>)?;
     let update = MenuItem::with_id(app, "update", if s.version.is_empty() { "Buscar actualizaciones".to_string() } else { format!("Buscar actualizaciones (v{})", s.version) }, true, None::<&str>)?;
     let logout = MenuItem::with_id(app, "logout", "Cerrar sesión de Spotify", s.authed, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "Salir de Poptify", true, Some("CmdOrCtrl+Q"))?;
 
-    let mut items: Vec<&dyn IsMenuItem<Wry>> = vec![&toggle, &s1, &skins, &bgs];
+    let mut items: Vec<&dyn IsMenuItem<Wry>> = vec![&toggle, &move_to, &s1, &skins, &bgs];
     if s.skin == "ios" { items.push(&modes); }
     if avatar_on { items.push(&outfits); items.push(&dances); }
     items.extend([&audio as &dyn IsMenuItem<Wry>, &lastfm, &sources, &s2, &lyrics, &more, &s3, &update, &logout, &s4, &quit]);
