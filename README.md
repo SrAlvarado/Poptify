@@ -2,12 +2,32 @@
 
 Un popup flotante para macOS que muestra lo que suena **ahora mismo** en Spotify, con
 estética de **pantalla de bloqueo de iOS**, fondo reactivo al color de la portada, y
-varios "displays" (iOS, iPod, Game Boy, PSP, MP4, Vinilo, Notch). La ventana es flotante,
+varios "displays" (iOS, iPod, Game Boy, PSP, MP4, Vinilo, Notch, CRT y **Avatar**). La ventana es flotante,
 sin marco, transparente, siempre encima y **se arrastra desde cualquier punto**.
 
 - App de escritorio con **Tauri v2** (ventana Rust + frontend web).
 - Autenticación **OAuth 2.0 con PKCE** (sin client secret) contra la Spotify Web API.
 - Diseño y skins en `src/` (ver también el prototipo en `design/prototype.html`).
+
+## 🐰 Modo Avatar (Chupits)
+
+El display **Avatar (Chupits)** solo muestra a la mascota, sin carátula: un conejo blanco con collar de
+pinchos que **baila según el género** de lo que suena y se pone el outfit de ese género (rap, trap,
+reguetón, techno, pop, rock, lo-fi; y de vez en cuando, la máscara de lucha). Salta al cambiar de canción
+o dar like, se sienta en pausa y se aburre si pasa más de un minuto. Al pasar el ratón aparecen la canción
+y los controles.
+
+- El **género** sale del artista: Spotify primero y, como a las apps en modo desarrollo les llega vacío,
+  MusicBrainz y Deezer (sin clave). Se pide una vez por artista.
+- Con **Audio reactivo** activado, baila al **tempo real** (detecta los golpes del bajo del audio del sistema).
+- Los bailes siguen pasos reales de cada estilo (down bounce del rap, two-step del trap, golpe de cadera
+  del reguetón…). El diseño del personaje está en `design/chupits/index.html`.
+
+## Ajustes en la barra de menús
+
+Los ajustes viven en el **icono de Chupits de la barra de menús** (como Notion o Docker): display, fondo,
+modo, outfit y baile del avatar, audio reactivo, fuente, letra, actualizaciones y salir. Lo que necesita
+escribir (URLs de SoundCloud/YouTube, presets) está en **Más ajustes…** o con **clic derecho** en el popup.
 
 > ⚠️ Controlar la reproducción (play/pausa/siguiente/anterior/seek) requiere **Spotify Premium**.
 > Ver la canción y marcar favoritos funciona también con cuenta gratuita.
@@ -65,13 +85,17 @@ index.html            # entrada del frontend (Vite)
 src/
   main.js             # lógica del popup: skins, ajustes, drag, polling a Spotify
   styles.css          # estilos de todas las skins (ventana transparente)
+  avatar/             # modo Avatar: rig SVG de Chupits, outfits, bailes, género → baile, tempo
 src-tauri/
   src/lib.rs          # estado + comandos Tauri (auth, now_playing, controles)
   src/spotify.rs      # OAuth PKCE + llamadas a la Web API + servidor loopback
+  src/genres.rs       # géneros del artista vía MusicBrainz / Deezer (modo Avatar)
+  src/tray.rs         # ajustes en la barra de menús
   tauri.conf.json     # ventana flotante/transparente/always-on-top
   capabilities/       # permisos (start-dragging, opener, etc.)
 design/
   prototype.html      # prototipo de diseño (sin backend) para iterar skins
+  chupits/            # ficha de Chupits: poses, expresiones, bailes y outfits
 ```
 
 ## Comandos del backend (IPC)
@@ -88,6 +112,8 @@ design/
 | `next_track` / `prev_track` | Siguiente / anterior                   |
 | `seek`         | Saltar a una posición (ms)                          |
 | `set_like`     | Añadir / quitar de favoritos                         |
+| `artist_genres`| Géneros del artista (Spotify → MusicBrainz → Deezer) |
+| `tray_sync`    | Repinta el menú de la barra con el estado actual    |
 
 ## Fondo reactivo Hydra (audio real con BlackHole)
 
