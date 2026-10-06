@@ -244,7 +244,8 @@
       (back ? arms : '') +
       part('body', bodyPose, BODY(back, clothed) + clothes) +
       (back ? (sit ? `<g transform="translate(0 10)">${TAIL}</g>` : TAIL)
-            : (shoesFront ? legs : '') + (pose.armsFront ? '' : arms) + (OF && OF.torso ? '' : part('body', bodyPose, RUFF))) +
+            : (shoesFront ? legs : '') + (pose.armsFront ? '' : arms) + (OF && OF.torso ? '' : part('body', bodyPose, RUFF)) +
+              (OF && OF.chest ? part('body', bodyPose, slot('chest')) : '')) +     // arnés y similares, sobre la pechera
       head + (pose.armsFront && !back ? arms : '');
   }
 

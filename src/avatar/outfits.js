@@ -1,8 +1,11 @@
 // Outfits de Chupits. Cada outfit rellena huecos del rig y cada hueco se pinta dentro de la pieza que lo mueve:
-//   head / headBack (cabeza, coords de la cabeza sin escalar) · ear (oreja de delante) · neck (cuello, sobre el collar)
+//   head / headBack (cabeza, coords de la cabeza sin escalar) · ear (oreja de delante = la izquierda)
+//   neck (cuello, sobre el collar) · chest (pecho, sobre la pechera: arnés)
 //   prop / propL (patas, coords de la pata izquierda: la derecha es su espejo)
 //   El rig también acepta torso / pants / sleeve / shoe, pero los outfits no los usan: se decidió que fueran
 //   minimalistas y que no taparan el cuerpo.
+// Kits según "Accesorios por género" (Claude Docs · Patrones de baile por género): 2–3 piezas por género;
+// el metal y el color separan los parecidos (rap y reguetón oro, trap diamante, techno y rock plata).
 // Todas las funciones reciben la vista ('tq' | 'front' | 'back'). Los ids ch-* los hace únicos render().
 (function () {
   // tela: color plano + sombreado vertical y lateral encima, para que tenga volumen sin filtros
@@ -10,35 +13,50 @@
     `<path d="${d}" fill="${fill}"/><path d="${d}" fill="url(#ch-cloth)"/><path d="${d}" fill="url(#ch-clothx)"/>${extra}`;
   const FOLD = (d, o = 0.35) => `<path d="${d}" fill="none" stroke="#000" stroke-opacity="${o}" stroke-width="1.6" stroke-linecap="round"/>`;
   const LINE = (d, c, w = 2, o = 1) => `<path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-opacity="${o}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const STAR = (x, y, r, c = '#fff') => `<path fill="${c}" d="M${x} ${y - r} L${x + r * .25} ${y - r * .25} L${x + r} ${y} L${x + r * .25} ${y + r * .25} L${x} ${y + r} L${x - r * .25} ${y + r * .25} L${x - r} ${y} L${x - r * .25} ${y - r * .25} Z"/>`;
+  const EAR_G = (s) => `<g transform="rotate(-10 128 84)">${s}</g>`;      // mismo giro que la oreja del rig
+  const DEFS = `<defs>` +
+    `<linearGradient id="ch-mirror" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9fd8ff"/><stop offset=".35" stop-color="#f1f3ff"/><stop offset=".6" stop-color="#ffb8ef"/><stop offset="1" stop-color="#7effd2"/></linearGradient>` +
+    `<linearGradient id="ch-ice" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#d9f1ff"/><stop offset="1" stop-color="#a9c4d6"/></linearGradient>` +
+    `<linearGradient id="ch-pinklens" x1="0" x2="1"><stop offset="0" stop-color="#ff5fa8" stop-opacity=".85"/><stop offset="1" stop-color="#ff9a5c" stop-opacity=".85"/></linearGradient>` +
+    `</defs>`;
 
   // ---------- cabeza (coords de la cabeza; 'tq' = 3/4 mirando a la derecha) ----------
-  const CAP_SIDE = (c, logo) => (v) =>
-    v === 'tq'
-      ? CL('M94 104 C92 70 120 52 152 52 C186 52 212 72 214 104 Q154 90 94 104 Z', c) +
-        CL('M98 102 Q74 96 54 106 Q48 116 58 119 Q80 116 106 110 Z', c) +            // visera de lado, a la izquierda
-        FOLD('M152 52 Q130 70 122 100 M152 52 Q176 70 186 96', .35) + `<circle cx="152" cy="52" r="3.5" fill="${c}"/>` +
-        (logo ? `<text x="170" y="90" font-family="Georgia,serif" font-weight="900" font-size="20" fill="url(#ch-gold)">P</text>` : '')
-      : CL('M90 106 C88 70 120 56 150 56 C180 56 212 70 210 106 Q150 92 90 106 Z', c) +
-        CL('M94 104 Q68 98 48 110 Q42 120 52 122 Q76 118 102 112 Z', c) +
-        (v === 'front' && logo ? `<text x="140" y="94" font-family="Georgia,serif" font-weight="900" font-size="20" fill="url(#ch-gold)">P</text>` : '');
-  const BUCKET = (c, band, dots) => (v) => {
+  // RAP · Kangol bucket rojo de pelo (LL Cool J), con el ala caída
+  const KANGOL = (v) => {
     const tq = v === 'tq';
-    const crown = tq ? 'M104 94 C102 64 128 50 154 50 C182 50 202 64 204 94 Z' : 'M100 96 C98 66 124 52 150 52 C176 52 202 66 200 96 Z';
-    const brim = tq ? 'M78 98 Q150 80 228 98 Q236 110 222 114 Q150 98 82 114 Q70 110 78 98 Z' : 'M74 100 Q150 82 226 100 Q234 112 220 116 Q150 100 80 116 Q66 112 74 100 Z';
-    return CL(crown, c) + (dots ? `<g fill="${dots}" opacity=".9">` + [[120, 70], [140, 60], [160, 66], [182, 74], [130, 84], [170, 86], [150, 78]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.2"/>`).join('') + `</g>` : '') +
-      CL(tq ? 'M103 88 Q154 80 205 88 L205 95 Q154 87 103 95 Z' : 'M99 90 Q150 82 201 90 L201 97 Q150 89 99 97 Z', band) + CL(brim, c);
+    const crown = tq ? 'M100 98 C98 62 126 46 154 46 C184 46 206 62 208 98 Z' : 'M96 100 C94 64 122 48 150 48 C178 48 206 64 204 100 Z';
+    const brim = tq ? 'M84 100 Q154 84 224 100 Q230 116 214 120 Q154 106 92 120 Q78 114 84 100 Z' : 'M80 102 Q150 86 220 102 Q226 118 210 122 Q150 108 90 122 Q74 116 80 102 Z';
+    let fuzz = '';                                                    // textura de angora: pelillos cortos
+    for (let i = 0; i < 46; i++) { const x = (tq ? 104 : 100) + (i * 37) % 100, y = 54 + (i * 23) % 44; fuzz += `M${x} ${y} l${(i % 3) - 1} 3`; }
+    return CL(crown, '#c8102e') + LINE(fuzz, '#7d0a1d', 1.2, .55) + CL(brim, '#b30e28') + FOLD(tq ? 'M92 112 Q154 98 216 112' : 'M88 114 Q150 100 212 114', .3);
   };
-  const DURAG = (v) => v === 'back'
-    ? CL('M90 112 C88 74 116 56 150 56 C184 56 212 74 210 112 Z', '#16141a')
-    : CL('M88 114 C86 76 116 54 150 54 C188 56 214 80 214 114 Q196 104 150 102 Q108 102 88 114 Z', '#16141a') +
-      LINE('M112 70 Q140 58 176 66', '#fff', 3, .22) + LINE('M104 92 Q150 80 200 90', '#fff', 2, .12) +
-      CL('M88 106 Q150 96 214 108 L214 116 Q150 104 88 114 Z', '#221f27');
-  const DURAG_TAILS = (v) => CL('M98 104 C82 132 80 172 88 208 L100 206 C96 172 98 134 110 108 Z', '#16141a') +
-                             CL('M108 106 C98 136 98 176 106 214 L117 210 C112 176 112 138 120 110 Z', '#1d1a22');
+  // REGUETÓN · gorra plana de visera recta, ladeada (Barrio Fino → Bad Bunny)
+  const FLATCAP = (c, under) => (v) =>
+    v === 'tq'
+      ? CL('M94 104 C92 70 120 52 152 52 C186 52 212 72 214 104 Q154 92 94 104 Z', c) + `<circle cx="152" cy="52" r="3.5" fill="${c}"/>` +
+        `<path d="M100 103 L50 100 L54 110 L104 112 Z" fill="${under}"/>` + CL('M100 101 L48 98 L50 104 L102 108 Z', c) +     // visera plana, recta
+        FOLD('M152 52 Q130 70 122 100 M152 52 Q176 70 186 96', .35) + `<text x="168" y="92" font-family="Georgia,serif" font-weight="900" font-size="18" fill="url(#ch-gold)">P</text>`
+      : CL('M90 106 C88 70 120 56 150 56 C180 56 212 70 210 106 Q150 94 90 106 Z', c) +
+        `<path d="M96 105 L46 102 L50 112 L100 114 Z" fill="${under}"/>` + CL('M96 103 L44 100 L46 106 L98 110 Z', c);
+  // gafas oscuras / envolventes (lente según el género)
   const SHADES = (lens) => (v) => v === 'back' ? '' : v === 'tq'
     ? `<path d="M117 106 Q160 99 214 107 L212 125 Q168 133 121 129 Q113 118 117 106 Z" fill="${lens}"/>` +
       LINE('M122 110 Q160 104 208 111', '#fff', 1.6, .55) + LINE('M117 110 L92 108', '#111', 3)
     : `<path d="M88 106 Q150 97 212 106 L210 127 Q150 135 90 127 Z" fill="${lens}"/>` + LINE('M94 110 Q150 102 206 110', '#fff', 1.6, .5);
+  // TECHNO · envolventes de espejo iridiscente, tipo visor
+  const MIRROR = (v) => v === 'back' ? '' : v === 'tq'
+    ? `<path d="M112 104 Q162 94 218 104 L216 124 Q172 136 118 130 Q108 118 112 104 Z" fill="url(#ch-mirror)" stroke="#2b2f36" stroke-width="1.6"/>` +
+      LINE('M120 110 Q164 102 210 109', '#fff', 2, .8) + LINE('M112 110 L90 107', '#1a1c20', 3.4)
+    : `<path d="M84 104 Q150 94 216 104 L213 126 Q150 138 87 126 Z" fill="url(#ch-mirror)" stroke="#2b2f36" stroke-width="1.6"/>` + LINE('M92 110 Q150 101 208 110', '#fff', 2, .8);
+  // REGUETÓN · gafas pequeñas de lente rosa-atardecer (Bad Bunny)
+  const PINKGLASSES = (v) => v === 'back' ? '' : v === 'tq'
+    ? `<ellipse cx="146" cy="120" rx="15" ry="10" transform="rotate(-8 146 120)" fill="url(#ch-pinklens)" stroke="url(#ch-gold)" stroke-width="1.8"/>` +
+      `<ellipse cx="209" cy="118" rx="3.5" ry="8" fill="url(#ch-pinklens)" stroke="url(#ch-gold)" stroke-width="1.4"/>` +
+      LINE('M161 117 Q184 112 206 115', '#c9a03a', 1.6) + LINE('M131 117 L96 110', '#c9a03a', 1.6)
+    : `<ellipse cx="116" cy="118" rx="14" ry="10" fill="url(#ch-pinklens)" stroke="url(#ch-gold)" stroke-width="1.8"/>` +
+      `<ellipse cx="184" cy="118" rx="14" ry="10" fill="url(#ch-pinklens)" stroke="url(#ch-gold)" stroke-width="1.8"/>` + LINE('M130 116 Q150 110 170 116', '#c9a03a', 1.6);
+  // LO-FI · beanie de punto y auriculares grandes de diadema
   const BEANIE = (c) => (v) =>
     CL(v === 'tq' ? 'M92 112 C90 70 118 48 152 48 C188 48 214 70 214 112 Z' : 'M90 112 C88 70 118 50 150 50 C182 50 212 70 210 112 Z', c) +
     CL(v === 'tq' ? 'M90 100 Q152 86 216 100 L216 118 Q152 104 90 120 Z' : 'M88 100 Q150 86 212 100 L212 118 Q150 104 88 120 Z', c) +
@@ -47,19 +65,18 @@
     LINE(v === 'tq' ? 'M96 126 C88 76 120 44 156 44 C194 46 218 76 216 120' : 'M94 126 C86 76 116 46 150 46 C184 46 214 76 206 126', '#2b2b30', 7) +
     CL(v === 'tq' ? 'M84 112 C84 102 96 98 104 104 L108 150 C100 158 86 152 84 142 Z' : 'M80 112 C80 102 92 98 100 104 L104 150 C96 158 82 152 80 142 Z', '#33333a') +
     CL(v === 'tq' ? 'M210 108 C216 104 222 110 222 118 L220 140 C218 146 212 146 210 142 Z' : 'M200 104 C208 98 220 102 220 112 L220 142 C218 152 204 158 196 150 Z', '#33333a');
-  const BOW = (v) => v === 'back' ? '' :
-    `<g transform="rotate(-10 128 84)">` +
-    CL('M126 40 C108 24 94 32 97 46 C100 60 114 54 126 40 Z', '#121114') + CL('M126 40 C144 24 158 32 155 46 C152 60 138 54 126 40 Z', '#121114') +
-    CL('M124 42 L114 70 L120 68 L124 76 L127 44 Z', '#121114') + CL('M128 42 L138 70 L132 68 L128 76 L127 44 Z', '#18171b') +
-    `<ellipse cx="126" cy="41" rx="6" ry="5.5" fill="#1d1c21"/>` + LINE('M106 36 Q112 32 118 36 M136 36 Q142 32 148 36', '#fff', 1.6, .35) + `</g>`;
-  const SPARKLES = (v) => v === 'back' ? '' : `<g fill="#fff" opacity=".9">` +
-    (v === 'tq' ? [[118, 146, 6], [130, 158, 4], [212, 132, 4]] : [[104, 146, 6], [116, 158, 4], [196, 146, 6], [184, 158, 4]])
-      .map(([x, y, r]) => `<path d="M${x} ${y - r} L${x + r * .25} ${y - r * .25} L${x + r} ${y} L${x + r * .25} ${y + r * .25} L${x} ${y + r} L${x - r * .25} ${y + r * .25} L${x - r} ${y} L${x - r * .25} ${y - r * .25} Z"/>`).join('') + `</g>`;
+  // POP · micro de diadema fino (el "Madonna mic")
   const HEADSET = (v) => v === 'back' ? '' : v === 'tq'
-    ? LINE('M112 132 C118 158 146 170 176 162', '#2a2a2e', 2.4) + `<ellipse cx="178" cy="162" rx="4" ry="3.4" fill="#2a2a2e"/>`
-    : LINE('M96 132 C100 158 120 170 138 166', '#2a2a2e', 2.4) + `<ellipse cx="140" cy="166" rx="4" ry="3.4" fill="#2a2a2e"/>`;
-  const PIN = (v) => v === 'back' ? '' :
-    `<g transform="rotate(-10 128 84)">${LINE('M104 2 L122 -2', '#d6dbe0', 2.2)}${LINE('M104 6 L122 0', '#9aa1a9', 1.6)}<circle cx="102" cy="4" r="3.4" fill="none" stroke="#d6dbe0" stroke-width="1.8"/></g>`;
+    ? LINE('M112 132 C118 158 146 170 176 162', '#1f1f23', 2) + `<ellipse cx="178" cy="162" rx="3.6" ry="3" fill="#1f1f23"/>`
+    : LINE('M96 132 C100 158 120 170 138 166', '#1f1f23', 2) + `<ellipse cx="140" cy="166" rx="3.6" ry="3" fill="#1f1f23"/>`;
+  // ROCK · delineador negro corrido alrededor del ojo
+  const LINER = (v) => {
+    if (v === 'back') return '';
+    const eye = (x, y, dir) => LINE(`M${x - 15 * dir} ${y} Q${x} ${y + 16} ${x + 15 * dir} ${y - 2}`, '#141214', 9, .22) +      // difuminado
+      LINE(`M${x - 15 * dir} ${y} Q${x} ${y + 14} ${x + 15 * dir} ${y - 2}`, '#141214', 3, .75) +                                 // raya
+      LINE(`M${x - 15 * dir} ${y} L${x - 23 * dir} ${y - 6}`, '#141214', 3, .75);                                                 // ala
+    return v === 'tq' ? eye(146, 121, 1) : eye(116, 119, 1) + eye(184, 119, -1);
+  };
   // máscara de luchador: cubre la cabeza con agujeros para ojos y morro (evenodd)
   const MASK = (v) => {
     const tq = v === 'tq', back = v === 'back';
@@ -77,43 +94,94 @@
       LINE(tq ? 'M106 176 Q150 196 200 170' : 'M110 178 Q150 194 190 178', '#e5333f', 3);
   };
 
+  // ---------- oreja de delante (la izquierda) ----------
+  const BOW = (c, c2) => () => EAR_G(                                  // POP · lazo grande rosa
+    CL('M126 40 C108 24 94 32 97 46 C100 60 114 54 126 40 Z', c) + CL('M126 40 C144 24 158 32 155 46 C152 60 138 54 126 40 Z', c) +
+    CL('M124 42 L114 70 L120 68 L124 76 L127 44 Z', c2) + CL('M128 42 L138 70 L132 68 L128 76 L127 44 Z', c2) +
+    `<ellipse cx="126" cy="41" rx="6" ry="5.5" fill="${c2}"/>` + LINE('M106 36 Q112 32 118 36 M136 36 Q142 32 148 36', '#fff', 1.6, .45));
+  const HEART_EARRING = () => EAR_G(                                   // POP · pendiente de corazón
+    `<circle cx="101" cy="44" r="2.4" fill="url(#ch-gold)"/>` + LINE('M101 46 L101 52', '#d4a537', 1.6) +
+    `<path d="M101 64 C93 58 91 53 95 50 C97.5 48.5 100 49.5 101 51.5 C102 49.5 104.5 48.5 107 50 C111 53 109 58 101 64 Z" fill="#ff7eb6" stroke="#d4a537" stroke-width="1.2"/>`);
+  const HOOP_CROSS = () => EAR_G(                                      // ROCK · aro de plata con cruz colgando
+    `<circle cx="100" cy="46" r="6.5" fill="none" stroke="#c9ced6" stroke-width="2.6"/>` +
+    `<path d="M98.6 52.5 h2.8 v4 h3.4 v2.8 h-3.4 v8 h-2.8 v-8 h-3.4 v-2.8 h3.4 Z" fill="#d6dbe0" stroke="#4a4f56" stroke-width=".7"/>`);
+
   // ---------- cuello (sobre el collar) ----------
-  function CHAIN(n, rx, ry, depth, grad, stroke) {
+  // cadena por una curva del cuello al pecho; twist > 0 la convierte en cordón trenzado
+  function CHAIN(n, rx, ry, depth, grad, stroke, twist = 0) {
     let s = '';
     for (let i = 0; i <= n; i++) {
       const t = i / n, x = (1 - t) ** 2 * 92 + 2 * (1 - t) * t * 152 + t * t * 212, y = (1 - t) ** 2 * 196 + 2 * (1 - t) * t * depth + t * t * 196;
       const dx = 2 * (1 - t) * (152 - 92) + 2 * t * (212 - 152), dy = 2 * (1 - t) * (depth - 196) + 2 * t * (196 - depth);
-      const a = Math.atan2(dy, dx) * 180 / Math.PI;
-      s += `<ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="${rx}" ry="${i % 2 ? ry * .55 : ry}" transform="rotate(${a.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)})" fill="url(#ch-${grad})" stroke="${stroke}" stroke-width=".8"/>`;
+      const a = Math.atan2(dy, dx) * 180 / Math.PI + (twist ? (i % 2 ? twist : -twist) : 0);
+      s += `<ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="${rx}" ry="${!twist && i % 2 ? ry * .55 : ry}" transform="rotate(${a.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)})" fill="url(#ch-${grad})" stroke="${stroke}" stroke-width=".8"/>`;
     }
     return s;
   }
-  const PENDANT_P = `<rect x="138" y="222" width="28" height="30" rx="5" fill="url(#ch-silver)" stroke="#59606a" stroke-width="1"/>` +
-    `<text x="144" y="246" font-family="Georgia,serif" font-weight="900" font-size="22" fill="#2a2d33">P</text>` +
-    `<path d="M162 226 l1.5 4 4 1.5 -4 1.5 -1.5 4 -1.5 -4 -4 -1.5 4 -1.5 Z" fill="#fff"/>`;
-  // cascos de DJ apoyados en las clavículas, con la diadema por detrás del cuello
-  const CUP = (x, a) => `<g transform="rotate(${a} ${x} 214)">` + CL(`M${x - 17} 214 a17 11 0 1 0 34 0 a17 11 0 1 0 -34 0 Z`, '#1d1d22') +
-                        `<ellipse cx="${x}" cy="211" rx="11" ry="6" fill="#2c2c33"/>` + LINE(`M${x - 14} 216 a14 8 0 0 0 28 0`, '#c6ff00', 2, .9) + `</g>`;
-  const NECK_PHONES = LINE('M96 206 C92 190 100 182 110 186 M204 206 C208 190 200 182 190 186', '#2b2b30', 5) + CUP(100, -24) + CUP(200, 24);
-  const LED = `<path class="led" d="M100 318 Q127 326 154 318 L154 328 Q127 336 100 328 Z" fill="#c6ff00"/>`;
-  const MIC = `<g transform="rotate(16 128 340)"><rect x="123.5" y="318" width="9" height="40" rx="3.5" fill="#1a1a1c"/>` +
-              `<circle cx="128" cy="314" r="10" fill="url(#ch-silver)"/>` + LINE('M120 310 L136 318 M120 318 L136 310 M118 314 L138 314', '#6d737b', .9) + `</g>`;
+  // centro de la curva a una profundidad dada (donde cuelga el colgante)
+  const mid = (depth) => [152, 0.25 * 196 + 0.5 * depth + 0.25 * 196];
+  // RAP · cordón de oro trenzado + medallón
+  const ROPE_MEDALLION = () => {
+    const [x, y] = mid(258);
+    return CHAIN(30, 6, 3.4, 258, 'gold', '#7a5410', 38) +
+      `<circle cx="${x}" cy="${y + 12}" r="13" fill="url(#ch-gold)" stroke="#7a5410" stroke-width="1.2"/>` +
+      `<circle cx="${x}" cy="${y + 12}" r="9" fill="none" stroke="#7a5410" stroke-width="1" stroke-opacity=".6"/>` +
+      `<text x="${x - 5.5}" y="${y + 17}" font-family="Georgia,serif" font-weight="900" font-size="15" fill="#7a5410">P</text>`;
+  };
+  // TRAP · 2–3 cadenas de "hielo" superpuestas + colgante raro: una zanahoria de diamantes
+  const ICED = () => {
+    const [x, y] = mid(272);
+    const carrot = `<g transform="translate(${x} ${y + 4})">` +
+      `<path d="M-9 0 L9 0 L1.5 30 Q0 33 -1.5 30 Z" fill="url(#ch-ice)" stroke="#7b97aa" stroke-width="1"/>` +
+      LINE('M-6 6 L6 7 M-4 13 L4 14 M-3 20 L2 21', '#7b97aa', 1, .9) +
+      `<path d="M-2 0 L-8 -11 L-1 -4 L0 -13 L2 -4 L8 -11 L2 0 Z" fill="url(#ch-ice)" stroke="#7b97aa" stroke-width=".8"/>` +
+      STAR(6, 8, 4) + STAR(-5, 18, 3) + `</g>`;
+    return CHAIN(34, 3.4, 2.6, 236, 'ice', '#8aa4b6') + CHAIN(38, 3.2, 2.4, 254, 'ice', '#8aa4b6') + CHAIN(42, 3, 2.2, 272, 'ice', '#8aa4b6') +
+      carrot + STAR(118, 214, 4) + STAR(186, 226, 3.5);
+  };
+  // REGUETÓN · cadenas de oro superpuestas con cruz brillante
+  const GOLD_CROSS = () => {
+    const [x, y] = mid(262);
+    return CHAIN(30, 4.4, 3, 240, 'gold', '#7a5410') + CHAIN(34, 4.4, 3, 262, 'gold', '#7a5410') +
+      `<path transform="translate(${x} ${y + 4})" d="M-3.5 0 h7 v8 h8 v7 h-8 v18 h-7 v-18 h-8 v-7 h8 Z" fill="url(#ch-gold)" stroke="#7a5410" stroke-width="1"/>` +
+      STAR(x, y + 15, 5);
+  };
+  // TECHNO · cadena plateada fina
+  const FINE_SILVER = () => CHAIN(44, 2.2, 1.5, 230, 'silver', '#5b6168');
+  // LO-FI · bufanda roja de punto (la de la Lofi Girl), con una punta cayendo
+  const SCARF = () =>
+    CL('M84 184 Q152 218 220 184 L222 204 Q152 240 82 204 Z', '#d2574a') +
+    `<g opacity=".35">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(i => FOLD(`M${92 + i * 11} ${196 + Math.sin(i / 11 * Math.PI) * 18} l1 14`, .7)).join('')}</g>` +
+    CL('M176 210 L196 206 L202 262 L184 266 Z', '#c84d41') + FOLD('M180 262 l1 6 M186 262 l1 6 M192 261 l1 6 M198 260 l1 6', .5);
 
-  const Y2K = `<defs><linearGradient id="ch-y2k" x1="0" x2="1"><stop offset="0" stop-color="#ff4fa0" stop-opacity=".9"/><stop offset="1" stop-color="#ffd23f" stop-opacity=".9"/></linearGradient></defs>`;
+  // ---------- pecho ----------
+  // TECHNO · arnés de tiras negras finas con anilla plateada (Berlín)
+  const HARNESS = () =>
+    LINE('M90 214 Q120 232 150 250 M210 214 Q180 232 150 250 M150 250 L150 268', '#121214', 5) +
+    LINE('M90 214 Q120 232 150 250 M210 214 Q180 232 150 250 M150 250 L150 268', '#3a3d44', 1.2, .8) +
+    `<circle cx="150" cy="251" r="8" fill="#121214" fill-opacity=".001" stroke="#c9ced6" stroke-width="3.2"/>` + STAR(156, 245, 3.4);
+
+  // ---------- manos (pata izquierda; la derecha es su espejo) ----------
+  // RAP · anillo de cuatro dedos con el nombre
+  // (sin letras: la pata derecha es un espejo y el texto saldría al revés)
+  const KNUCKLE_RING = `<path d="M110 326 Q128 333 148 326 L148 337 Q128 344 110 337 Z" fill="url(#ch-gold)" stroke="#7a5410" stroke-width="1"/>` +
+    [115, 124, 133, 142].map((x) => `<ellipse cx="${x}" cy="${331 + (x - 129) ** 2 / 300}" rx="3.6" ry="3" fill="url(#ch-gold)" stroke="#7a5410" stroke-width=".7"/>`).join('');
+  // TECHNO · glow stick verde (rave de los 90): halo con trazo translúcido, sin filtros
+  const GLOWSTICK = `<g transform="rotate(-20 128 338)">` + LINE('M128 300 L128 352', '#9dff6a', 14, .18) + LINE('M128 302 L128 350', '#9dff6a', 7, .9) + LINE('M127 304 L127 348', '#efffe6', 2.2) + `</g>`;
+  // ROCK · muñequera de cuero con tachuelas
   const STUDS = `<path d="M100 314 Q127 322 154 314 L154 328 Q127 336 100 328 Z" fill="#141416"/>` +
                 `<g fill="url(#ch-silver)">${[108, 118, 128, 138, 148].map((x) => `<circle cx="${x}" cy="${322 + (x - 127) ** 2 / 400}" r="2.6"/>`).join('')}</g>`;
 
   // Minimalistas a propósito: 2-3 piezas que dicen el género, el cuerpo y el pelo siempre a la vista.
   window.ChupitsOutfits = {
-    rap:       { label: 'Rap',          head: CAP_SIDE('#141416', true), neck: () => CHAIN(22, 6, 4.2, 258, 'gold', '#7a5410'), prop: () => MIC },
-    trap:      { label: 'Trap',         headBack: (v) => v === 'back' ? '' : DURAG_TAILS(v), head: (v) => DURAG(v) + SHADES('#1b1426')(v),
-                 neck: () => CHAIN(28, 3.4, 2.4, 238, 'silver', '#59606a') + PENDANT_P },
-    reggaeton: { label: 'Reguetón',     head: (v) => Y2K + BUCKET('#ffd23f', '#ff4fa0', '#ff4fa0')(v) + SHADES('url(#ch-y2k)')(v) },
-    techno:    { label: 'Techno',       head: SHADES('#0b0b0d'), neck: () => NECK_PHONES, propL: () => LED },
-    pop:       { label: 'Pop',          ear: () => BOW('front'), head: (v) => SPARKLES(v) + HEADSET(v) },
-    rock:      { label: 'Rock / Punk',  ear: () => PIN('front'), propL: () => STUDS },
-    lofi:      { label: 'Lo-fi / Chill', head: (v) => BEANIE('#b58a3c')(v) + HEADPHONES_ON(v) },
-    lucha:     { label: 'Lucha',        head: MASK },
+    rap:       { label: 'Rap',           head: KANGOL, neck: ROPE_MEDALLION, prop: () => KNUCKLE_RING },
+    trap:      { label: 'Trap',          head: SHADES('#0d0c10'), neck: () => DEFS + ICED() },
+    reggaeton: { label: 'Reguetón',      head: (v) => DEFS + FLATCAP('#141416', '#2bff88')(v) + PINKGLASSES(v), neck: GOLD_CROSS },
+    techno:    { label: 'Techno',        head: (v) => DEFS + MIRROR(v), neck: FINE_SILVER, chest: HARNESS, prop: () => GLOWSTICK },
+    pop:       { label: 'Pop',           ear: () => DEFS + BOW('#ffb3d1', '#f28dbb')() + HEART_EARRING(), head: HEADSET },
+    rock:      { label: 'Rock / Punk',   ear: HOOP_CROSS, head: LINER, propL: () => STUDS },
+    lofi:      { label: 'Lo-fi / Chill', head: (v) => BEANIE('#7a5aa6')(v) + HEADPHONES_ON(v), neck: SCARF },
+    lucha:     { label: 'Lucha',         head: MASK },
   };
   // qué outfit va con cada baile (modo Auto)
   window.ChupitsOutfits.byPose = { rap: 'rap', trap: 'trap', reggaeton: 'reggaeton', techno: 'techno', pop: 'pop', chill: 'lofi' };

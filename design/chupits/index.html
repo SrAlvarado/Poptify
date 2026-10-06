@@ -149,7 +149,7 @@
   <div class="grid g5" id="exprs"></div>
 
   <h2>Outfits</h2>
-  <p>Minimalistas: 2 o 3 piezas que dicen el género, siempre en cabeza, cuello u orejas, para que el conejo y su pelo se vean enteros. Cada pieza va colgada de su parte del rig, así baila con él sin animarse aparte. En <b>Auto</b> el outfit sigue al baile; en la app saldrá del género del artista en Spotify y, si no hay, se queda naked. Haz clic en uno para verlo bailar en grande.</p>
+  <p>Minimalistas: 2 o 3 piezas por género según el análisis de accesorios (metal y color separan los parecidos: rap y reguetón en oro, trap en diamante, techno y rock en plata). Nunca tapan el cuerpo. Cada pieza va colgada de su parte del rig, así baila con él sin animarse aparte. En <b>Auto</b> el outfit sigue al baile; en la app saldrá del género del artista en Spotify y, si no hay, se queda naked. Haz clic en uno para verlo bailar en grande.</p>
   <div class="grid g4" id="outfits"></div>
 
   <h2>Cómo encaja en la app</h2>
@@ -228,23 +228,24 @@
   document.getElementById('poses').onclick = e => { const card = e.target.closest('[data-pose]'); if (card) { state.pose = card.dataset.pose; state.bpm = null; state.view = 'tq'; draw(); window.scrollTo({ top: 0, behavior: 'smooth' }); } };
 
   // ---------- outfits (definición) ----------
+  // kits de "Accesorios por género" (Claude Docs · Patrones de baile por género)
   const OUTFITS = [
-    { id:'rap', pose:'rap', n:'Rap', core:true, kw:'hip hop · rap · boom bap · old school', pal:['#141416','#d4a537','#c9ced6'], s:{
-      Cabeza:'Gorra negra con la visera de lado y la "P" dorada.', Cuello:'Cadena gorda de oro sobre el collar.', Mano:'Micro.' } },
-    { id:'trap', pose:'trap', n:'Trap', core:true, kw:'trap · trap latino · drill · rage', pal:['#16141a','#1b1426','#c9ced6'], s:{
-      Cabeza:'Durag negro con las colas por detrás.', Cara:'Gafas finas oscuras.', Cuello:'Cadena de plata con colgante "P".' } },
-    { id:'reggaeton', pose:'reggaeton', n:'Reguetón', core:true, kw:'reggaeton · urbano latino · dembow', pal:['#ffd23f','#ff4fa0'], s:{
-      Cabeza:'Gorro de pescador amarillo con lunares rosas.', Cara:'Gafas Y2K de rosa a amarillo.' } },
-    { id:'techno', pose:'techno', n:'Techno', core:true, kw:'techno · house · tech house · minimal', pal:['#0b0b0d','#1d1d22','#c6ff00'], s:{
-      Cara:'Gafas negras.', Cuello:'Cascos de DJ apoyados en las clavículas.', Muñeca:'Pulsera LED que parpadea a tempo.' } },
-    { id:'pop', pose:'pop', n:'Pop', core:true, kw:'pop · dance pop · k-pop · europop', pal:['#121114','#ffffff','#2a2a2e'], s:{
-      Oreja:'El lazo negro del logo.', Cara:'Brillos en las mejillas y micro de diadema.' } },
-    { id:'rock', pose:'stand', n:'Rock / Punk', kw:'rock · punk · metal · emo', pal:['#141416','#d6dbe0'], s:{
-      Oreja:'Imperdible.', Muñeca:'Muñequera negra de tachuelas (pega con el collar).' } },
-    { id:'lofi', pose:'chill', n:'Lo-fi / Chill', kw:'lo-fi · chill · ambient · indie', pal:['#b58a3c','#33333a'], s:{
-      Cabeza:'Gorro de lana y cascos puestos.', Baile:'Chill: vibing sentado.' } },
+    { id:'rap', pose:'rap', n:'Rap', core:true, kw:'oro amarillo, rojo, negro', pal:['#c8102e','#d4a537','#141416'], s:{
+      Cabeza:'Kangol bucket rojo de pelo (LL Cool J).', Cuello:'Cordón de oro trenzado con medallón.', Mano:'Anillo de cuatro dedos.', Evita:'Durag, bandana suelta, grillz.' } },
+    { id:'trap', pose:'trap', n:'Trap', core:true, kw:'negro y diamante blanco', pal:['#0d0c10','#ffffff','#a9c4d6'], s:{
+      Cara:'Gafas oscuras siempre puestas.', Cuello:'3 cadenas iced-out superpuestas con un colgante raro: una zanahoria de diamantes.', Evita:'Kangol, oro trenzado, durag. Sin grillz: nunca se le ven los dientes.' } },
+    { id:'reggaeton', pose:'reggaeton', n:'Reguetón', core:true, kw:'oro con neón', pal:['#d4a537','#ff5fa8','#2bff88'], s:{
+      Cabeza:'Gorra plana de visera recta, ladeada.', Cara:'Gafas pequeñas de lente rosa-atardecer (Bad Bunny).', Cuello:'Cadenas de oro superpuestas con cruz brillante.', Evita:'Todo negro, bandana de paisley, gorro rasta.' } },
+    { id:'techno', pose:'techno', n:'Techno', core:true, kw:'negro, plata, cromo', pal:['#121214','#c9ced6','#9dff6a'], s:{
+      Cara:'Gafas envolventes de espejo iridiscente.', Pecho:'Arnés de tiras negras finas con anilla plateada (Berlín).', Cuello:'Cadena plateada fina.', Mano:'Glow stick (rave de los 90).', Evita:'Oro grueso, logos, arcoíris.' } },
+    { id:'pop', pose:'pop', n:'Pop', core:true, kw:'rosa pastel, azul bebé, plata', pal:['#ffb3d1','#bfe3ff','#1f1f23'], s:{
+      Cara:'Micro de diadema fino (el "Madonna mic").', Oreja:'Lazo grande rosa y pendiente de corazón.', Evita:'Cuero y tachuelas, cadena dorada con gorra plana.' } },
+    { id:'rock', pose:'stand', n:'Rock / Punk', kw:'negro y plata, nada de dorado', pal:['#141416','#c9ced6','#e5333f'], s:{
+      Oreja:'Aro de plata con cruz en la izquierda.', Muñeca:'Muñequera de cuero con tachuelas.', Cara:'Delineador negro corrido.', Nota:'El choker de pinchos ya lo lleva siempre.' } },
+    { id:'lofi', pose:'chill', n:'Lo-fi / Chill', kw:'verde suave, salmón, morado', pal:['#7a5aa6','#d2574a','#33333a'], s:{
+      Cabeza:'Beanie morado y auriculares grandes de diadema.', Cuello:'Bufanda roja de punto (la Lofi Girl).', Evita:'Joyería gorda, metal plateado, LED gaming.' } },
     { id:'lucha', pose:'stand', n:'Lucha', kw:'easter egg · aleatorio', pal:['#c9ced6','#141214','#e5333f'], s:{
-      Cabeza:'Máscara de luchador plateada con estrella y rayos (la de la foto del callejón).', Cuándo:'Muy de vez en cuando, o con un like en una canción de lucha libre.' } },
+      Cabeza:'Máscara de luchador plateada con estrella y rayos (la de la foto del callejón).', Cuándo:'Más o menos 1 de cada 30 canciones.' } },
   ];
   document.getElementById('outfits').innerHTML = OUTFITS.map(o =>
     `<div class="of click" data-o="${o.id}" data-p="${o.pose}"><div class="st">${render({ pose: o.pose, outfit: o.id })}</div><header><h4>${o.n}</h4><span class="pill ${o.core ? 'core' : ''}">${o.core ? 'pedido' : 'propuesto'}</span></header>` +
