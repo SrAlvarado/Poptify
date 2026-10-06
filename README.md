@@ -17,8 +17,11 @@ reguetón, techno, pop, rock, lo-fi; y de vez en cuando, la máscara de lucha). 
 o dar like, se sienta en pausa y se aburre si pasa más de un minuto. Al pasar el ratón aparecen la canción
 y los controles.
 
-- El **género** sale del artista: Spotify primero y, como a las apps en modo desarrollo les llega vacío,
-  MusicBrainz y Deezer (sin clave). Se pide una vez por artista.
+- El **género** sale de las etiquetas de **la canción** en Last.fm (opcional: pega tu API key en
+  Ajustes → Avatar; sácala gratis en last.fm/api/account/create) y, si no, del artista: Spotify,
+  MusicBrainz y Deezer (sin clave). Las etiquetas de ambiente ("chill", "mellow", "rnb") mandan: Chill.
+- Los **outfits** son 2–3 accesorios por género (Kangol y oro trenzado en rap, cadenas de diamante en trap,
+  gorra plana y oro con cruz en reguetón, arnés y gafas de espejo en techno…), sin tapar el cuerpo.
 - Con **Audio reactivo** activado, baila al **tempo real** (detecta los golpes del bajo del audio del sistema).
 - Los bailes siguen pasos reales de cada estilo (down bounce del rap, two-step del trap, golpe de cadera
   del reguetón…). El diseño del personaje está en `design/chupits/index.html`.
