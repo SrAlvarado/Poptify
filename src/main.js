@@ -600,6 +600,14 @@ function renderSettings() {
     <div class="sec"><span class="lbl">Avatar · baile</span>
       <div class="opts" style="grid-template-columns:repeat(3,1fr)">${[['auto','Auto'],['rap','Rap'],['trap','Trap'],['reggaeton','Reguetón'],['techno','Techno'],['pop','Pop'],['chill','Chill']].map(([k,n])=>`<div class="opt ${avatar.prefs.dance===k?'active':''}" data-set-avdance="${k}">${n}</div>`).join('')}</div>
       <button class="opt" style="width:100%;margin-top:8px" data-act="avatar-audio">${state.hydraAudio?'● Bailando al tempo real — desactivar':'Bailar al tempo real (audio del sistema)'}</button>
+    </div>
+    <div class="sec"><span class="lbl">Avatar · Last.fm ${state.hasLastfm ? '· ● activo' : '(opcional)'}</span>
+      <div style="font-size:11px;opacity:.7;line-height:1.4;margin-bottom:6px">Con tu clave de Last.fm el baile sale de las etiquetas de cada canción (también "chill"). Sácala gratis en <a href="#" data-act="lastfm-link" style="color:inherit">last.fm/api/account/create</a>.</div>
+      <div style="display:flex;gap:6px">
+        <input id="lastfmKeyInput" class="auth-input" style="margin-top:0;flex:1" placeholder="${state.hasLastfm ? 'Clave guardada (pega otra para cambiarla)' : 'API key de Last.fm'}" />
+        <button class="opt" data-act="lastfm-save" style="width:auto;padding:0 14px">${state.hasLastfm ? '↻' : 'Guardar'}</button>
+      </div>
+      ${state.hasLastfm ? `<button class="opt" style="width:100%;margin-top:6px" data-act="lastfm-clear">Quitar clave</button>` : ''}
     </div>` : ''}
     <div class="sec"><span class="lbl">Fondo</span><div class="opts" style="grid-template-columns:repeat(2,1fr)">${bgOpts}</div></div>
     ${state.bg==='hydra' ? `
@@ -634,6 +642,17 @@ function renderSettings() {
   settingsEl.querySelectorAll('[data-set-avdance]').forEach(el=>el.addEventListener('click',()=>avatar.set('dance', el.dataset.setAvdance)));
   const avAudio = settingsEl.querySelector('[data-act="avatar-audio"]');
   if (avAudio) avAudio.addEventListener('click', toggleAudio);
+  const lfLink = settingsEl.querySelector('[data-act="lastfm-link"]');
+  if (lfLink) lfLink.addEventListener('click', (e) => { e.preventDefault(); invoke('plugin:opener|open_url', { url: 'https://www.last.fm/api/account/create' }).catch(() => window.open('https://www.last.fm/api/account/create')); });
+  const setLastfm = async (key) => {
+    try { await invoke('set_lastfm_key', { key }); state.hasLastfm = !!key; avatar.refreshGenres(state.track); }
+    catch (e) { console.error('lastfm', e); }
+    syncSettings();
+  };
+  const lfSave = settingsEl.querySelector('[data-act="lastfm-save"]');
+  if (lfSave) lfSave.addEventListener('click', () => { const k = (settingsEl.querySelector('#lastfmKeyInput').value || '').trim(); if (k) setLastfm(k); });
+  const lfClear = settingsEl.querySelector('[data-act="lastfm-clear"]');
+  if (lfClear) lfClear.addEventListener('click', () => setLastfm(''));
   settingsEl.querySelectorAll('[data-set-sketch]').forEach(el=>el.addEventListener('click',()=>{ state.hydraSketch=el.dataset.setSketch; localStorage.setItem('hydraSketch',state.hydraSketch); lastHydraKey=''; render(true); }));
   const audioBtn = settingsEl.querySelector('[data-act="hydra-audio"]');
   if (audioBtn) audioBtn.addEventListener('click', async ()=>{ if(state.hydraAudio){ Hydra.stopAudio(); state.hydraAudio=false; localStorage.setItem('hydraAudio','0'); manageHydra(); syncSettings(); } else { await startHydraAudio(); } });
@@ -1292,6 +1311,7 @@ async function boot() {
     state.hasClientId = await invoke('has_client_id');
     state.authed = await invoke('auth_status');
     state.version = await getVersion();
+    state.hasLastfm = await invoke('has_lastfm_key');
   } catch (err) { console.error('boot error', err); }
   if (state.authed) await pollSpotify();
   if (state.scUrl && (state.source === 'soundcloud')) { try { await sc.load(state.scUrl); } catch (e) {} }

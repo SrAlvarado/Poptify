@@ -1,7 +1,7 @@
-//! Géneros de un artista para el modo Avatar cuando Spotify no los da
-//! (las apps en modo desarrollo reciben `genres: []`). Dos fuentes públicas, sin clave:
-//!   1. MusicBrainz: etiquetas del artista (finas: trap, drill, reggaeton…)
-//!   2. Deezer: género del álbum de la canción (más grueso, pero casi siempre existe)
+//! Géneros para el modo Avatar. Spotify no los da a las apps en modo desarrollo (`genres: []`), así que:
+//!   0. Last.fm (si el usuario puso su clave): etiquetas de LA CANCIÓN, también de ambiente ("chill", "mellow")
+//!   1. MusicBrainz: etiquetas del artista (finas: trap, drill, reggaeton…), sin clave
+//!   2. Deezer: género del álbum de la canción (más grueso, pero casi siempre existe), sin clave
 
 const UA: &str = "Poptify/0.2 (https://github.com/SrAlvarado/Poptify)";
 
@@ -50,4 +50,18 @@ pub async fn deezer(client: &reqwest::Client, artist: &str, title: &str) -> Vec<
         if !g.is_empty() { return g; }
     }
     vec![]
+}
+
+/// Etiquetas de Last.fm de esta canción (las más votadas primero). Sin clave o sin datos → vacío.
+pub async fn lastfm_track(client: &reqwest::Client, key: &str, artist: &str, title: &str) -> Vec<String> {
+    if key.is_empty() || artist.is_empty() || title.is_empty() { return vec![]; }
+    let url = format!(
+        "https://ws.audioscrobbler.com/2.0/?method=track.gettoptags&autocorrect=1&format=json&api_key={}&artist={}&track={}",
+        urlencoding::encode(key), urlencoding::encode(artist), urlencoding::encode(title));
+    let Ok(resp) = client.get(url).header("User-Agent", UA).send().await else { return vec![] };
+    let Ok(v) = resp.json::<serde_json::Value>().await else { return vec![] };
+    // con pocos votos las etiquetas son ruido ("seen live", "favorites"…): se quedan las que tienen peso
+    v["toptags"]["tag"].as_array().map(|t| t.iter()
+        .filter(|x| x["count"].as_i64().unwrap_or(0) >= 5)
+        .filter_map(|x| x["name"].as_str().map(String::from)).take(10).collect()).unwrap_or_default()
 }

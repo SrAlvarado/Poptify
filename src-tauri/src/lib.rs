@@ -25,11 +25,16 @@ pub struct AppState {
     me_logged: Mutex<bool>,
     // géneros por artista (modo Avatar): se piden una sola vez por artista y sesión
     genres_cache: Mutex<std::collections::HashMap<String, Vec<String>>>,
+    // clave de API de Last.fm (opcional): etiquetas por canción para el modo Avatar
+    lastfm_key: Mutex<String>,
 }
 
 impl AppState {
     fn tokens_path(&self) -> PathBuf {
         self.data_dir.lock().unwrap().join("tokens.json")
+    }
+    fn lastfm_key_path(&self) -> PathBuf {
+        self.data_dir.lock().unwrap().join("lastfm_key.txt")
     }
     fn client_id_path(&self) -> PathBuf {
         self.data_dir.lock().unwrap().join("client_id.txt")
@@ -296,27 +301,54 @@ async fn set_like(track_id: String, liked: bool, state: State<'_, AppState>) -> 
 
 /// Fetch any image URL and return it as a data: URL (sidesteps canvas CORS taint).
 /// Used for SoundCloud artwork so reactive colors still work.
-/// Géneros del artista para el modo Avatar. Spotify primero; como a las apps en modo desarrollo
-/// les llegan vacíos, después MusicBrainz y Deezer. Cacheado por artista; si todo falla devuelve
-/// lista vacía (Chupits baila el estilo por defecto) sin cachear, para reintentar en la próxima.
+/// Géneros/etiquetas para el modo Avatar. Primero las etiquetas de la canción en Last.fm (si hay clave),
+/// luego el artista: Spotify (vacío en modo desarrollo) → MusicBrainz → Deezer. Todo cacheado; si nada
+/// devuelve datos, lista vacía sin cachear (Chupits baila el estilo por defecto y se reintenta otra vez).
 #[tauri::command]
 async fn artist_genres(artist_id: String, artist: Option<String>, title: Option<String>, state: State<'_, AppState>) -> Result<Vec<String>, String> {
-    let key = if artist_id.is_empty() { artist.clone().unwrap_or_default() } else { artist_id.clone() };
-    if key.is_empty() { return Ok(vec![]); }
-    if let Some(g) = state.genres_cache.lock().unwrap().get(&key) { return Ok(g.clone()); }
+    let name = artist.unwrap_or_default();
+    let title = title.unwrap_or_default();
+    let key = state.lastfm_key.lock().unwrap().clone();
+    if !key.is_empty() && !name.is_empty() && !title.is_empty() {
+        let tkey = format!("track:{}|{}", name.to_lowercase(), title.to_lowercase());
+        let cached = state.genres_cache.lock().unwrap().get(&tkey).cloned();
+        if let Some(g) = cached { return Ok(g); }
+        let g = genres::lastfm_track(&state.client, &key, &name, &title).await;
+        dbg_log(&format!("[genres] {name} - {title} via lastfm -> {g:?}"));
+        if !g.is_empty() { state.genres_cache.lock().unwrap().insert(tkey, g.clone()); return Ok(g); }
+    }
+    let akey = if artist_id.is_empty() { name.clone() } else { artist_id.clone() };
+    if akey.is_empty() { return Ok(vec![]); }
+    if let Some(g) = state.genres_cache.lock().unwrap().get(&akey) { return Ok(g.clone()); }
     let mut g: Vec<String> = vec![];
     if !artist_id.is_empty() && !spotify::rate_limited() {
         if let Ok(token) = ensure_token(&state).await {
             if let Ok(sg) = spotify::artist_genres(&state.client, &token, &artist_id).await { g = sg; }
         }
     }
-    let name = artist.unwrap_or_default();
     let mut src = "spotify";
     if g.is_empty() && !name.is_empty() { g = genres::musicbrainz(&state.client, &name).await; src = "musicbrainz"; }
-    if g.is_empty() && !name.is_empty() { g = genres::deezer(&state.client, &name, title.as_deref().unwrap_or("")).await; src = "deezer"; }
-    dbg_log(&format!("[genres] {name} ({key}) via {src} -> {g:?}"));
-    if !g.is_empty() { state.genres_cache.lock().unwrap().insert(key, g.clone()); }
+    if g.is_empty() && !name.is_empty() { g = genres::deezer(&state.client, &name, &title).await; src = "deezer"; }
+    dbg_log(&format!("[genres] {name} ({akey}) via {src} -> {g:?}"));
+    if !g.is_empty() { state.genres_cache.lock().unwrap().insert(akey, g.clone()); }
     Ok(g)
+}
+
+#[tauri::command]
+fn has_lastfm_key(state: State<'_, AppState>) -> bool {
+    !state.lastfm_key.lock().unwrap().is_empty()
+}
+
+/// Guarda (o borra, si viene vacía) la clave de Last.fm y olvida los géneros ya cacheados.
+#[tauri::command]
+fn set_lastfm_key(key: String, state: State<'_, AppState>) -> Result<(), String> {
+    let key = key.trim().to_string();
+    let _ = std::fs::create_dir_all(&*state.data_dir.lock().unwrap());
+    if key.is_empty() { let _ = std::fs::remove_file(state.lastfm_key_path()); }
+    else { std::fs::write(state.lastfm_key_path(), &key).map_err(|e| e.to_string())?; }
+    *state.lastfm_key.lock().unwrap() = key;
+    state.genres_cache.lock().unwrap().clear();
+    Ok(())
 }
 
 #[tauri::command]
@@ -438,6 +470,10 @@ pub fn run() {
                 .map(|s| s.trim().to_string())
                 .unwrap_or_default();
 
+            // clave de Last.fm: variable de entorno o fichero guardado desde Ajustes
+            let lastfm_key = std::env::var("POPTIFY_LASTFM_KEY").ok().filter(|s| !s.trim().is_empty())
+                .or_else(|| std::fs::read_to_string(data_dir.join("lastfm_key.txt")).ok())
+                .map(|s| s.trim().to_string()).unwrap_or_default();
             let state = AppState {
                 client: reqwest::Client::new(),
                 tokens: Mutex::new(None),
@@ -447,6 +483,7 @@ pub fn run() {
                 last_np: Mutex::new(None),
                 me_logged: Mutex::new(false),
                 genres_cache: Mutex::new(std::collections::HashMap::new()),
+                lastfm_key: Mutex::new(lastfm_key),
             };
             // load persisted tokens
             if let Some(t) = load_tokens(&state) {
@@ -471,6 +508,8 @@ pub fn run() {
             set_like,
             fetch_image,
             artist_genres,
+            has_lastfm_key,
+            set_lastfm_key,
             fetch_lyrics,
             set_notch_overlay,
             audio_tap::start_audio_tap,

@@ -16,13 +16,17 @@ const OUT = () => window.ChupitsOutfits;
 const RULES = [
   ['trap', /trap|drill|rage|plugg/],
   ['reggaeton', /reggaet|urbano|dembow|perreo|latin|bachata|dancehall|moombah|salsa/],
-  ['rap', /hip ?hop|rap|boom bap|grime/],
+  ['rap', /hip[ -]?hop|rap|boom bap|grime/],
   ['techno', /techno|house|edm|electr|trance|minimal|rave|drum and bass|dnb|dubstep|garage|hardstyle|club/],
   ['rock', /rock|punk|metal|emo|grunge|hardcore|post-punk|alternativ/],
-  ['lofi', /lo-?fi|chill|ambient|indie|acoustic|jazz|soul|funk|sleep|study|bedroom|singer-songwriter/],
-  ['pop', /pop|dance|disco|k-?pop|europop|r&b/],
+  ['lofi', /lo-?fi|chill|ambient|indie|acoustic|jazz|soul|funk|sleep|study|bedroom|singer-songwriter|mellow|relax|r&b|rnb/],
+  ['pop', /pop|dance|disco|k-?pop|europop/],
 ];
+// etiquetas de ambiente (Last.fm, por canción): si una de las 5 más votadas dice que es tranquila,
+// manda sobre el género ("A Mí" de Rels B es latin, pero se baila chill)
+const MOOD_CHILL = /^(chill|chillout|chill out|mellow|relax|relaxing|calm|soft|slow|lo-?fi|sad|sleep|smooth)$/;
 export function styleFromGenres(genres) {
+  if ((genres || []).slice(0, 5).some((g) => MOOD_CHILL.test(g.toLowerCase().trim()))) return 'lofi';
   for (const g of genres || []) {
     const t = g.toLowerCase();
     for (const [style, re] of RULES) if (re.test(t)) return style;
@@ -96,9 +100,10 @@ export function createAvatar({ invoke, onChange }) {
   const beat = createBeatTracker();
   let stageEl = null;
 
+  // el estilo se guarda por canción: con Last.fm las etiquetas son de cada tema, no del artista
   async function loadStyle(track) {
     const artist = (track.artist || '').split(',')[0].trim();
-    const key = track.artistId || artist;
+    const key = track.id;
     if (!key) { st.style = null; return; }
     if (!(key in genreCache)) {
       try {
@@ -158,7 +163,7 @@ export function createAvatar({ invoke, onChange }) {
       const now = performance.now();
       if (id !== st.trackId) {
         st.trackId = id; st.artistId = track ? track.artistId || (track.artist || '').split(',')[0].trim() || null : null;
-        st.style = st.artistId && st.artistId in genreCache ? genreCache[st.artistId] : null;
+        st.style = id && id in genreCache ? genreCache[id] : null;
         st.lucha = !!id && Math.random() < 0.03;           // easter egg: de vez en cuando sale de luchador
         if (id) st.jumpUntil = now + 1300;
         if (track) loadStyle(track);
@@ -169,6 +174,8 @@ export function createAvatar({ invoke, onChange }) {
       refresh();
     },
     html: () => svg(),
+    // tras cambiar la clave de Last.fm: olvida lo aprendido y vuelve a pedir el estilo de la canción actual
+    refreshGenres(track) { for (const k in genreCache) delete genreCache[k]; st.style = null; if (track) loadStyle(track); },
     mount(el) { stageEl = el; C().furrify(el); },
     feedAudio(levels) { beat.feed(levels.bass); },
     prefs,
