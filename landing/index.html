@@ -766,7 +766,7 @@
     if(!rel||!rel.tag_name) return;
     const v=rel.tag_name.startsWith('v')?rel.tag_name:'v'+rel.tag_name;
     document.querySelectorAll('[data-ver]').forEach(el=>{ el.textContent=v; });
-    document.querySelectorAll('[data-ver-kicker]').forEach(el=>{ el.textContent=el.textContent.replace(/v[\d.]+/,v); el.setAttribute('data-en','Free · '+v); });
+    document.querySelectorAll('[data-ver-kicker]').forEach(el=>{ el.textContent=el.textContent.replace(/v[\d.]+/,v); el.setAttribute('data-en','Free · '+v); el.setAttribute('data-es','Gratis · '+v); });
   }).catch(()=>{});
 
   // highlight the visitor's platform card
