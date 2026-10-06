@@ -10,20 +10,23 @@ const C = () => window.Chupits;
 const OUT = () => window.ChupitsOutfits;
 
 // ---------- género → estilo ----------
-// orden importa: "trap latino" es trap antes que latino; "pop rap" es rap antes que pop
+// Las etiquetas llegan ordenadas por relevancia (la más votada primero): manda la primera que
+// encaje. Dentro de una etiqueta, el orden de las reglas desempata ("latin trap" es trap, "pop rap" es rap).
+// Deezer las devuelve traducidas según el país: también van en español.
 const RULES = [
   ['trap', /trap|drill|rage|plugg/],
-  ['reggaeton', /reggaet|urbano|dembow|perreo|latin|bachata|dancehall|moombah/],
+  ['reggaeton', /reggaet|urbano|dembow|perreo|latin|bachata|dancehall|moombah|salsa/],
   ['rap', /hip ?hop|rap|boom bap|grime/],
-  ['techno', /techno|house|edm|electro|trance|minimal|rave|drum and bass|dnb|dubstep|garage|hardstyle|club/],
-  ['rock', /rock|punk|metal|emo|grunge|hardcore|post-punk/],
-  ['lofi', /lo-?fi|chill|ambient|indie|acoustic|jazz|soul|sleep|study|bedroom/],
+  ['techno', /techno|house|edm|electr|trance|minimal|rave|drum and bass|dnb|dubstep|garage|hardstyle|club/],
+  ['rock', /rock|punk|metal|emo|grunge|hardcore|post-punk|alternativ/],
+  ['lofi', /lo-?fi|chill|ambient|indie|acoustic|jazz|soul|funk|sleep|study|bedroom|singer-songwriter/],
   ['pop', /pop|dance|disco|k-?pop|europop|r&b/],
 ];
 export function styleFromGenres(genres) {
-  const g = (genres || []).join(' | ').toLowerCase();
-  if (!g) return null;
-  for (const [style, re] of RULES) if (re.test(g)) return style;
+  for (const g of genres || []) {
+    const t = g.toLowerCase();
+    for (const [style, re] of RULES) if (re.test(t)) return style;
+  }
   return null;
 }
 // estilo → baile (rock y lo-fi no tienen baile propio todavía)
@@ -92,13 +95,18 @@ export function createAvatar({ invoke, onChange }) {
   const beat = createBeatTracker();
   let stageEl = null;
 
-  async function loadStyle(artistId, trackId) {
-    if (!artistId) { st.style = null; return; }
-    if (!(artistId in genreCache)) {
-      try { genreCache[artistId] = styleFromGenres(await invoke('artist_genres', { artistId })); }
-      catch (e) { genreCache[artistId] = null; }
+  async function loadStyle(track) {
+    const artist = (track.artist || '').split(',')[0].trim();
+    const key = track.artistId || artist;
+    if (!key) { st.style = null; return; }
+    if (!(key in genreCache)) {
+      try {
+        const style = styleFromGenres(await invoke('artist_genres', { artistId: track.artistId || '', artist, title: track.title || '' }));
+        if (style) genreCache[key] = style;           // sin resultado no se cachea: se reintenta con la próxima canción
+        else if (st.trackId === track.id) { st.style = null; refresh(); return; }
+      } catch (e) { return; }
     }
-    if (st.trackId === trackId) { st.style = genreCache[artistId]; refresh(); }
+    if (st.trackId === track.id) { st.style = genreCache[key]; refresh(); }
   }
 
   function pose() {
@@ -148,11 +156,11 @@ export function createAvatar({ invoke, onChange }) {
       const id = track ? track.id : null;
       const now = performance.now();
       if (id !== st.trackId) {
-        st.trackId = id; st.artistId = track ? track.artistId || null : null;
+        st.trackId = id; st.artistId = track ? track.artistId || (track.artist || '').split(',')[0].trim() || null : null;
         st.style = st.artistId && st.artistId in genreCache ? genreCache[st.artistId] : null;
         st.lucha = !!id && Math.random() < 0.03;           // easter egg: de vez en cuando sale de luchador
         if (id) st.jumpUntil = now + 1300;
-        loadStyle(st.artistId, id);
+        if (track) loadStyle(track);
       }
       if (liked && !st.liked && id) st.jumpUntil = now + 1100;
       if (playing !== st.playing) st.pausedSince = now;

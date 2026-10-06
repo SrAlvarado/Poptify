@@ -1,4 +1,5 @@
 mod audio_tap;
+mod genres;
 mod spotify;
 
 use spotify::{NowPlaying, Tokens};
@@ -294,22 +295,27 @@ async fn set_like(track_id: String, liked: bool, state: State<'_, AppState>) -> 
 
 /// Fetch any image URL and return it as a data: URL (sidesteps canvas CORS taint).
 /// Used for SoundCloud artwork so reactive colors still work.
-/// Géneros del artista para el modo Avatar. Cacheado por artista; con 429 o error
-/// devuelve lista vacía (Chupits baila el estilo por defecto) y no lo cachea, para reintentar.
+/// Géneros del artista para el modo Avatar. Spotify primero; como a las apps en modo desarrollo
+/// les llegan vacíos, después MusicBrainz y Deezer. Cacheado por artista; si todo falla devuelve
+/// lista vacía (Chupits baila el estilo por defecto) sin cachear, para reintentar en la próxima.
 #[tauri::command]
-async fn artist_genres(artist_id: String, state: State<'_, AppState>) -> Result<Vec<String>, String> {
-    if artist_id.is_empty() { return Ok(vec![]); }
-    if let Some(g) = state.genres_cache.lock().unwrap().get(&artist_id) { return Ok(g.clone()); }
-    if spotify::rate_limited() { return Ok(vec![]); }
-    let token = ensure_token(&state).await?;
-    match spotify::artist_genres(&state.client, &token, &artist_id).await {
-        Ok(g) => {
-            dbg_log(&format!("[genres] {artist_id} -> {g:?}"));
-            state.genres_cache.lock().unwrap().insert(artist_id, g.clone());
-            Ok(g)
+async fn artist_genres(artist_id: String, artist: Option<String>, title: Option<String>, state: State<'_, AppState>) -> Result<Vec<String>, String> {
+    let key = if artist_id.is_empty() { artist.clone().unwrap_or_default() } else { artist_id.clone() };
+    if key.is_empty() { return Ok(vec![]); }
+    if let Some(g) = state.genres_cache.lock().unwrap().get(&key) { return Ok(g.clone()); }
+    let mut g: Vec<String> = vec![];
+    if !artist_id.is_empty() && !spotify::rate_limited() {
+        if let Ok(token) = ensure_token(&state).await {
+            if let Ok(sg) = spotify::artist_genres(&state.client, &token, &artist_id).await { g = sg; }
         }
-        Err(e) => { dbg_log(&format!("[genres] {artist_id} error {e}")); Ok(vec![]) }
     }
+    let name = artist.unwrap_or_default();
+    let mut src = "spotify";
+    if g.is_empty() && !name.is_empty() { g = genres::musicbrainz(&state.client, &name).await; src = "musicbrainz"; }
+    if g.is_empty() && !name.is_empty() { g = genres::deezer(&state.client, &name, title.as_deref().unwrap_or("")).await; src = "deezer"; }
+    dbg_log(&format!("[genres] {name} ({key}) via {src} -> {g:?}"));
+    if !g.is_empty() { state.genres_cache.lock().unwrap().insert(key, g.clone()); }
+    Ok(g)
 }
 
 #[tauri::command]
