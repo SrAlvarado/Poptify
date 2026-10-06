@@ -12,6 +12,7 @@
     "core:window:allow-inner-size",
     "core:window:allow-outer-position",
     "core:window:allow-scale-factor",
+    "core:window:allow-available-monitors",
     "core:window:allow-minimize",
     "core:window:allow-close",
     "opener:default",

@@ -4,7 +4,7 @@ if (typeof globalThis.global === 'undefined') globalThis.global = globalThis;
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { getVersion } from '@tauri-apps/api/app';
-import { getCurrentWindow, currentMonitor, primaryMonitor } from '@tauri-apps/api/window';
+import { getCurrentWindow, currentMonitor, primaryMonitor, availableMonitors } from '@tauri-apps/api/window';
 import { LogicalSize, LogicalPosition } from '@tauri-apps/api/dpi';
 import { createSoundCloud } from './soundcloud.js';
 import { createYouTube } from './youtube.js';
@@ -994,6 +994,9 @@ popup.addEventListener('mouseleave', () => {
 // resize the OS window to fit the current skin (+ settings panel when open),
 // place the popup/panel inside, and pin the notch to the top of the screen.
 let lastWinW = 0, lastWinH = 0;
+// último movimiento de la ventana (arrastre): mientras se mueve, layout() no la recoloca
+let lastMovedAt = 0;
+appWindow.onMoved(() => { lastMovedAt = performance.now(); }).catch(() => {});
 let resizing = false;
 async function layout() {
   popup.classList.toggle('n-collapsed', notchCollapsed());
@@ -1035,16 +1038,22 @@ async function layout() {
       if (state.skin === 'notch' && state.authed && state.track) {
         // pin the notch to the top-center of the CURRENT display
         await appWindow.setPosition(new LogicalPosition(Math.round(mx + (sw - winW) / 2), Math.round(my)));
-      } else {
-        // only nudge back if it would actually fall off the current screen
+      } else if (performance.now() - lastMovedAt > 1500) {
+        // Solo se recoloca si la ventana ha quedado FUERA DE TODAS las pantallas (p. ej. al desconectar
+        // un monitor). Antes se comparaba solo con la pantalla actual: al arrastrarla a otra, quedaba a
+        // caballo entre las dos, parecía "salirse" y se devolvía a la primera. Nunca durante un arrastre.
+        // Posiciones en lógico: la de la ventana con SU escala y la de cada monitor con la suya
+        // (con pantallas de distinta densidad, mezclarlas descuadraba las cuentas).
         const pos = await appWindow.outerPosition();
-        let x = pos.x / sf, y = pos.y / sf;
-        let nx = x, ny = y;
-        if (x + winW > mx + sw) nx = mx + sw - winW - 8;
-        if (y + winH > my + sh) ny = my + sh - winH - 8;
-        if (nx < mx + 8) nx = mx + 8;
-        if (ny < my + 8) ny = my + 8;
-        if (Math.abs(nx - x) > 1 || Math.abs(ny - y) > 1) {
+        const wsf = (await appWindow.scaleFactor()) || sf;
+        const x = pos.x / wsf, y = pos.y / wsf;
+        const mons = (await availableMonitors()) || [mon];
+        const visible = mons.some(m => {
+          const k = m.scaleFactor || 1, ax = m.position.x / k, ay = m.position.y / k, aw = m.size.width / k, ah = m.size.height / k;
+          return x + winW > ax + 40 && x < ax + aw - 40 && y + winH > ay + 40 && y < ay + ah - 40;
+        });
+        if (!visible) {
+          const nx = Math.min(Math.max(x, mx + 8), mx + sw - winW - 8), ny = Math.min(Math.max(y, my + 8), my + sh - winH - 8);
           await appWindow.setPosition(new LogicalPosition(Math.round(nx), Math.round(ny)));
         }
       }
