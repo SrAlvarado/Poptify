@@ -18,7 +18,7 @@ pub struct Opt {
 
 /// Estado que pinta la web (sus nombres de campo vienen de main.js → syncTray)
 #[derive(Deserialize, Default)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", default)]
 pub struct TrayState {
     skins: Vec<Opt>,
     skin: String,
@@ -34,6 +34,7 @@ pub struct TrayState {
     audio: bool,
     authed: bool,
     version: String,
+    lastfm: bool,
 }
 
 pub fn setup(app: &AppHandle) -> tauri::Result<()> {
@@ -93,6 +94,7 @@ fn build(app: &AppHandle, s: &TrayState) -> tauri::Result<Menu<Wry>> {
     let audio = CheckMenuItem::with_id(app, "audio", "Audio reactivo (tempo real)", true, s.audio, None::<&str>)?;
 
     let more = MenuItem::with_id(app, "settings", "Más ajustes…", true, None::<&str>)?;
+    let lastfm = MenuItem::with_id(app, "lastfm", if s.lastfm { "Last.fm: conectado ✓" } else { "Conectar Last.fm…" }, true, None::<&str>)?;
     let lyrics = MenuItem::with_id(app, "lyrics", "Ver letra", true, None::<&str>)?;
     let update = MenuItem::with_id(app, "update", if s.version.is_empty() { "Buscar actualizaciones".to_string() } else { format!("Buscar actualizaciones (v{})", s.version) }, true, None::<&str>)?;
     let logout = MenuItem::with_id(app, "logout", "Cerrar sesión de Spotify", s.authed, None::<&str>)?;
@@ -101,7 +103,7 @@ fn build(app: &AppHandle, s: &TrayState) -> tauri::Result<Menu<Wry>> {
     let mut items: Vec<&dyn IsMenuItem<Wry>> = vec![&toggle, &s1, &skins, &bgs];
     if s.skin == "ios" { items.push(&modes); }
     if avatar_on { items.push(&outfits); items.push(&dances); }
-    items.extend([&audio as &dyn IsMenuItem<Wry>, &sources, &s2, &lyrics, &more, &s3, &update, &logout, &s4, &quit]);
+    items.extend([&audio as &dyn IsMenuItem<Wry>, &lastfm, &sources, &s2, &lyrics, &more, &s3, &update, &logout, &s4, &quit]);
     Menu::with_items(app, &items)
 }
 

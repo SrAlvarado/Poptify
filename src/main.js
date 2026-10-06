@@ -593,6 +593,14 @@ function renderSettings() {
       </div>
     </div>
     <div class="sec"><span class="lbl">Display</span><div class="opts" style="grid-template-columns:repeat(2,1fr)">${skinOpts}</div></div>
+    <div class="sec" id="lastfmSec"><span class="lbl">Last.fm ${state.hasLastfm ? '· ● activo' : '(opcional · para el Avatar)'}</span>
+      <div style="font-size:11px;opacity:.7;line-height:1.4;margin-bottom:6px">Con tu clave de Last.fm el baile sale de las etiquetas de cada canción (también "chill"). Sácala gratis en <a href="#" data-act="lastfm-link" style="color:inherit">last.fm/api/account/create</a>.</div>
+      <div style="display:flex;gap:6px">
+        <input id="lastfmKeyInput" class="auth-input" style="margin-top:0;flex:1" placeholder="${state.hasLastfm ? 'Clave guardada (pega otra para cambiarla)' : 'API key de Last.fm'}" />
+        <button class="opt" data-act="lastfm-save" style="width:auto;padding:0 14px">${state.hasLastfm ? '↻' : 'Guardar'}</button>
+      </div>
+      ${state.hasLastfm ? `<button class="opt" style="width:100%;margin-top:6px" data-act="lastfm-clear">Quitar clave</button>` : ''}
+    </div>
     ${state.skin==='avatar' ? `
     <div class="sec"><span class="lbl">Avatar · outfit</span>
       <div class="opts" style="grid-template-columns:repeat(3,1fr)">${[['auto','Auto'],['naked','Naked'],...avatar.outfitLabels()].map(([k,n])=>`<div class="opt ${avatar.prefs.outfit===k?'active':''}" data-set-avoutfit="${k}">${n}</div>`).join('')}</div>
@@ -601,13 +609,6 @@ function renderSettings() {
       <div class="opts" style="grid-template-columns:repeat(3,1fr)">${[['auto','Auto'],['rap','Rap'],['trap','Trap'],['reggaeton','Reguetón'],['techno','Techno'],['pop','Pop'],['chill','Chill']].map(([k,n])=>`<div class="opt ${avatar.prefs.dance===k?'active':''}" data-set-avdance="${k}">${n}</div>`).join('')}</div>
       <button class="opt" style="width:100%;margin-top:8px" data-act="avatar-audio">${state.hydraAudio?'● Bailando al tempo real — desactivar':'Bailar al tempo real (audio del sistema)'}</button>
     </div>
-    <div class="sec"><span class="lbl">Avatar · Last.fm ${state.hasLastfm ? '· ● activo' : '(opcional)'}</span>
-      <div style="font-size:11px;opacity:.7;line-height:1.4;margin-bottom:6px">Con tu clave de Last.fm el baile sale de las etiquetas de cada canción (también "chill"). Sácala gratis en <a href="#" data-act="lastfm-link" style="color:inherit">last.fm/api/account/create</a>.</div>
-      <div style="display:flex;gap:6px">
-        <input id="lastfmKeyInput" class="auth-input" style="margin-top:0;flex:1" placeholder="${state.hasLastfm ? 'Clave guardada (pega otra para cambiarla)' : 'API key de Last.fm'}" />
-        <button class="opt" data-act="lastfm-save" style="width:auto;padding:0 14px">${state.hasLastfm ? '↻' : 'Guardar'}</button>
-      </div>
-      ${state.hasLastfm ? `<button class="opt" style="width:100%;margin-top:6px" data-act="lastfm-clear">Quitar clave</button>` : ''}
     </div>` : ''}
     <div class="sec"><span class="lbl">Fondo</span><div class="opts" style="grid-template-columns:repeat(2,1fr)">${bgOpts}</div></div>
     ${state.bg==='hydra' ? `
@@ -717,7 +718,7 @@ function syncTray(force) {
     mode: state.mode,
     outfits: [['auto','Auto (según el género)'],['naked','Naked'],...avatar.outfitLabels()].map(([id, name]) => ({ id, name })), outfit: avatar.prefs.outfit,
     dances: [['auto','Auto (según el género)'],['rap','Rap'],['trap','Trap'],['reggaeton','Reguetón'],['techno','Techno'],['pop','Pop'],['chill','Chill']].map(([id, name]) => ({ id, name })), dance: avatar.prefs.dance,
-    audio: !!state.hydraAudio, authed: !!state.authed, version: state.version || '',
+    audio: !!state.hydraAudio, authed: !!state.authed, version: state.version || '', lastfm: !!state.hasLastfm,
   };
   const key = JSON.stringify(menu);
   if (!force && key === lastTrayKey) return;
@@ -735,6 +736,11 @@ listen('tray', async (ev) => {
   else if (k === 'avd') avatar.set('dance', v);
   else if (id === 'audio') await toggleAudio();
   else if (id === 'settings') { state.settingsOpen = true; syncSettings(); }
+  else if (id === 'lastfm') {
+    state.settingsOpen = true; syncSettings();
+    const sec = settingsEl.querySelector('#lastfmSec');
+    if (sec) { sec.scrollIntoView({ block: 'center' }); settingsEl.querySelector('#lastfmKeyInput')?.focus(); }
+  }
   else if (id === 'lyrics') { if (state.track) { state.settingsOpen = false; state.lyricsOpen = true; render(true); loadLyrics(); } }
   else if (id === 'update') { state.settingsOpen = true; syncSettings(); settingsEl.querySelector('[data-act="check-update"]')?.click(); }
   else if (id === 'logout') { await invoke('logout'); state.settingsOpen = false; state.authed = false; sp.track = null; applyActive(true); }
