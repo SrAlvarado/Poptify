@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "web:sync": "for d in docs landing; do mkdir -p $d/chupits && cp src/avatar/chupits.js src/avatar/outfits.js src/avatar/chupits.css $d/chupits/ && cp src-tauri/icons/128x128.png $d/favicon.png; done"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",

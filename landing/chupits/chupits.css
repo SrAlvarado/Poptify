@@ -1,0 +1,166 @@
+/* Chupits — estilos y animaciones del rig. Lo usan la app (modo Avatar) y design/chupits/index.html.
+ Las animaciones van a tempo con --b (duración de un beat), que fija render() o quien lo monte. */
+.chupits{overflow:visible}
+  .chupits .fur.pad{fill:#f7f3f0}
+.chupits .strands path{fill:none;stroke-linecap:round}
+.chupits .s-el{stroke:#fbf9f7;stroke-width:.85}
+.chupits .s-ed{stroke:#cbc2bc;stroke-width:.85}
+.chupits .s-il{stroke:#fff;stroke-width:.7;opacity:.5}
+.chupits .s-id{stroke:#b4a9a3;stroke-width:.7;opacity:.3}
+.chupits .s-w{stroke:#fff;stroke-width:.6;opacity:.6}
+.chupits .socket{opacity:.35}
+.chupits .refl{opacity:.5}
+.chupits .glint{fill:#fff;opacity:.92}
+.chupits .rim{fill:none;stroke:#000;stroke-width:1.4}
+.chupits .lash{fill:none;stroke:#1c1617;stroke-width:2.2;stroke-linecap:round}
+.chupits .lidfold{fill:none;stroke:#b9aea8;stroke-width:1.3;opacity:.55;stroke-linecap:round}
+.chupits .thigh{opacity:.25}
+.chupits .brow{opacity:.3}
+.chupits .band{fill:none;stroke:#0c0b0d;stroke-width:10;stroke-linecap:round}
+.chupits .band-hl{fill:none;stroke:#fff;stroke-opacity:.14;stroke-width:1.6;stroke-linecap:round}
+.chupits .spike{stroke:#2c2f34;stroke-width:.6;stroke-linejoin:round}
+.chupits .spark{fill:#fff;opacity:.9}
+.chupits .led{animation:ch-tick var(--b) steps(1) infinite}
+@keyframes ch-tick{0%{opacity:1}30%{opacity:.15}}
+.chupits .ao{}
+.chupits .belly{opacity:.35}
+.chupits .inner{opacity:.92}
+.chupits .vein{fill:none;stroke:#cf7d8a;stroke-width:1;opacity:.55;stroke-linecap:round}
+.chupits .nose{stroke:#b56b77;stroke-width:.8}
+.chupits .lip{fill:none;stroke:#8f6f6c;stroke-width:1.6;stroke-linecap:round}
+.chupits .mouth{fill:#3a1418}
+.chupits .tooth{fill:#fbf6ee;stroke:#b9aea6;stroke-width:.8}
+.chupits .dots circle{fill:#8c7f7a;opacity:.7}
+.chupits .whisk path{fill:none;stroke:rgba(255,255,255,.75);stroke-width:.9;stroke-linecap:round}
+.chupits .toe{fill:none;stroke:#b3a8a2;stroke-width:1.3;stroke-linecap:round}
+.chupits .shadow{opacity:.75}
+.chupits .halo{opacity:.1}
+.chupits .zzz text{font:900 24px -apple-system,system-ui;fill:rgba(243,239,236,.75);animation:zfloat 3s ease-in-out infinite}
+.chupits .zzz text:nth-child(2){animation-delay:.5s}.chupits .zzz text:nth-child(3){animation-delay:1s}
+@keyframes zfloat{0%,100%{opacity:0;transform:translate(0,8px)}40%,70%{opacity:1;transform:translate(4px,-6px)}}
+
+/* idle: respira, parpadea, oreja nerviosa */
+@keyframes breathe{50%{transform:scale(1.012,1.025)}}
+@keyframes idleHead{50%{transform:translateY(2px) rotate(1deg)}}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+@keyframes twitch{0%,78%,100%{transform:rotate(0)}82%{transform:rotate(9deg)}86%{transform:rotate(-5deg)}90%{transform:rotate(3deg)}}
+.pose-stand .a-body,.pose-sit .a-body{animation:breathe 3.2s ease-in-out infinite}
+.pose-stand .a-head,.pose-sit .a-head{animation:idleHead 3.2s ease-in-out infinite}
+.pose-stand .a-eyes,.pose-sit .a-eyes{animation:blink 4.6s infinite}
+.pose-stand .a-earL{animation:twitch 5.3s infinite}
+.pose-sit .a-earR{animation:twitch 3.7s infinite}
+
+/* aburrido: suspiro largo, cabeza que se va cayendo, oreja floja */
+@keyframes sigh{50%{transform:scale(1.03,.96)}}
+@keyframes droop{50%{transform:rotate(4deg) translateY(4px)}}
+@keyframes flop{50%{transform:rotate(7deg)}}
+.pose-bored .a-body{animation:sigh 5s ease-in-out infinite}
+.pose-bored .a-head{animation:droop 5s ease-in-out infinite}
+.pose-bored .a-earR{animation:flop 5s ease-in-out infinite}
+
+/* saltando: squash & stretch, sombra que se encoge */
+@keyframes hop{0%,100%{transform:translateY(0) scale(1.1,.88)}12%{transform:translateY(0) scale(.94,1.08)}50%{transform:translateY(-84px) scale(1,1)}88%{transform:translateY(0) scale(.96,1.05)}}
+@keyframes hopShadow{50%{transform:scale(.5);opacity:.5}}
+@keyframes flutterL{0%,100%{transform:rotate(0)}50%{transform:rotate(-14deg)}}
+@keyframes flutterR{0%,100%{transform:rotate(0)}50%{transform:rotate(14deg)}}
+.pose-jump .a-root{animation:hop calc(var(--b)*2) cubic-bezier(.4,0,.6,1) infinite}
+.pose-jump .shadow{animation:hopShadow calc(var(--b)*2) cubic-bezier(.4,0,.6,1) infinite}
+.pose-jump .a-earL{animation:flutterL calc(var(--b)*2) ease-in-out infinite}
+.pose-jump .a-earR{animation:flutterR calc(var(--b)*2) ease-in-out infinite}
+
+/* Bailes según "Patrones de baile por género — análisis fotograma a fotograma" (Claude Docs).
+   Cada ciclo arranca en el 1 (0 %). Con ciclos de N tiempos, el tiempo k cae en k/N.
+   Pivotes: a-root = pies, a-body = cadera/torso, a-head = cuello; brazo izq. +° = hacia fuera/arriba, der. al revés. */
+@keyframes lagL{0%,100%{transform:rotate(0)}35%{transform:rotate(-7deg)}}
+@keyframes lagR{0%,100%{transform:rotate(0)}35%{transform:rotate(7deg)}}
+
+/* RAP · 85-115 · groove base: down bounce con el bombo (1 y 3); en la caja (2 y 4) cabeceo seco,
+   pop de pecho y golpe de mano. Rebotado y laid-back, brazos sueltos. Ciclo de 2 tiempos. */
+@keyframes rapBounce{0%,100%{transform:translateY(5px)}25%,75%{transform:translateY(0)}50%{transform:translateY(6px)}}
+@keyframes rapNod{0%,100%{transform:translateY(3px) rotate(2deg)}25%,75%{transform:translateY(-1px) rotate(-2deg)}50%{transform:translateY(7px) rotate(5deg)}56%{transform:translateY(6px) rotate(4deg)}}
+@keyframes chestPop{0%,40%,64%,100%{transform:scale(1)}50%{transform:scale(1.035,1.012)}}
+@keyframes rapChop{0%,40%,100%{transform:rotate(0)}50%{transform:rotate(16deg)}}
+@keyframes looseL{0%,50%,100%{transform:rotate(-4deg)}25%,75%{transform:rotate(3deg)}}
+.pose-rap .a-root{animation:rapBounce calc(var(--b)*2) cubic-bezier(.3,.6,.4,1) infinite}
+.pose-rap .a-head{animation:rapNod calc(var(--b)*2) cubic-bezier(.25,.8,.35,1) infinite}
+.pose-rap .a-body{animation:chestPop calc(var(--b)*2) ease-out infinite}
+.pose-rap .a-armR{animation:rapChop calc(var(--b)*2) cubic-bezier(.2,.9,.3,1) infinite}
+.pose-rap .a-armL{animation:looseL calc(var(--b)*2) ease-in-out infinite;animation-delay:calc(var(--b)*.15)}
+.pose-rap .a-earL{animation:lagL var(--b) ease-out infinite}
+.pose-rap .a-earR{animation:lagR var(--b) ease-out infinite}
+
+/* TECHNO · 120-150 · bounce + pisotón alterno: un pie por bombo, cadera a la izq. en el 1 y a la
+   der. en el 2, cabeceo con la cadera, torso quieto. Seco. Puño arriba. Ciclo de 2 tiempos. */
+@keyframes techBounce{0%,100%{transform:translate(-3px,6px)}25%,75%{transform:translate(0,0)}50%{transform:translate(3px,6px)}}
+@keyframes techNod{0%,50%,100%{transform:translateY(4px) rotate(2deg)}25%,75%{transform:translateY(0) rotate(0)}}
+@keyframes stompL{0%,70%,100%{transform:translateY(0)}85%{transform:translateY(-9px)}}
+@keyframes stompR{0%,20%,50%,100%{transform:translateY(0)}35%{transform:translateY(-9px)}}
+@keyframes fistPump{0%,50%,100%{transform:rotate(16deg)}25%,75%{transform:rotate(0)}}
+@keyframes tuck{0%,50%,100%{transform:rotate(-6deg)}25%,75%{transform:rotate(0)}}
+.pose-techno .a-root{animation:techBounce calc(var(--b)*2) cubic-bezier(.2,.7,.3,1) infinite}
+.pose-techno .a-head{animation:techNod calc(var(--b)*2) cubic-bezier(.2,.7,.3,1) infinite}
+.pose-techno .a-legL{animation:stompL calc(var(--b)*2) ease-in infinite}
+.pose-techno .a-legR{animation:stompR calc(var(--b)*2) ease-in infinite}
+.pose-techno .a-armR{animation:fistPump calc(var(--b)*2) cubic-bezier(.1,.9,.2,1) infinite}
+.pose-techno .a-armL{animation:tuck calc(var(--b)*2) cubic-bezier(.1,.9,.2,1) infinite}
+.pose-techno .a-earL{animation:lagL var(--b) ease-out infinite}
+.pose-techno .a-earR{animation:lagR var(--b) ease-out infinite}
+
+/* REGUETÓN · 85-100 · paso lateral con golpe de cadera: rebote "tiny" en cada tiempo, golpe seco de
+   cadera a la der. en el 1 y a la izq. en el 3, micro-golpes en las cajas del dembow (1a, 2&, 3a, 4&).
+   Brazos a la altura del pecho que bajan al flexionar. Ciclo de 4 tiempos. */
+@keyframes regStep{0%,100%{transform:translate(6px,4px)}12.5%{transform:translate(4px,0)}25%{transform:translate(0,4px)}37.5%,87.5%{transform:translate(0,0)}50%{transform:translate(-6px,4px)}62.5%{transform:translate(-4px,0)}75%{transform:translate(0,4px)}}
+@keyframes regHip{0%,100%{transform:translateX(7px) rotate(-3deg)}8%{transform:translateX(2px) rotate(-1deg)}18.75%{transform:translateX(4px) rotate(-1.5deg)}25%,45%,75%,95%{transform:translateX(0) rotate(0)}37.5%{transform:translateX(3px)}50%{transform:translateX(-7px) rotate(3deg)}58%{transform:translateX(-2px) rotate(1deg)}68.75%{transform:translateX(-4px) rotate(1.5deg)}87.5%{transform:translateX(-3px)}}
+@keyframes regHead{0%,25%,100%{transform:rotate(3deg)}50%,75%{transform:rotate(-3deg)}}
+@keyframes regArmL{0%,25%,50%,75%,100%{transform:rotate(10deg)}12.5%,37.5%,62.5%,87.5%{transform:rotate(0)}}
+@keyframes regArmR{0%,25%,50%,75%,100%{transform:rotate(-10deg)}12.5%,37.5%,62.5%,87.5%{transform:rotate(0)}}
+.pose-reggaeton .a-root{animation:regStep calc(var(--b)*4) cubic-bezier(.3,.6,.4,1) infinite}
+.pose-reggaeton .a-body{animation:regHip calc(var(--b)*4) cubic-bezier(.1,.9,.2,1) infinite}
+.pose-reggaeton .a-head{animation:regHead calc(var(--b)*4) ease-in-out infinite}
+.pose-reggaeton .a-armL{animation:regArmL calc(var(--b)*4) ease-out infinite}
+.pose-reggaeton .a-armR{animation:regArmR calc(var(--b)*4) ease-out infinite}
+.pose-reggaeton .a-earL{animation:lagL var(--b) ease-in-out infinite}
+.pose-reggaeton .a-earR{animation:lagR var(--b) ease-in-out infinite}
+
+/* TRAP · 130-145 en medio tiempo (--b = pulso lento ≈70) · two-step con rebote (Bankhead): rodillas abajo
+   en cada pulso lento, golpe fuerte en la caja (2.º pulso lento), brazos cruzados en el pecho en los
+   acentos y abiertos entre medias, hombros a doble tiempo, orejas con los hi-hats. Pesado, con freezes. */
+@keyframes trapStep{0%,100%{transform:translate(6px,7px)}25%{transform:translate(4px,0)}50%{transform:translate(-6px,9px)}75%{transform:translate(-4px,0)}}
+@keyframes trapNod{0%,100%{transform:translateY(4px) rotate(3deg)}20%,75%{transform:translateY(0) rotate(0)}50%{transform:translateY(9px) rotate(6deg)}56%{transform:translateY(8px) rotate(5deg)}}
+@keyframes crossL{0%,10%,50%,60%,100%{transform:rotate(-95deg)}25%,35%,75%,85%{transform:rotate(30deg)}}
+@keyframes crossR{0%,10%,50%,60%,100%{transform:rotate(95deg)}25%,35%,75%,85%{transform:rotate(-30deg)}}
+@keyframes shoulders{0%,25%,50%,75%,100%{transform:translateY(0)}12.5%,37.5%,62.5%,87.5%{transform:translateY(-3px)}}
+@keyframes hat{0%,100%{transform:rotate(0)}50%{transform:rotate(4deg)}}
+.pose-trap .a-root{animation:trapStep calc(var(--b)*2) cubic-bezier(.2,.9,.3,1) infinite}
+.pose-trap .a-head{animation:trapNod calc(var(--b)*2) cubic-bezier(.2,.9,.3,1) infinite}
+.pose-trap .a-armL{animation:crossL calc(var(--b)*2) cubic-bezier(.15,.9,.25,1) infinite}
+.pose-trap .a-armR{animation:crossR calc(var(--b)*2) cubic-bezier(.15,.9,.25,1) infinite}
+.pose-trap .a-body{animation:shoulders calc(var(--b)*2) ease-in-out infinite}
+.pose-trap .a-earL,.pose-trap .a-earR{animation:hat calc(var(--b)/4) linear infinite}
+
+/* POP · 97-132 · step touch en frases de 8 con una pose de brazos por count; toque (y nod) en los
+   pares; pose final del 8 con saltito. Poses secas, piernas rebotadas. Ciclo de 8 tiempos. */
+@keyframes popStep{0%,100%{transform:translate(10px,0)}12.5%{transform:translate(10px,6px)}25%{transform:translate(-10px,0)}37.5%{transform:translate(-10px,6px)}50%{transform:translate(10px,0)}62.5%{transform:translate(10px,6px)}75%{transform:translate(-10px,0)}87.5%{transform:translate(0,-14px)}}
+@keyframes popNod{0%,25%,50%,75%,100%{transform:rotate(0)}12.5%,37.5%,62.5%{transform:translateY(3px) rotate(4deg)}87.5%{transform:rotate(-4deg)}}
+@keyframes popArmL{0%,9%,100%{transform:rotate(0)}12.5%,21.5%,25%,34%{transform:rotate(90deg)}37.5%,46.5%,50%,59%{transform:rotate(150deg)}62.5%,71.5%{transform:rotate(40deg)}75%,84%{transform:rotate(-100deg)}87.5%,96.5%{transform:rotate(160deg)}}
+@keyframes popArmR{0%,9%,12.5%,21.5%,100%{transform:rotate(-90deg)}25%,34%,37.5%,46.5%{transform:rotate(-150deg)}50%,59%,62.5%,71.5%{transform:rotate(-40deg)}75%,84%{transform:rotate(100deg)}87.5%,96.5%{transform:rotate(-160deg)}}
+.pose-pop .a-root{animation:popStep calc(var(--b)*8) ease-out infinite}
+.pose-pop .a-head{animation:popNod calc(var(--b)*8) ease-out infinite}
+.pose-pop .a-armL{animation:popArmL calc(var(--b)*8) cubic-bezier(.2,.9,.3,1) infinite}
+.pose-pop .a-armR{animation:popArmR calc(var(--b)*8) cubic-bezier(.2,.9,.3,1) infinite}
+.pose-pop .a-earL{animation:lagL var(--b) ease-in-out infinite}
+.pose-pop .a-earR{animation:lagR var(--b) ease-in-out infinite}
+
+/* CHILL / LO-FI · 60-95 · vibing sentado: sin rodillas, el rebote lo hacen cuello y hombros, que caen
+   en el pulso un pelín por detrás; balanceo lateral lento. Fluido y sutil. */
+@keyframes chillSway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+@keyframes chillBob{0%,100%{transform:translateY(0) rotate(0)}14%{transform:translateY(5px) rotate(3deg)}}
+@keyframes chillDrop{0%,100%{transform:translateY(0) scale(1)}14%{transform:translateY(2px) scale(1.01,.99)}}
+@keyframes chillArm{0%,100%{transform:translateY(0)}14%{transform:translateY(2px)}}
+.pose-chill .a-root{animation:chillSway calc(var(--b)*4) ease-in-out infinite}
+.pose-chill .a-head{animation:chillBob var(--b) cubic-bezier(.3,.5,.4,1) infinite;animation-delay:calc(var(--b)*.06)}
+.pose-chill .a-body{animation:chillDrop var(--b) cubic-bezier(.3,.5,.4,1) infinite;animation-delay:calc(var(--b)*.06)}
+.pose-chill .a-armL,.pose-chill .a-armR{animation:chillArm var(--b) cubic-bezier(.3,.5,.4,1) infinite;animation-delay:calc(var(--b)*.06)}
+.pose-chill .a-earL{animation:lagL calc(var(--b)*2) ease-in-out infinite}
+
+@media (prefers-reduced-motion:reduce){.chupits *{animation:none!important}}
