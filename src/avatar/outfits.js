@@ -17,7 +17,6 @@
   const STAR = (x, y, r, c = '#fff') => `<path fill="${c}" d="M${x} ${y - r} L${x + r * .25} ${y - r * .25} L${x + r} ${y} L${x + r * .25} ${y + r * .25} L${x} ${y + r} L${x - r * .25} ${y + r * .25} L${x - r} ${y} L${x - r * .25} ${y - r * .25} Z"/>`;
   const EAR_G = (s) => `<g transform="rotate(-10 128 84)">${s}</g>`;      // mismo giro que la oreja del rig
   const DEFS = `<defs>` +
-    `<linearGradient id="ch-mirror" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9fd8ff"/><stop offset=".35" stop-color="#f1f3ff"/><stop offset=".6" stop-color="#ffb8ef"/><stop offset="1" stop-color="#7effd2"/></linearGradient>` +
     `<linearGradient id="ch-ice" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#d9f1ff"/><stop offset="1" stop-color="#a9c4d6"/></linearGradient>` +
     `</defs>`;
 
@@ -90,11 +89,19 @@
       LINE('M156 87 Q170 82 185 84', '#3a3a40', 2) + LINE('M128 87 Q138 83 150 85 M189 81 Q195 79 201 81', '#fff', 1.4, .5)
     : `<ellipse cx="116" cy="88" rx="16" ry="8.5" fill="#0d0c10" stroke="#3a3a40" stroke-width="1.4"/><ellipse cx="184" cy="88" rx="16" ry="8.5" fill="#0d0c10" stroke="#3a3a40" stroke-width="1.4"/>` +
       LINE('M132 87 Q150 82 168 87', '#3a3a40', 2);
-  // TECHNO · visor envolvente de espejo, subido en la frente
-  const MIRROR_UP = (v) => v === 'back' ? '' : v === 'tq'
-    ? LINE('M114 100 L90 104', '#1a1c20', 3) +
-      `<path d="M112 96 Q160 74 220 86 L218 100 Q164 90 114 108 Z" fill="url(#ch-mirror)" stroke="#2b2f36" stroke-width="1.6"/>` + LINE('M122 98 Q164 82 212 90', '#fff', 1.8, .8)
-    : `<path d="M86 92 Q150 72 214 92 L212 106 Q150 88 88 106 Z" fill="url(#ch-mirror)" stroke="#2b2f36" stroke-width="1.6"/>` + LINE('M96 92 Q150 78 204 92', '#fff', 1.8, .8);
+  // TECHNO · pasamontañas negro de punto con UNA abertura ancha para los ojos (estilo "shiesty");
+  // las orejas salen por encima y el ojo queda a la vista
+  const BALACLAVA = (v) => {
+    const slot = v === 'tq' ? 'M118 104 Q168 94 216 102 L216 132 Q168 140 122 136 Q110 120 118 104 Z'
+                            : 'M90 102 Q150 94 210 102 L210 132 Q150 140 90 132 Z';
+    let rib = '';
+    for (let x = 80; x < 228; x += 7) rib += `M${x} 50 L${x + 1} 196`;
+    return `<clipPath id="ch-bc"><path d="${hp(v)}${v === 'back' ? '' : slot}" ${SC(1.03)} clip-rule="evenodd"/></clipPath>` +
+      `<path d="${hp(v)}${v === 'back' ? '' : slot}" ${SC(1.03)} fill="#111113" fill-rule="evenodd" stroke="#000" stroke-width="1.4"/>` +
+      `<path d="${hp(v)}" ${SC(1.03)} fill="url(#ch-cloth)" clip-path="url(#ch-bc)"/>` +
+      `<g clip-path="url(#ch-bc)">${LINE(rib, '#fff', 1, .06)}</g>` +
+      (v === 'back' ? '' : `<path d="${slot}" fill="none" stroke="#2a2a2e" stroke-width="2.4"/>`);   // borde del agujero, algo grueso como el punto
+  };
   // POP · micro de diadema fino: diadema por encima de la cabeza y brazo hasta la boca
   const HEADSET = (v) => v === 'back' ? '' : v === 'tq'
     ? LINE('M98 126 C92 84 112 58 148 55 C174 54 192 63 202 76', '#1f1f23', 2.2) + `<circle cx="98" cy="131" r="6.5" fill="#1f1f23"/>` +   // la diadema se pierde por detrás
@@ -200,8 +207,6 @@
   // (sin letras: la pata derecha es un espejo y el texto saldría al revés)
   const KNUCKLE_RING = `<path d="M110 326 Q128 333 148 326 L148 337 Q128 344 110 337 Z" fill="url(#ch-gold)" stroke="#7a5410" stroke-width="1"/>` +
     [115, 124, 133, 142].map((x) => `<ellipse cx="${x}" cy="${331 + (x - 129) ** 2 / 300}" rx="3.6" ry="3" fill="url(#ch-gold)" stroke="#7a5410" stroke-width=".7"/>`).join('');
-  // TECHNO · glow stick verde (rave de los 90): halo con trazo translúcido, sin filtros
-  const GLOWSTICK = `<g transform="rotate(-20 128 338)">` + LINE('M128 300 L128 352', '#9dff6a', 14, .18) + LINE('M128 302 L128 350', '#9dff6a', 7, .9) + LINE('M127 304 L127 348', '#efffe6', 2.2) + `</g>`;
   // ROCK · muñequera de cuero con tachuelas
   const STUDS = `<path d="M100 314 Q127 322 154 314 L154 328 Q127 336 100 328 Z" fill="#141416"/>` +
                 `<g fill="url(#ch-silver)">${[108, 118, 128, 138, 148].map((x) => `<circle cx="${x}" cy="${322 + (x - 127) ** 2 / 400}" r="2.6"/>`).join('')}</g>`;
@@ -211,7 +216,7 @@
     rap:       { label: 'Rap',           head: KANGOL, neck: ROPE_MEDALLION, prop: () => KNUCKLE_RING },
     trap:      { label: 'Trap',          head: SHADES_UP, neck: () => DEFS + ICED() },
     reggaeton: { label: 'Reguetón',      head: FLATCAP, ear: GOLD_HOOP, neck: GOLD_CROSS },
-    techno:    { label: 'Techno',        head: (v) => DEFS + MIRROR_UP(v), neck: FINE_SILVER, chest: HARNESS, prop: () => GLOWSTICK },
+    techno:    { label: 'Techno',        head: BALACLAVA, neck: FINE_SILVER, chest: HARNESS },
     pop:       { label: 'Pop',           ear: () => BOW('#ffb3d1', '#f28dbb')() + HEART_EARRING(), head: HEADSET },
     rock:      { label: 'Rock / Punk',   ear: HOOP_CROSS, head: LINER, propL: () => STUDS },
     lofi:      { label: 'Lo-fi / Chill', head: (v) => BEANIE(v) + HEADPHONES_ON(v), neck: SCARF },
