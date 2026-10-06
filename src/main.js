@@ -2,6 +2,7 @@
 if (typeof globalThis.global === 'undefined') globalThis.global = globalThis;
 
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 import { getVersion } from '@tauri-apps/api/app';
 import { getCurrentWindow, currentMonitor, primaryMonitor } from '@tauri-apps/api/window';
 import { LogicalSize, LogicalPosition } from '@tauri-apps/api/dpi';
@@ -197,7 +198,6 @@ function renderIOSMini(al, col) {
         <div class="mini-times"><span>${fmt(al.cur)}</span><span>${fmt(al.dur)}</span></div>
       </div>
       <button class="icon-btn like ${state.liked?'liked':''}" data-act="like" title="Favorito">${I.heart(state.liked)}</button>
-      <button class="icon-btn settings-inline" data-act="settings" title="Ajustes">${I.gear}</button>
     </div>
   </div>`;
 }
@@ -378,7 +378,6 @@ function renderNotch(al, col) {
       <button class="icon-btn play" data-act="play" title="Pausa">${I.play()}</button>
       <button class="icon-btn" data-act="next" title="Siguiente">${I.next}</button>
       <button class="icon-btn like ${state.liked?'liked':''}" data-act="like" title="Favorito">${I.heart(state.liked)}</button>
-      <button class="icon-btn settings-inline" data-act="settings" title="Ajustes">${I.gear}</button>
     </div>
   </div>
   <div class="n-mini"><div class="n-marq"><span>${al.title} · ${al.artist}</span><span>${al.title} · ${al.artist}</span></div></div>
@@ -432,7 +431,6 @@ function renderAvatar(al) {
         <button class="icon-btn play" data-act="play" title="Pausa">${I.play()}</button>
         <button class="icon-btn" data-act="next" title="Siguiente">${I.next}</button>
         <button class="icon-btn like ${state.liked?'liked':''}" data-act="like" title="Favorito">${I.heart(state.liked)}</button>
-        <button class="icon-btn settings-inline" data-act="settings" title="Ajustes">${I.gear}</button>
       </div>
     </div>
   </div>`;
@@ -635,7 +633,7 @@ function renderSettings() {
   settingsEl.querySelectorAll('[data-set-avoutfit]').forEach(el=>el.addEventListener('click',()=>avatar.set('outfit', el.dataset.setAvoutfit)));
   settingsEl.querySelectorAll('[data-set-avdance]').forEach(el=>el.addEventListener('click',()=>avatar.set('dance', el.dataset.setAvdance)));
   const avAudio = settingsEl.querySelector('[data-act="avatar-audio"]');
-  if (avAudio) avAudio.addEventListener('click', async ()=>{ if(state.hydraAudio){ Hydra.stopAudio(); state.hydraAudio=false; localStorage.setItem('hydraAudio','0'); syncSettings(); } else { await startHydraAudio(); } });
+  if (avAudio) avAudio.addEventListener('click', toggleAudio);
   settingsEl.querySelectorAll('[data-set-sketch]').forEach(el=>el.addEventListener('click',()=>{ state.hydraSketch=el.dataset.setSketch; localStorage.setItem('hydraSketch',state.hydraSketch); lastHydraKey=''; render(true); }));
   const audioBtn = settingsEl.querySelector('[data-act="hydra-audio"]');
   if (audioBtn) audioBtn.addEventListener('click', async ()=>{ if(state.hydraAudio){ Hydra.stopAudio(); state.hydraAudio=false; localStorage.setItem('hydraAudio','0'); manageHydra(); syncSettings(); } else { await startHydraAudio(); } });
@@ -681,7 +679,48 @@ function renderSettings() {
   if (logout) logout.addEventListener('click', async ()=>{ await invoke('logout'); state.settingsOpen=false; state.authed=false; sp.track=null; applyActive(true); });
   settingsEl.classList.toggle('open', state.settingsOpen);
   scrimEl.classList.toggle('show', state.settingsOpen);
+  syncTray();
 }
+
+async function toggleAudio() {
+  if (state.hydraAudio) { Hydra.stopAudio(); state.hydraAudio = false; localStorage.setItem('hydraAudio', '0'); manageHydra(); syncSettings(); }
+  else await startHydraAudio();
+}
+
+// ---------- barra de menús (icono de Chupits) ----------
+// La web es la dueña del estado: se lo manda a Rust para marcar las opciones y recibe los clics.
+let lastTrayKey = '';
+function syncTray(force) {
+  const menu = {
+    skins: SKINS.map(s => ({ id: s.id, name: s.name })), skin: state.skin,
+    bgs: BGS.map(b => ({ id: b.id, name: b.name })), bg: state.bg,
+    sources: [['auto','Auto'],['spotify','Spotify'],['soundcloud','SoundCloud'],['youtube','YouTube']].map(([id, name]) => ({ id, name })), source: state.source,
+    mode: state.mode,
+    outfits: [['auto','Auto (según el género)'],['naked','Naked'],...avatar.outfitLabels()].map(([id, name]) => ({ id, name })), outfit: avatar.prefs.outfit,
+    dances: [['auto','Auto (según el género)'],['rap','Rap'],['trap','Trap'],['reggaeton','Reguetón'],['techno','Techno'],['pop','Pop']].map(([id, name]) => ({ id, name })), dance: avatar.prefs.dance,
+    audio: !!state.hydraAudio, authed: !!state.authed, version: state.version || '',
+  };
+  const key = JSON.stringify(menu);
+  if (!force && key === lastTrayKey) return;
+  lastTrayKey = key;
+  invoke('tray_sync', { state: menu }).catch(e => console.error('tray', e));
+}
+listen('tray', async (ev) => {
+  const id = ev.payload;
+  const [k, v] = id.split(':');
+  if (k === 'skin') { state.skin = v; localStorage.setItem('skin', v); render(true); }
+  else if (k === 'bg') { state.bg = v; localStorage.setItem('bg', v); render(true); }
+  else if (k === 'mode') { state.mode = v; localStorage.setItem('mode', v); render(true); }
+  else if (k === 'src') { state.source = v; localStorage.setItem('source', v); if (v !== 'auto') stopOtherSources(v); applyActive(true); }
+  else if (k === 'avo') avatar.set('outfit', v);
+  else if (k === 'avd') avatar.set('dance', v);
+  else if (id === 'audio') await toggleAudio();
+  else if (id === 'settings') { state.settingsOpen = true; syncSettings(); }
+  else if (id === 'lyrics') { if (state.track) { state.settingsOpen = false; state.lyricsOpen = true; render(true); loadLyrics(); } }
+  else if (id === 'update') { state.settingsOpen = true; syncSettings(); settingsEl.querySelector('[data-act="check-update"]')?.click(); }
+  else if (id === 'logout') { await invoke('logout'); state.settingsOpen = false; state.authed = false; sp.track = null; applyActive(true); }
+  syncTray(true);   // un CheckMenuItem se marca solo al pulsarlo: se repinta con el estado real
+}).catch(e => console.error('tray listen', e));
 
 function syncSettings() {
   renderSettings();
@@ -849,10 +888,10 @@ function render(swap) {
   const al = trackForSkin();
   const col = colors();
   const isMini = state.skin==='ios' && state.mode==='mini';
-  const inlineSettings = isMini || state.skin==='notch' || state.skin==='crt' || state.skin==='avatar';
   const renderers = { ios:renderIOS, ipod:renderIpod, gb:renderGB, psp:renderPSP, mp4:renderMP4, vinyl:renderVinyl, crt:renderCrtSkin, notch:renderNotch, avatar:renderAvatar };
   popup.className = 'popup skin-' + state.skin + (isMini ? ' mini' : '');
-  const gear = inlineSettings ? '' : `<button class="icon-btn gear" data-act="settings" title="Ajustes">${I.gear}</button>`;
+  // los ajustes están en la barra de menús; el panel avanzado se abre desde allí o con clic derecho
+  const gear = '';
   popup.innerHTML = gear + (isMini ? renderIOSMini(al, col) : renderers[state.skin](al, col));
   if (state.skin === 'avatar') avatar.mount(popup.querySelector('.av-stage'));
   if (state.skin === 'notch') {
@@ -1092,6 +1131,9 @@ popup.addEventListener('pointermove', e => {
   tiltRAF = requestAnimationFrame(()=>{ popup.style.transform = `perspective(1000px) rotateY(${px*4}deg) rotateX(${-py*4}deg)`; });
 });
 popup.addEventListener('pointerleave', ()=>{ popup.style.transform=''; });
+
+// clic derecho en el popup → panel de ajustes avanzados (lo normal está en la barra de menús)
+popup.addEventListener('contextmenu', e => { e.preventDefault(); state.settingsOpen = !state.settingsOpen; syncSettings(); });
 
 // ---------- drag the OS window from anywhere on the popup ----------
 popup.addEventListener('mousedown', e => {

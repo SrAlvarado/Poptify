@@ -1,6 +1,7 @@
 mod audio_tap;
 mod genres;
 mod spotify;
+mod tray;
 
 use spotify::{NowPlaying, Tokens};
 use std::path::PathBuf;
@@ -452,6 +453,8 @@ pub fn run() {
                 *state.tokens.lock().unwrap() = Some(t);
             }
             app.manage(state);
+            // ajustes en la barra de menús (icono de Chupits)
+            tray::setup(app.handle())?;
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -472,7 +475,8 @@ pub fn run() {
             set_notch_overlay,
             audio_tap::start_audio_tap,
             audio_tap::stop_audio_tap,
-            open_capture_settings
+            open_capture_settings,
+            tray::tray_sync
         ])
         .run(tauri::generate_context!())
         .expect("error al arrancar Poptify");
