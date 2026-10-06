@@ -8,9 +8,10 @@
 // el metal y el color separan los parecidos (rap y reguetón oro, trap diamante, techno y rock plata).
 // Todas las funciones reciben la vista ('tq' | 'front' | 'back'). Los ids ch-* los hace únicos render().
 (function () {
-  // tela: color plano + sombreado vertical y lateral encima, para que tenga volumen sin filtros
+  // material: color sólido + luz arriba / sombra abajo + un perfil fino que lo separa del pelo blanco.
+  // (antes llevaba también un degradado lateral que oscurecía los bordes y parecía transparente)
   const CL = (d, fill, extra = '') =>
-    `<path d="${d}" fill="${fill}"/><path d="${d}" fill="url(#ch-cloth)"/><path d="${d}" fill="url(#ch-clothx)"/>${extra}`;
+    `<path d="${d}" fill="${fill}" stroke="#000" stroke-opacity=".38" stroke-width="1.2" stroke-linejoin="round"/><path d="${d}" fill="url(#ch-cloth)"/>${extra}`;
   const FOLD = (d, o = 0.35) => `<path d="${d}" fill="none" stroke="#000" stroke-opacity="${o}" stroke-width="1.6" stroke-linecap="round"/>`;
   const LINE = (d, c, w = 2, o = 1) => `<path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-opacity="${o}" stroke-linecap="round" stroke-linejoin="round"/>`;
   const STAR = (x, y, r, c = '#fff') => `<path fill="${c}" d="M${x} ${y - r} L${x + r * .25} ${y - r * .25} L${x + r} ${y} L${x + r * .25} ${y + r * .25} L${x} ${y + r} L${x - r * .25} ${y + r * .25} L${x - r} ${y} L${x - r * .25} ${y - r * .25} Z"/>`;
@@ -18,75 +19,104 @@
   const DEFS = `<defs>` +
     `<linearGradient id="ch-mirror" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9fd8ff"/><stop offset=".35" stop-color="#f1f3ff"/><stop offset=".6" stop-color="#ffb8ef"/><stop offset="1" stop-color="#7effd2"/></linearGradient>` +
     `<linearGradient id="ch-ice" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#d9f1ff"/><stop offset="1" stop-color="#a9c4d6"/></linearGradient>` +
-    `<linearGradient id="ch-pinklens" x1="0" x2="1"><stop offset="0" stop-color="#ff5fa8" stop-opacity=".85"/><stop offset="1" stop-color="#ff9a5c" stop-opacity=".85"/></linearGradient>` +
     `</defs>`;
 
-  // ---------- cabeza (coords de la cabeza; 'tq' = 3/4 mirando a la derecha) ----------
-  // RAP · Kangol bucket rojo de pelo (LL Cool J), con el ala caída
-  const KANGOL = (v) => {
-    const tq = v === 'tq';
-    const crown = tq ? 'M100 98 C98 62 126 46 154 46 C184 46 206 62 208 98 Z' : 'M96 100 C94 64 122 48 150 48 C178 48 206 64 204 100 Z';
-    const brim = tq ? 'M84 100 Q154 84 224 100 Q230 116 214 120 Q154 106 92 120 Q78 114 84 100 Z' : 'M80 102 Q150 86 220 102 Q226 118 210 122 Q150 108 90 122 Q74 116 80 102 Z';
-    let fuzz = '';                                                    // textura de angora: pelillos cortos
-    for (let i = 0; i < 46; i++) { const x = (tq ? 104 : 100) + (i * 37) % 100, y = 54 + (i * 23) % 44; fuzz += `M${x} ${y} l${(i % 3) - 1} 3`; }
-    return CL(crown, '#c8102e') + LINE(fuzz, '#7d0a1d', 1.2, .55) + CL(brim, '#b30e28') + FOLD(tq ? 'M92 112 Q154 98 216 112' : 'M88 114 Q150 100 212 114', .3);
+  // ---------- cabeza ----------
+  // Todo lo que va en la cabeza se construye sobre SU silueta (la de 3/4 o la de frente), para que se
+  // ajuste al cráneo en vez de ser una forma de frente pegada encima. La "cinta" es la curva de la
+  // frente donde acaba un gorro: siempre por encima de los ojos.
+  const HEADP = {
+    tq: 'M140 64 C178 60 206 82 214 112 C220 132 218 150 208 162 C198 178 176 190 150 190 C124 190 100 180 92 160 C82 138 86 104 100 84 C110 70 124 64 140 64 Z',
+    front: 'M150 66 C188 66 208 92 210 122 C212 146 204 166 186 176 C174 183 162 186 150 186 C138 186 126 183 114 176 C96 166 88 146 90 122 C92 92 112 66 150 66 Z',
   };
-  // REGUETÓN · gorra plana de visera recta, ladeada (Barrio Fino → Bad Bunny)
-  const FLATCAP = (c, under) => (v) =>
-    v === 'tq'
-      ? CL('M94 104 C92 70 120 52 152 52 C186 52 212 72 214 104 Q154 92 94 104 Z', c) + `<circle cx="152" cy="52" r="3.5" fill="${c}"/>` +
-        `<path d="M100 103 L50 100 L54 110 L104 112 Z" fill="${under}"/>` + CL('M100 101 L48 98 L50 104 L102 108 Z', c) +     // visera plana, recta
-        FOLD('M152 52 Q130 70 122 100 M152 52 Q176 70 186 96', .35) + `<text x="168" y="92" font-family="Georgia,serif" font-weight="900" font-size="18" fill="url(#ch-gold)">P</text>`
-      : CL('M90 106 C88 70 120 56 150 56 C180 56 212 70 210 106 Q150 94 90 106 Z', c) +
-        `<path d="M96 105 L46 102 L50 112 L100 114 Z" fill="${under}"/>` + CL('M96 103 L44 100 L46 106 L98 110 Z', c);
-  // gafas oscuras / envolventes (lente según el género)
-  const SHADES = (lens) => (v) => v === 'back' ? '' : v === 'tq'
-    ? `<path d="M117 106 Q160 99 214 107 L212 125 Q168 133 121 129 Q113 118 117 106 Z" fill="${lens}"/>` +
-      LINE('M122 110 Q160 104 208 111', '#fff', 1.6, .55) + LINE('M117 110 L92 108', '#111', 3)
-    : `<path d="M88 106 Q150 97 212 106 L210 127 Q150 135 90 127 Z" fill="${lens}"/>` + LINE('M94 110 Q150 102 206 110', '#fff', 1.6, .5);
-  // TECHNO · envolventes de espejo iridiscente, tipo visor
-  const MIRROR = (v) => v === 'back' ? '' : v === 'tq'
-    ? `<path d="M112 104 Q162 94 218 104 L216 124 Q172 136 118 130 Q108 118 112 104 Z" fill="url(#ch-mirror)" stroke="#2b2f36" stroke-width="1.6"/>` +
-      LINE('M120 110 Q164 102 210 109', '#fff', 2, .8) + LINE('M112 110 L90 107', '#1a1c20', 3.4)
-    : `<path d="M84 104 Q150 94 216 104 L213 126 Q150 138 87 126 Z" fill="url(#ch-mirror)" stroke="#2b2f36" stroke-width="1.6"/>` + LINE('M92 110 Q150 101 208 110', '#fff', 2, .8);
-  // REGUETÓN · gafas pequeñas de lente rosa-atardecer (Bad Bunny)
-  const PINKGLASSES = (v) => v === 'back' ? '' : v === 'tq'
-    ? `<ellipse cx="146" cy="120" rx="15" ry="10" transform="rotate(-8 146 120)" fill="url(#ch-pinklens)" stroke="url(#ch-gold)" stroke-width="1.8"/>` +
-      `<ellipse cx="209" cy="118" rx="3.5" ry="8" fill="url(#ch-pinklens)" stroke="url(#ch-gold)" stroke-width="1.4"/>` +
-      LINE('M161 117 Q184 112 206 115', '#c9a03a', 1.6) + LINE('M131 117 L96 110', '#c9a03a', 1.6)
-    : `<ellipse cx="116" cy="118" rx="14" ry="10" fill="url(#ch-pinklens)" stroke="url(#ch-gold)" stroke-width="1.8"/>` +
-      `<ellipse cx="184" cy="118" rx="14" ry="10" fill="url(#ch-pinklens)" stroke="url(#ch-gold)" stroke-width="1.8"/>` + LINE('M130 116 Q150 110 170 116', '#c9a03a', 1.6);
-  // LO-FI · beanie de punto y auriculares grandes de diadema
-  const BEANIE = (c) => (v) =>
-    CL(v === 'tq' ? 'M92 112 C90 70 118 48 152 48 C188 48 214 70 214 112 Z' : 'M90 112 C88 70 118 50 150 50 C182 50 212 70 210 112 Z', c) +
-    CL(v === 'tq' ? 'M90 100 Q152 86 216 100 L216 118 Q152 104 90 120 Z' : 'M88 100 Q150 86 212 100 L212 118 Q150 104 88 120 Z', c) +
-    `<g opacity=".3">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => FOLD(`M${98 + i * 11} ${96 - (i > 5 ? (10 - i) : i) * 1.3} l0 18`, .6)).join('')}</g>`;
-  const HEADPHONES_ON = (v) => v === 'back' ? '' :
-    LINE(v === 'tq' ? 'M96 126 C88 76 120 44 156 44 C194 46 218 76 216 120' : 'M94 126 C86 76 116 46 150 46 C184 46 214 76 206 126', '#2b2b30', 7) +
-    CL(v === 'tq' ? 'M84 112 C84 102 96 98 104 104 L108 150 C100 158 86 152 84 142 Z' : 'M80 112 C80 102 92 98 100 104 L104 150 C96 158 82 152 80 142 Z', '#33333a') +
-    CL(v === 'tq' ? 'M210 108 C216 104 222 110 222 118 L220 140 C218 146 212 146 210 142 Z' : 'M200 104 C208 98 220 102 220 112 L220 142 C218 152 204 158 196 150 Z', '#33333a');
-  // POP · micro de diadema fino (el "Madonna mic")
+  const hp = (v) => (v === 'tq' ? HEADP.tq : HEADP.front);
+  const BAND = (v, dy = 0) => v === 'tq'
+    ? { l: [80, 112 + dy], c: [150, 84 + dy], r: [226, 98 + dy] }
+    : { l: [82, 110 + dy], c: [150, 82 + dy], r: [218, 110 + dy] };
+  const bandAt = (b, t) => [0, 1].map((k) => (1 - t) ** 2 * b.l[k] + 2 * (1 - t) * t * b.c[k] + t * t * b.r[k]);
+  const SC = (k, cx = 152, cy = 128) => `transform="translate(${cx} ${cy}) scale(${k}) translate(${-cx} ${-cy})"`;
+  // copa del gorro: el cráneo un poco más grande, recortado por encima de la cinta
+  function CROWN(v, id, fill, k = 1.07, inner = '', dy = 0) {
+    const b = BAND(v, dy);
+    return `<clipPath id="ch-cr${id}"><path d="M-60 -140 H360 V${b.r[1]} L${b.r[0]} ${b.r[1]} Q${b.c[0]} ${b.c[1]} ${b.l[0]} ${b.l[1]} L-60 ${b.l[1]} Z"/></clipPath>` +
+      `<clipPath id="ch-cs${id}"><path d="${hp(v)}" ${SC(k)}/></clipPath>` +
+      `<g clip-path="url(#ch-cr${id})"><path d="${hp(v)}" ${SC(k)} fill="${fill}" stroke="#000" stroke-opacity=".38" stroke-width="1.4"/>` +
+      `<path d="${hp(v)}" ${SC(k)} fill="url(#ch-cloth)"/><g clip-path="url(#ch-cs${id})">${inner}</g></g>`;
+  }
+  // tira a lo largo de la cinta (puño del gorro, banda), recortada al cráneo
+  const STRIP = (v, id, color, w, k = 1.08, dy = 0) => {
+    const b = BAND(v, dy);
+    return `<clipPath id="ch-st${id}"><path d="${hp(v)}" ${SC(k)}/></clipPath>` +
+      `<g clip-path="url(#ch-st${id})">${LINE(`M${b.l[0] - 20} ${b.l[1] + 4} Q${b.c[0]} ${b.c[1]} ${b.r[0] + 20} ${b.r[1] - 2}`, color, w)}` +
+      `${LINE(`M${b.l[0] - 20} ${b.l[1] + 4 - w / 2} Q${b.c[0]} ${b.c[1] - w / 2} ${b.r[0] + 20} ${b.r[1] - 2 - w / 2}`, '#fff', 1.2, .25)}</g>`;
+  };
+
+  // RAP · Kangol rojo de pelo con ala corta caída (LL Cool J)
+  const KANGOL = (v) => {
+    let fuzz = '';
+    for (let i = 0; i < 70; i++) { const x = 84 + (i * 37) % 140, y = 46 + (i * 23) % 58; fuzz += `M${x} ${y} l${(i % 3) - 1} 3`; }
+    const brim = v === 'tq' ? `<ellipse cx="156" cy="93" rx="76" ry="10" transform="rotate(-5 156 93)" fill="#a50d24" stroke="#000" stroke-opacity=".4" stroke-width="1.2"/>`
+                            : `<ellipse cx="150" cy="94" rx="74" ry="10" fill="#a50d24" stroke="#000" stroke-opacity=".4" stroke-width="1.2"/>`;
+    return brim + CROWN(v, 'k', '#c8102e', 1.09, LINE(fuzz, '#7d0a1d', 1.1, .5)) + STRIP(v, 'k', '#9b0c22', 4, 1.09);
+  };
+  // REGUETÓN · gorra plana negra, visera recta ladeada hacia atrás-izquierda
+  const FLATCAP = (v) => {
+    const b = BAND(v), A = bandAt(b, .12), B = bandAt(b, .38);
+    const visor = `M${A[0]} ${A[1]} L${B[0]} ${B[1]} L${B[0] - 40} ${B[1] + 22} L${A[0] - 40} ${A[1] + 10} Z`;
+    const under = `M${A[0] - 40} ${A[1] + 10} L${B[0] - 40} ${B[1] + 22} L${B[0] - 38} ${B[1] + 27} L${A[0] - 39} ${A[1] + 14} Z`;
+    const seams = v === 'tq' ? FOLD('M150 50 Q128 70 120 104 M150 50 Q178 66 192 94', .5) : FOLD('M150 52 Q130 72 124 100 M150 52 Q170 72 176 100', .5);
+    const logo = v === 'back' ? '' : `<text x="${v === 'tq' ? 166 : 140}" y="${v === 'tq' ? 86 : 88}" font-family="Georgia,serif" font-weight="900" font-size="17" fill="url(#ch-gold)" stroke="#5c4110" stroke-width=".5">P</text>`;
+    return `<path d="${under}" fill="#2bff88" stroke="#000" stroke-opacity=".4" stroke-width="1"/>` + CL(visor, '#141416') +
+      CROWN(v, 'f', '#151517', 1.06, seams) + `<circle cx="150" cy="${v === 'tq' ? 51 : 53}" r="3.5" fill="#151517"/>` + logo;
+  };
+  // LO-FI · beanie morado de punto (un poco flojo) con el puño vuelto
+  const BEANIE = (v) => {
+    let rib = '';
+    for (let x = 78; x < 228; x += 8) rib += `M${x} 30 L${x + 2} 110`;
+    return CROWN(v, 'b', '#7a5aa6', 1.11, LINE(rib, '#000', 1.2, .14), -2) + STRIP(v, 'b', '#6a4b95', 13, 1.1, 2) +
+      (() => { const b = BAND(v, 2); let r = ''; for (let t = .04; t < 1; t += .045) { const [x, y] = bandAt(b, t); r += `M${x.toFixed(1)} ${(y - 5).toFixed(1)} l0 10`; } return `<clipPath id="ch-rb"><path d="${hp(v)}" ${SC(1.1)}/></clipPath><g clip-path="url(#ch-rb)">${LINE(r, '#000', 1.1, .25)}</g>`; })();
+  };
+  const HEADPHONES_ON = (v) => v === 'back' ? '' : v === 'tq'
+    ? LINE('M90 124 C82 72 116 38 160 42 C198 46 222 74 220 104', '#26262b', 7) + LINE('M92 120 C86 74 118 42 160 46', '#fff', 1.2, .18) +
+      `<ellipse cx="88" cy="130" rx="12" ry="20" fill="#2f2f36" stroke="#000" stroke-opacity=".5"/><ellipse cx="91" cy="130" rx="7" ry="14" fill="#3d3d45"/>` +
+      `<ellipse cx="219" cy="112" rx="5" ry="13" fill="#2f2f36" stroke="#000" stroke-opacity=".5"/>`
+    : LINE('M84 128 C78 72 114 42 150 42 C186 42 222 72 216 128', '#26262b', 7) +
+      `<ellipse cx="84" cy="134" rx="10" ry="20" fill="#2f2f36"/><ellipse cx="216" cy="134" rx="10" ry="20" fill="#2f2f36"/>`;
+  // TRAP · gafas oscuras subidas en la frente: estilo sin tapar el ojo
+  const SHADES_UP = (v) => v === 'back' ? '' : v === 'tq'
+    ? LINE('M122 94 L94 100', '#111', 2.6) +
+      `<ellipse cx="139" cy="90" rx="17" ry="8.5" transform="rotate(-10 139 90)" fill="#0d0c10" stroke="#3a3a40" stroke-width="1.4"/>` +
+      `<ellipse cx="195" cy="85" rx="10" ry="7.5" transform="rotate(-10 195 85)" fill="#0d0c10" stroke="#3a3a40" stroke-width="1.4"/>` +
+      LINE('M156 87 Q170 82 185 84', '#3a3a40', 2) + LINE('M128 87 Q138 83 150 85 M189 81 Q195 79 201 81', '#fff', 1.4, .5)
+    : `<ellipse cx="116" cy="88" rx="16" ry="8.5" fill="#0d0c10" stroke="#3a3a40" stroke-width="1.4"/><ellipse cx="184" cy="88" rx="16" ry="8.5" fill="#0d0c10" stroke="#3a3a40" stroke-width="1.4"/>` +
+      LINE('M132 87 Q150 82 168 87', '#3a3a40', 2);
+  // TECHNO · visor envolvente de espejo, subido en la frente
+  const MIRROR_UP = (v) => v === 'back' ? '' : v === 'tq'
+    ? LINE('M114 100 L90 104', '#1a1c20', 3) +
+      `<path d="M112 96 Q160 74 220 86 L218 100 Q164 90 114 108 Z" fill="url(#ch-mirror)" stroke="#2b2f36" stroke-width="1.6"/>` + LINE('M122 98 Q164 82 212 90', '#fff', 1.8, .8)
+    : `<path d="M86 92 Q150 72 214 92 L212 106 Q150 88 88 106 Z" fill="url(#ch-mirror)" stroke="#2b2f36" stroke-width="1.6"/>` + LINE('M96 92 Q150 78 204 92', '#fff', 1.8, .8);
+  // POP · micro de diadema fino: diadema por encima de la cabeza y brazo hasta la boca
   const HEADSET = (v) => v === 'back' ? '' : v === 'tq'
-    ? LINE('M112 132 C118 158 146 170 176 162', '#1f1f23', 2) + `<ellipse cx="178" cy="162" rx="3.6" ry="3" fill="#1f1f23"/>`
-    : LINE('M96 132 C100 158 120 170 138 166', '#1f1f23', 2) + `<ellipse cx="140" cy="166" rx="3.6" ry="3" fill="#1f1f23"/>`;
-  // ROCK · delineador negro corrido alrededor del ojo
+    ? LINE('M98 126 C92 84 112 58 148 55 C174 54 192 63 202 76', '#1f1f23', 2.2) + `<circle cx="98" cy="131" r="6.5" fill="#1f1f23"/>` +   // la diadema se pierde por detrás
+      LINE('M101 136 C114 162 150 172 177 163', '#1f1f23', 2) + `<ellipse cx="180" cy="162" rx="4" ry="3.2" fill="#1f1f23"/>`
+    : LINE('M90 128 C84 74 118 46 150 46 C182 46 216 74 210 128', '#1f1f23', 2.2) + `<circle cx="90" cy="132" r="6.5" fill="#1f1f23"/>` +
+      LINE('M93 138 C100 160 120 168 140 166', '#1f1f23', 2) + `<ellipse cx="142" cy="165" rx="4" ry="3.2" fill="#1f1f23"/>`;
+  // ROCK · delineador negro corrido: raya bajo el ojo, difuminado y ala hacia fuera
   const LINER = (v) => {
     if (v === 'back') return '';
-    const eye = (x, y, dir) => LINE(`M${x - 15 * dir} ${y} Q${x} ${y + 16} ${x + 15 * dir} ${y - 2}`, '#141214', 9, .22) +      // difuminado
-      LINE(`M${x - 15 * dir} ${y} Q${x} ${y + 14} ${x + 15 * dir} ${y - 2}`, '#141214', 3, .75) +                                 // raya
-      LINE(`M${x - 15 * dir} ${y} L${x - 23 * dir} ${y - 6}`, '#141214', 3, .75);                                                 // ala
+    const eye = (x, y, dir) => LINE(`M${x - 15 * dir} ${y} Q${x} ${y + 16} ${x + 15 * dir} ${y - 2}`, '#141214', 8, .16) +
+      LINE(`M${x - 15 * dir} ${y} Q${x} ${y + 14} ${x + 15 * dir} ${y - 2}`, '#141214', 3.4, .9) +
+      LINE(`M${x - 15 * dir} ${y - 1} L${x - 24 * dir} ${y - 8}`, '#141214', 3.4, .9);
     return v === 'tq' ? eye(146, 121, 1) : eye(116, 119, 1) + eye(184, 119, -1);
   };
-  // máscara de luchador: cubre la cabeza con agujeros para ojos y morro (evenodd)
+  // máscara de luchador: la silueta exacta de la cabeza, con agujeros para ojos y morro (evenodd)
   const MASK = (v) => {
     const tq = v === 'tq', back = v === 'back';
-    const head = tq ? 'M140 64 C178 60 206 82 214 112 C220 132 218 150 208 162 C198 178 176 190 150 190 C124 190 100 180 92 160 C82 138 86 104 100 84 C110 70 124 64 140 64 Z'
-                    : 'M150 66 C188 66 208 92 210 122 C212 146 204 166 186 176 C174 183 162 186 150 186 C138 186 126 183 114 176 C96 166 88 146 90 122 C92 92 112 66 150 66 Z';
     const E = (cx, cy, rx, ry) => `M${cx - rx} ${cy} a${rx} ${ry} 0 1 0 ${2 * rx} 0 a${rx} ${ry} 0 1 0 ${-2 * rx} 0 Z`;
     const holes = back ? '' : tq ? E(146, 120, 22, 17) + E(190, 154, 18, 20) + E(210, 118, 6, 12) : E(116, 118, 20, 16) + E(184, 118, 20, 16) + E(150, 156, 18, 18);
     const star = tq ? 'M120 66 L127 84 L146 84 L131 95 L137 113 L120 102 L104 113 L110 95 L95 84 L114 84 Z'
                     : 'M150 68 L156 84 L173 84 L159 94 L165 110 L150 100 L135 110 L141 94 L127 84 L144 84 Z';
-    return `<path d="${head}${holes}" fill="url(#ch-silver)" fill-rule="evenodd"/>` + `<path d="${head}${holes}" fill="url(#ch-clothx)" fill-rule="evenodd"/>` +
+    return `<path d="${hp(v)}${holes}" ${SC(1.02)} fill="url(#ch-silver)" fill-rule="evenodd" stroke="#000" stroke-opacity=".35" stroke-width="1.2"/>` +
       `<path d="${star}" fill="#141214"/>` +
       `<path d="${tq ? 'M166 92 L184 100 L176 108 L198 118 L182 122 L206 138 L178 130 L186 124 L166 118 L174 110 Z' : 'M186 92 L202 98 L194 106 L212 116 L198 120 L214 132 L192 126 L198 120 L182 114 L188 108 Z'}" fill="#141214"/>` +
       (back ? '' : tq ? LINE('M124 120 a22 17 0 1 0 44 0 a22 17 0 1 0 -44 0 M172 154 a18 20 0 1 0 36 0 a18 20 0 1 0 -36 0', '#e5333f', 2.4)
@@ -102,9 +132,13 @@
   const HEART_EARRING = () => EAR_G(                                   // POP · pendiente de corazón
     `<circle cx="101" cy="44" r="2.4" fill="url(#ch-gold)"/>` + LINE('M101 46 L101 52', '#d4a537', 1.6) +
     `<path d="M101 64 C93 58 91 53 95 50 C97.5 48.5 100 49.5 101 51.5 C102 49.5 104.5 48.5 107 50 C111 53 109 58 101 64 Z" fill="#ff7eb6" stroke="#d4a537" stroke-width="1.2"/>`);
-  const HOOP_CROSS = () => EAR_G(                                      // ROCK · aro de plata con cruz colgando
-    `<circle cx="100" cy="46" r="6.5" fill="none" stroke="#c9ced6" stroke-width="2.6"/>` +
-    `<path d="M98.6 52.5 h2.8 v4 h3.4 v2.8 h-3.4 v8 h-2.8 v-8 h-3.4 v-2.8 h3.4 Z" fill="#d6dbe0" stroke="#4a4f56" stroke-width=".7"/>`);
+  // aro atravesando el borde de la oreja: solo se ve la parte de fuera (el resto queda "dentro")
+  const HOOP = (c, r = 8) => `<path d="M100 ${34 - r * .2} A${r} ${r} 0 1 0 ${100 + r * 1.2} ${34 + r * .4}" fill="none" stroke="${c}" stroke-width="2.6" stroke-linecap="round"/>`;
+  const GOLD_HOOP = () => EAR_G(HOOP('#d9ad3c', 10) + HOOP('#fff3c4', 10).replace('stroke-width="2.6"', 'stroke-width=".8" stroke-opacity=".7"'));
+  // ROCK · aro de plata pequeño con una cruz latina colgando de una anilla (no un ♀)
+  const HOOP_CROSS = () => EAR_G(HOOP('#c9ced6', 10) +
+    `<g transform="rotate(14 96 44)">${LINE('M96 43 L96 47', '#c9ced6', 1.2)}` +
+    `<path d="M95 47 h2 v3 h2.8 v1.8 h-2.8 v7.5 h-2 v-7.5 h-2.8 v-1.8 h2.8 Z" fill="#d6dbe0" stroke="#3e434a" stroke-width=".6"/></g>`);
 
   // ---------- cuello (sobre el collar) ----------
   // cadena por una curva del cuello al pecho; twist > 0 la convierte en cordón trenzado
@@ -150,9 +184,9 @@
   const FINE_SILVER = () => CHAIN(44, 2.2, 1.5, 230, 'silver', '#5b6168');
   // LO-FI · bufanda roja de punto (la de la Lofi Girl), con una punta cayendo
   const SCARF = () =>
-    CL('M84 184 Q152 218 220 184 L222 204 Q152 240 82 204 Z', '#d2574a') +
-    `<g opacity=".35">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(i => FOLD(`M${92 + i * 11} ${196 + Math.sin(i / 11 * Math.PI) * 18} l1 14`, .7)).join('')}</g>` +
-    CL('M176 210 L196 206 L202 262 L184 266 Z', '#c84d41') + FOLD('M180 262 l1 6 M186 262 l1 6 M192 261 l1 6 M198 260 l1 6', .5);
+    CL('M90 198 Q152 228 214 198 L215 211 Q152 242 89 211 Z', '#d2574a') +
+    `<g opacity=".35">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => FOLD(`M${96 + i * 11.4} ${206 + Math.sin(i / 10 * Math.PI) * 15} l1 11`, .7)).join('')}</g>` +
+    CL('M176 220 L192 216 L197 256 L182 259 Z', '#c84d41') + FOLD('M184 256 l1 5 M190 255 l1 5', .5);
 
   // ---------- pecho ----------
   // TECHNO · arnés de tiras negras finas con anilla plateada (Berlín)
@@ -175,12 +209,12 @@
   // Minimalistas a propósito: 2-3 piezas que dicen el género, el cuerpo y el pelo siempre a la vista.
   window.ChupitsOutfits = {
     rap:       { label: 'Rap',           head: KANGOL, neck: ROPE_MEDALLION, prop: () => KNUCKLE_RING },
-    trap:      { label: 'Trap',          head: SHADES('#0d0c10'), neck: () => DEFS + ICED() },
-    reggaeton: { label: 'Reguetón',      head: (v) => DEFS + FLATCAP('#141416', '#2bff88')(v) + PINKGLASSES(v), neck: GOLD_CROSS },
-    techno:    { label: 'Techno',        head: (v) => DEFS + MIRROR(v), neck: FINE_SILVER, chest: HARNESS, prop: () => GLOWSTICK },
-    pop:       { label: 'Pop',           ear: () => DEFS + BOW('#ffb3d1', '#f28dbb')() + HEART_EARRING(), head: HEADSET },
+    trap:      { label: 'Trap',          head: SHADES_UP, neck: () => DEFS + ICED() },
+    reggaeton: { label: 'Reguetón',      head: FLATCAP, ear: GOLD_HOOP, neck: GOLD_CROSS },
+    techno:    { label: 'Techno',        head: (v) => DEFS + MIRROR_UP(v), neck: FINE_SILVER, chest: HARNESS, prop: () => GLOWSTICK },
+    pop:       { label: 'Pop',           ear: () => BOW('#ffb3d1', '#f28dbb')() + HEART_EARRING(), head: HEADSET },
     rock:      { label: 'Rock / Punk',   ear: HOOP_CROSS, head: LINER, propL: () => STUDS },
-    lofi:      { label: 'Lo-fi / Chill', head: (v) => BEANIE('#7a5aa6')(v) + HEADPHONES_ON(v), neck: SCARF },
+    lofi:      { label: 'Lo-fi / Chill', head: (v) => BEANIE(v) + HEADPHONES_ON(v), neck: SCARF },
     lucha:     { label: 'Lucha',         head: MASK },
   };
   // qué outfit va con cada baile (modo Auto)

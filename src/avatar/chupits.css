@@ -16,7 +16,8 @@
 .chupits .lidfold{fill:none;stroke:#b9aea8;stroke-width:1.3;opacity:.55;stroke-linecap:round}
 .chupits .thigh{opacity:.25}
 .chupits .brow{opacity:.3}
-.chupits .band{fill:none;stroke:#2a292d;stroke-width:6;stroke-linecap:round}
+.chupits .band{fill:none;stroke:#0c0b0d;stroke-width:10;stroke-linecap:round}
+.chupits .band-hl{fill:none;stroke:#fff;stroke-opacity:.14;stroke-width:1.6;stroke-linecap:round}
 .chupits .spike{stroke:#2c2f34;stroke-width:.6;stroke-linejoin:round}
 .chupits .spark{fill:#fff;opacity:.9}
 .chupits .led{animation:ch-tick var(--b) steps(1) infinite}

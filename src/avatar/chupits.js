@@ -178,8 +178,9 @@
   function COLLAR(half) {
     const cx = 152, cy = 182, rx = 66, ry = 24;
     let s = half === 'front'
+      // cinta de cuero negra, a la vista (antes la tapaba un mechón de pelo y no se leía negra)
       ? `<path class="band" d="M${cx - rx} ${cy} A${rx} ${ry} 0 0 0 ${cx + rx} ${cy}"/>` +
-        OVER('M84 186 Q152 222 220 186 Q218 200 206 208 Q152 232 98 208 Q86 200 84 186 Z', 10)     // pelo del cuello sobre la cinta
+        `<path class="band-hl" d="M${cx - rx + 6} ${cy + 2} A${rx - 6} ${ry - 4} 0 0 0 ${cx + rx - 6} ${cy + 2}"/>`
       : '';
     for (let k = 0; k < 14; k++) {
       const th = (k / 14) * Math.PI * 2 + 0.2;
