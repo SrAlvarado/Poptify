@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Poptify · Tu música, en una nube de color</title>
-<meta name="description" content="Poptify — el popup flotante que muestra lo que suena en Spotify con estética de pantalla de bloqueo iOS, fondo reactivo y skins retro. Para Mac y Android." />
+<meta name="description" content="Poptify — el popup flotante que muestra lo que suena en Spotify con estética de pantalla de bloqueo iOS, fondo reactivo y skins retro. Para Mac, Windows, Linux y Android." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
@@ -124,6 +124,7 @@
   .btn.mac{background:linear-gradient(120deg,var(--c1),var(--c2));box-shadow:0 16px 50px -12px var(--c1)}
   .btn.android{background:linear-gradient(120deg,var(--c3),var(--c4));color:#06140c;box-shadow:0 16px 50px -12px var(--c3)}
   .btn.win{background:linear-gradient(120deg,#00b3ff,#3a6bff);box-shadow:0 16px 50px -12px #00b3ff}
+  .btn.linux{background:linear-gradient(120deg,#ff9a1f,#e95420);box-shadow:0 16px 50px -12px #e95420}
   .btn:hover{transform:translateY(-4px) scale(1.03)}
   .btn::after{content:"";position:absolute;top:0;left:-120%;width:60%;height:100%;
     background:linear-gradient(120deg,transparent,rgba(255,255,255,.5),transparent);transform:skewX(-20deg);transition:left .6s}
@@ -233,7 +234,11 @@
 
   /* download */
   .download{text-align:center}
-  .dl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:46px auto 0;max-width:1100px;perspective:1300px}
+  .dl-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin:46px auto 0;max-width:1320px;perspective:1300px}
+  @media(max-width:1180px){.dl-grid{grid-template-columns:repeat(2,1fr);max-width:860px}}
+  /* 4 tarjetas en fila: el portátil y el título se encogen para caber */
+  @media(min-width:1181px){.dl-grid .dl{padding:30px 20px 26px}.dl-grid .mac-dev{transform:scale(.78);transform-origin:50% 100%}.dl-grid .dl h3{font-size:24px}}
+  .dl-grid .dl{display:flex;flex-direction:column;align-items:center}.dl-grid .dl .go{margin-top:auto}.dl-grid .dl .fmt{margin-bottom:16px}
   @media(max-width:780px){.dl-grid{grid-template-columns:1fr;max-width:420px}}
   .dl{position:relative;border-radius:28px;padding:34px 30px 30px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));
     border:1px solid var(--line);overflow:hidden;transform-style:preserve-3d;transition:box-shadow .35s,border-color .35s;
@@ -275,6 +280,7 @@
   .dl.macc .go{background:linear-gradient(120deg,var(--c1),var(--c2))}
   .dl.andd .go{background:linear-gradient(120deg,var(--c3),var(--c4));color:#06140c}
   .dl.winn .go{background:linear-gradient(120deg,#00b3ff,#3a6bff)}
+  .dl.linn .go{background:linear-gradient(120deg,#ff9a1f,#e95420)}
   .dl .tag{position:absolute;top:16px;right:16px;z-index:4;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
     padding:5px 11px;border-radius:99px;background:rgba(255,255,255,.1);color:var(--dim)}
   .dl.you{border-color:transparent;box-shadow:0 0 0 1.5px var(--c3),0 30px 80px -28px var(--c3)}
@@ -508,7 +514,7 @@
     <div>
       <h1 class="title">POPTIFY</h1>
       <div class="tagline" data-en="Your music, in a cloud of color.">Tu música, en una nube de color.</div>
-      <p class="sub" data-en="The floating popup that shows what's playing on Spotify with an iOS lock-screen look, a <b>background reactive to the album color</b> and retro skins. Drag it anywhere. For Windows, Mac and Android.">El popup flotante que muestra lo que suena en Spotify con estética de pantalla de bloqueo de iOS, <b>fondo reactivo al color del álbum</b> y skins retro. Móvelo por toda la pantalla. Para Windows, Mac y Android.</p>
+      <p class="sub" data-en="The floating popup that shows what's playing on Spotify with an iOS lock-screen look, a <b>background reactive to the album color</b> and retro skins. Drag it anywhere. For Windows, Mac, Linux and Android.">El popup flotante que muestra lo que suena en Spotify con estética de pantalla de bloqueo de iOS, <b>fondo reactivo al color del álbum</b> y skins retro. Móvelo por toda la pantalla. Para Windows, Mac, Linux y Android.</p>
       <div class="hero-cta">
         <a class="btn mac" data-dl href="#" id="dlMacHero">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.7c0-2.2 1.8-3.3 1.9-3.4-1-1.5-2.6-1.7-3.2-1.7-1.4-.1-2.7.8-3.3.8-.7 0-1.7-.8-2.8-.8-1.4 0-2.8.8-3.5 2.1-1.5 2.6-.4 6.5 1.1 8.6.7 1 1.5 2.2 2.6 2.1 1-.1 1.4-.7 2.7-.7s1.6.7 2.7.6c1.1 0 1.8-1 2.5-2 .8-1.2 1.1-2.3 1.1-2.3 0 0-2.1-.8-2.1-3.2zM14.3 5.9c.6-.7 1-1.7.9-2.7-.9 0-1.9.6-2.5 1.3-.5.6-1 1.6-.9 2.6 1 .1 2-.5 2.5-1.2z"/></svg>
@@ -517,6 +523,10 @@
         <a class="btn win" data-dl href="#" id="dlWinHero">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5L10.5 4.4v7.1H3V5.5zm0 13l7.5 1.1v-7H3v5.9zM11.5 4.2L21 3v8.5h-9.5V4.2zm0 8.3H21V21l-9.5-1.3v-7.2z"/></svg>
           <span class="lbl">Descargar<small>para Windows · .exe</small></span>
+        </a>
+        <a class="btn linux" data-dl href="#" id="dlLinuxHero">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-2.2 0-3.6 1.9-3.6 4.4 0 1.3.3 2.2.1 3.1-.3 1.2-1.6 2.2-2.4 3.8-.8 1.7-1 3.4-.4 4.4-.9.4-1.7 1.1-1.5 1.8.3.9 2 .8 3.4 1.6 1.2.7 2.6.6 3.1-.4h2.6c.5 1 1.9 1.1 3.1.4 1.4-.8 3.1-.7 3.4-1.6.2-.7-.6-1.4-1.5-1.8.6-1 .4-2.7-.4-4.4-.8-1.6-2.1-2.6-2.4-3.8-.2-.9.1-1.8.1-3.1C15.6 3.9 14.2 2 12 2zm-1.5 4.3c.4 0 .7.5.7 1.1s-.3 1.1-.7 1.1-.7-.5-.7-1.1.3-1.1.7-1.1zm3 0c.4 0 .7.5.7 1.1s-.3 1.1-.7 1.1-.7-.5-.7-1.1.3-1.1.7-1.1zM12 9.2c.8 0 1.9.6 1.9 1s-1.1 1-1.9 1-1.9-.6-1.9-1 1.1-1 1.9-1z"/></svg>
+          <span class="lbl" data-en="Download<small>for Linux · .deb · .AppImage</small>">Descargar<small>para Linux · .deb · .AppImage</small></span>
         </a>
         <a class="btn android" data-dl href="#" id="dlAndroidHero">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 9.5l1.4-2.4c.1-.2 0-.4-.1-.5-.2-.1-.4 0-.5.1l-1.4 2.5C15.4 8.1 13.8 7.7 12 7.7s-3.4.4-4.5 1l-1.4-2.5c-.1-.2-.3-.2-.5-.1-.2.1-.2.3-.1.5L6.9 9C4.6 10.3 3 12.6 3 15.3h18c0-2.7-1.6-5-3.4-5.8zM8 13.4c-.4 0-.7-.3-.7-.7s.3-.7.7-.7.7.3.7.7-.3.7-.7.7zm8 0c-.4 0-.7-.3-.7-.7s.3-.7.7-.7.7.3.7.7-.3.7-.7.7z"/></svg>
@@ -546,7 +556,7 @@
       </div>
     </div>
     <span class="sticker s1" data-par="-0.14" data-en="Free">Gratis</span>
-    <span class="sticker s2" data-par="0.2">Mac + Android</span>
+    <span class="sticker s2" data-par="0.2">Mac · Win · Linux</span>
     <span class="sticker s3" data-par="0.12" data-en="★ Reactive">★ Reactivo</span>
     <span class="sticker s4" data-par="-0.24" data-ver>v0.3.2</span>
     <svg class="rbadge hero" data-par="0.26" viewBox="0 0 120 120" aria-hidden="true">
@@ -588,7 +598,7 @@
       <h2 data-en="How it <em>works</em>">Cómo <em>funciona</em></h2>
     </div>
     <div class="steps">
-      <div class="step reveal"><div class="num">01</div><h3 data-en="Download &amp; install">Descarga e instala</h3><p data-en="Grab the Windows, Mac or Android app. Tiny and installs in seconds.">Coge la app para Windows, Mac o Android. Pesa poco y se instala en segundos.</p></div>
+      <div class="step reveal"><div class="num">01</div><h3 data-en="Download &amp; install">Descarga e instala</h3><p data-en="Grab the app for Windows, Mac, Linux or Android. Tiny and installs in seconds.">Coge la app para Windows, Mac, Linux o Android. Pesa poco y se instala en segundos.</p></div>
       <div class="step reveal"><div class="num">02</div><h3 data-en="Connect Spotify">Conecta Spotify</h3><p data-en="One click, authorize your account and Poptify knows what you're hearing.">Un clic, autorizas tu cuenta y Poptify ya sabe qué estás escuchando.</p></div>
       <div class="step reveal"><div class="num">03</div><h3 data-en="Pick a skin &amp; enjoy">Elige skin y disfruta</h3><p data-en="Switch display, move it around and let the color flow.">Cambia de display, muévelo por la pantalla y deja que el color fluya.</p></div>
     </div>
@@ -597,7 +607,7 @@
   <section>
     <div class="statbar reveal">
       <div class="stat"><div class="n" data-count="7">0</div><div class="l" data-en="Skins">Skins</div><div class="sl" data-en="and counting">y subiendo</div></div>
-      <div class="stat"><div class="n" data-count="2">0</div><div class="l" data-en="Platforms">Plataformas</div><div class="sl">Mac · Android</div></div>
+      <div class="stat"><div class="n" data-count="4">0</div><div class="l" data-en="Platforms">Plataformas</div><div class="sl">Mac · Windows · Linux · Android</div></div>
       <div class="stat"><div class="n" data-count="2">0</div><div class="l" data-en="Sources">Fuentes</div><div class="sl">Spotify · SoundCloud</div></div>
       <div class="stat"><div class="n" data-suffix="∞">∞</div><div class="l" data-en="Colors">Colores</div><div class="sl" data-en="reactive to the album">reactivos al álbum</div></div>
     </div>
@@ -659,6 +669,19 @@
         </div>
         <h3 data-en="For Windows">Para Windows</h3>
         <div class="fmt">.exe / .msi · Windows 10/11</div>
+        <a class="go" data-dl href="#"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M5 21h14"/></svg><span data-en="Download">Descargar</span></a>
+      </div>
+      <div class="dl linn" id="dlLinCard">
+        <span class="tag">Linux</span>
+        <div class="glow"></div>
+        <div class="dev mac-dev">
+          <div class="dev-screen">
+            <div class="mp"><div class="mp-art" style="background:linear-gradient(135deg,#ffb347,#e95420 55%,#2c001e)"></div><div class="mp-l1"></div><div class="mp-l2"></div><div class="mp-bar"></div></div>
+          </div>
+          <div class="base"></div>
+        </div>
+        <h3 data-en="For Linux">Para Linux</h3>
+        <div class="fmt">.deb · .rpm · .AppImage · 64 bits</div>
         <a class="go" data-dl href="#"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M5 21h14"/></svg><span data-en="Download">Descargar</span></a>
       </div>
       <div class="dl andd" id="dlAndCard">
@@ -732,6 +755,21 @@
         <p class="help-note" data-en="You only need to do this once. It happens because the installer isn't signed with a paid certificate yet.">Solo hay que hacerlo una vez. Ocurre porque el instalador aún no está firmado con un certificado de pago.</p>
       </div>
     </div>
+
+    <div class="dl-help" id="dlHelpLinux">
+      <button class="help-toggle">
+        <span data-en="🐧 How do I install it on Linux?">🐧 ¿Cómo lo instalo en Linux?</span>
+        <span class="chev">▾</span>
+      </button>
+      <div class="help-body">
+        <ol>
+          <li data-en="<b>Ubuntu, Debian, Mint, Pop!_OS:</b> download the <b>.deb</b> and run <code>sudo apt install ./Poptify_*_amd64.deb</code>"><b>Ubuntu, Debian, Mint, Pop!_OS:</b> descarga el <b>.deb</b> y ejecuta <code>sudo apt install ./Poptify_*_amd64.deb</code></li>
+          <li data-en="<b>Fedora, openSUSE, RHEL:</b> download the <b>.rpm</b> and run <code>sudo dnf install ./Poptify-*.x86_64.rpm</code>"><b>Fedora, openSUSE, RHEL:</b> descarga el <b>.rpm</b> y ejecuta <code>sudo dnf install ./Poptify-*.x86_64.rpm</code></li>
+          <li data-en="<b>Any distro:</b> download the <b>.AppImage</b>, run <code>chmod +x Poptify_*.AppImage</code> and open it. It updates itself from the app."><b>Cualquier distro:</b> descarga el <b>.AppImage</b>, haz <code>chmod +x Poptify_*.AppImage</code> y ábrelo. Se actualiza solo desde la app.</li>
+        </ol>
+        <p class="help-note" data-en="PCs with 64-bit x86 (not ARM). Settings live in the Chupits icon of the top bar; on plain GNOME (e.g. Fedora) install the <b>AppIndicator</b> extension, or right-click Poptify to open them.">PC de 64 bits x86 (no ARM). Los ajustes están en el icono de Chupits de la barra superior; en GNOME puro (p. ej. Fedora) instala la extensión <b>AppIndicator</b>, o haz clic derecho en Poptify para abrirlos.</p>
+      </div>
+    </div>
   </section>
 
   <footer>
@@ -774,7 +812,9 @@
     const ua=navigator.userAgent||'';
     const isAndroid=/android/i.test(ua);
     const isMac=/Macintosh|Mac OS X/i.test(ua) && !isAndroid;
-    const card = isAndroid?document.getElementById('dlAndCard'):isMac?document.getElementById('dlMacCard'):null;
+    const isLinux=/Linux|X11/i.test(ua) && !isAndroid;
+    const isWin=/Windows/i.test(ua);
+    const card = isAndroid?document.getElementById('dlAndCard'):isMac?document.getElementById('dlMacCard'):isWin?document.getElementById('dlWinCard'):isLinux?document.getElementById('dlLinCard'):null;
     if(card){ const tg=card.querySelector('.tag'); card.classList.add('you'); tg.textContent='Tu sistema'; tg.setAttribute('data-en','Your system'); }
   })();
 
